@@ -118,9 +118,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Streamlit
-.streamlit/
-
 # IDE
 .vscode/
 .idea/
