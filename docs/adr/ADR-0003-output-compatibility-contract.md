@@ -1,7 +1,7 @@
 # ADR 0003: Preserve Output Compatibility Contract
 
 ## Status
-Accepted
+Accepted 2026-03-19, Superseded 2026-03-21
 
 ## Context
 Current downstream workflow depends on result artifacts in results/, including labels JSON and review Excel files. A rewrite must not break file naming patterns, merge behavior, or output column expectations.
@@ -27,4 +27,4 @@ Treat output behavior as a compatibility contract:
 
 ## Related
 - Spec: Tech Lead YAML spec approved in chat (2026-03-19)
-- Supersedes: ADR-XXXX (if any)
+- Superseded by: [ADR 0008: Cloud Download-First Output Persistence](ADR-0008-cloud-download-first-output-persistence.md)

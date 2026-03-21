@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import sys
+from io import BytesIO
 from pathlib import Path
 
 import pandas as pd
@@ -11,7 +12,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from review_web_gui import constants, persistence  # noqa: E402
+from web_gui import constants, persistence  # noqa: E402
 
 
 def test_save_then_load_labels_normalizes_and_sorts(tmp_path: Path) -> None:
@@ -38,7 +39,8 @@ def test_temp_and_final_paths_follow_contract(tmp_path: Path) -> None:
     assert re.match(r"^base_key_review_final_\d{8}_\d{6}\.xlsx$", final.name)
 
 
-def test_save_temp_excel_keeps_input_columns_plus_classification(tmp_path: Path) -> None:  # noqa: E501
+def test_build_output_excel_bytes_keeps_input_columns_plus_classification(
+) -> None:
     works = pd.DataFrame(
         {
             "Title": ["Paper 1", "Paper 2"],
@@ -56,15 +58,13 @@ def test_save_temp_excel_keeps_input_columns_plus_classification(tmp_path: Path)
         }
     )
 
-    out_path = persistence.save_temp_excel(
-        dataset_key="dataset_1",
+    payload = persistence.build_output_excel_bytes(
         works_df=works,
         assignments_df=assignments,
         input_columns=["Title", "Abstract"],
-        results_dir=tmp_path,
     )
 
-    saved = pd.read_excel(out_path)
+    saved = pd.read_excel(BytesIO(payload))
 
     assert list(saved.columns) == [
         "Title",

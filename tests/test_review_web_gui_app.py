@@ -14,7 +14,11 @@ if str(SRC) not in sys.path:
 
 import app  # noqa: E402
 from web_gui import constants  # noqa: E402
-from web_gui.ui import classification, tag_management  # noqa: E402
+from web_gui.ui import (  # noqa: E402
+    classification,
+    page,  # noqa: E402
+    tag_management,
+)
 
 
 class _DummyContext:
@@ -169,8 +173,8 @@ def test_main_orchestrates_ui_modules(monkeypatch) -> None:
     st.session_state.current_index = 0
     st.session_state.labels = {column: []
                                for column in constants.LABEL_COLUMNS}
-    st.session_state.last_saved_path = ""
-    st.session_state.last_exported_path = ""
+    st.session_state.last_exported_name = ""
+    st.session_state.last_exported_bytes = b""
     st.session_state.loaded_file_token = ""
     st.session_state.dataset_key = ""
     st.session_state.input_columns = []
@@ -200,8 +204,11 @@ def test_main_orchestrates_ui_modules(monkeypatch) -> None:
                         lambda: calls.append("current_work"))
     monkeypatch.setattr(app.classification_ui, "render_classification",
                         lambda: calls.append("classification"))
-    monkeypatch.setattr(app.tag_management_ui, "apply_pending_tag_management_clears",
-                        lambda: calls.append("apply_clears"))
+    monkeypatch.setattr(
+        app.tag_management_ui,
+        "apply_pending_tag_management_clears",
+        lambda: calls.append("apply_clears"),
+    )
     monkeypatch.setattr(app.tag_management_ui, "render_tag_management",
                         lambda: calls.append("tag_management"))
     monkeypatch.setattr(app.st, "info", lambda *args, **kwargs: None)
@@ -225,3 +232,125 @@ def test_streamlit_theme_config_defines_light_and_dark_palettes() -> None:
     theme = data["theme"]
     assert theme["light"]["backgroundColor"] == "#f6f1e8"
     assert theme["dark"]["backgroundColor"] == "#0f172a"
+
+
+def test_navigation_export_requires_download_confirmation(monkeypatch) -> None:
+    st.session_state.clear()
+    st.session_state.works_df = pd.DataFrame({"work_id": ["w1"]})
+    st.session_state.assignments_df = pd.DataFrame(
+        {
+            constants.SCOPE_COLUMN: [constants.PENDING_DIAGNOSTIC],
+            constants.METHODOLOGY_COLUMN: [constants.PENDING_DIAGNOSTIC],
+            constants.CONTRIBUTION_COLUMN: [constants.PENDING_DIAGNOSTIC],
+            constants.DIAGNOSTIC_COLUMN: [constants.PENDING_DIAGNOSTIC],
+        }
+    )
+    st.session_state.current_index = 0
+    st.session_state.last_exported_name = "out.xlsx"
+    st.session_state.last_exported_bytes = b"bytes"
+    st.session_state.pending_download_action = ""
+
+    class _Col:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    button_map = {
+        "Export": True,
+        "Save and Quit": False,
+        "No": False,
+    }
+    calls: list[str] = []
+    markdown_calls: list[str] = []
+    download_calls: list[dict[str, object]] = []
+
+    monkeypatch.setattr(page.st, "progress", lambda *args, **kwargs: None)
+    monkeypatch.setattr(page.st, "columns", lambda *args, **
+                        kwargs: [_Col(), _Col(), _Col(), _Col()])
+    monkeypatch.setattr(
+        page.st,
+        "button",
+        lambda label, **kwargs: button_map.get(label, False),
+    )
+    monkeypatch.setattr(page.st, "rerun", lambda: None)
+    monkeypatch.setattr(page.st, "success", lambda *args,
+                        **kwargs: calls.append("success"))
+    monkeypatch.setattr(page.st, "info", lambda *args,
+                        **kwargs: calls.append("info"))
+    monkeypatch.setattr(page.st, "markdown", lambda text, **
+                        kwargs: markdown_calls.append(text))
+    monkeypatch.setattr(
+        page.st,
+        "download_button",
+        lambda **kwargs: download_calls.append(kwargs),
+    )
+    monkeypatch.setattr(page.controller, "export_final", lambda: "out.xlsx")
+    monkeypatch.setattr(
+        page.controller, "save_and_quit_feedback", lambda: "out.xlsx")
+    monkeypatch.setattr(
+        page.controller, "get_export_file_data", lambda: b"bytes")
+    monkeypatch.setattr(
+        page.controller, "queue_download_toasts", lambda action: None)
+
+    page.render_navigation()
+
+    assert st.session_state.pending_download_action == "export_final"
+    assert calls == []
+    assert any("Do you wish to download" in text for text in markdown_calls)
+    assert len(download_calls) == 1
+
+
+def test_navigation_save_and_quit_download_button_queues_toasts(monkeypatch) -> None:
+    st.session_state.clear()
+    st.session_state.works_df = pd.DataFrame({"work_id": ["w1"]})
+    st.session_state.assignments_df = pd.DataFrame(
+        {
+            constants.SCOPE_COLUMN: [constants.PENDING_DIAGNOSTIC],
+            constants.METHODOLOGY_COLUMN: [constants.PENDING_DIAGNOSTIC],
+            constants.CONTRIBUTION_COLUMN: [constants.PENDING_DIAGNOSTIC],
+            constants.DIAGNOSTIC_COLUMN: [constants.PENDING_DIAGNOSTIC],
+        }
+    )
+    st.session_state.current_index = 0
+    st.session_state.last_exported_name = "out.xlsx"
+    st.session_state.last_exported_bytes = b"bytes"
+    st.session_state.pending_download_action = "save_and_quit"
+
+    class _Col:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    download_kwargs: dict[str, object] = {}
+    queued_actions: list[str] = []
+
+    monkeypatch.setattr(page.st, "progress", lambda *args, **kwargs: None)
+    monkeypatch.setattr(page.st, "columns", lambda *args, **
+                        kwargs: [_Col(), _Col(), _Col(), _Col()])
+    monkeypatch.setattr(page.st, "button", lambda *args, **kwargs: False)
+    monkeypatch.setattr(page.st, "rerun", lambda: None)
+    monkeypatch.setattr(page.st, "markdown", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        page.st,
+        "download_button",
+        lambda **kwargs: download_kwargs.update(kwargs),
+    )
+    monkeypatch.setattr(page.controller, "export_final", lambda: "out.xlsx")
+    monkeypatch.setattr(
+        page.controller, "save_and_quit_feedback", lambda: "out.xlsx")
+    monkeypatch.setattr(
+        page.controller, "get_export_file_data", lambda: b"bytes")
+    monkeypatch.setattr(
+        page.controller,
+        "queue_download_toasts",
+        lambda action: queued_actions.append(action),
+    )
+
+    page.render_navigation()
+
+    assert download_kwargs["on_click"] is page.controller.queue_download_toasts
+    assert download_kwargs["args"] == ("save_and_quit",)

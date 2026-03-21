@@ -11,7 +11,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from review_web_gui import constants, domain  # noqa: E402
+from web_gui import constants, domain  # noqa: E402
 
 
 class UploadedExcel(BytesIO):

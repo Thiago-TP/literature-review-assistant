@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
+from io import BytesIO
 from pathlib import Path
 
 import pandas as pd
@@ -24,6 +25,25 @@ def final_results_path(dataset_key: str,
                        results_dir: Path = constants.RESULTS_DIR) -> Path:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     return results_dir / f"{dataset_key}{constants.FINAL_RESULTS_SUFFIX}_{timestamp}.xlsx"  # noqa: E501
+
+
+def final_results_filename(dataset_key: str) -> str:
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"{dataset_key}{constants.FINAL_RESULTS_SUFFIX}_{timestamp}.xlsx"
+
+
+def build_output_excel_bytes(
+    works_df: pd.DataFrame,
+    assignments_df: pd.DataFrame,
+    input_columns: list[str],
+) -> bytes:
+    output_df = works_df[input_columns].copy()
+    for col in constants.LABEL_COLUMNS:
+        output_df[col] = assignments_df[col].values
+
+    buffer = BytesIO()
+    output_df.to_excel(buffer, index=False)
+    return buffer.getvalue()
 
 
 def load_labels(

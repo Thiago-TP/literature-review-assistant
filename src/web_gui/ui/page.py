@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 import pandas as pd
 import streamlit as st
 
@@ -32,30 +30,46 @@ def render_navigation() -> None:
                 total - 1, st.session_state.current_index + 1)
             st.rerun()
     with col_export:
-        if st.button("Export Final", use_container_width=True):
-            path = controller.export_final()
-            st.success(f"Final export created: {path}")
+        if st.button("Export", use_container_width=True):
+            controller.export_final()
+            st.session_state.pending_download_action = "export_final"
     with col_quit:
         if st.button("Save and Quit",
                      type="primary",
                      use_container_width=True):
-            path = controller.save_and_quit_feedback()
-            st.success(f"Work saved to temporary file: {path}")
-            st.info("You can now close this browser tab/window.")
+            controller.save_and_quit_feedback()
+            st.session_state.pending_download_action = "save_and_quit"
 
-    if st.session_state.last_exported_path:
+    if (
+        st.session_state.pending_download_action
+        and st.session_state.last_exported_name
+    ):
         payload = controller.get_export_file_data()
         if payload:
-            st.download_button(
-                label="Download Final Export",
-                data=payload,
-                file_name=Path(st.session_state.last_exported_path).name,
-                mime=(
-                    "application/vnd.openxmlformats-officedocument."
-                    "spreadsheetml.sheet"
-                ),
-                use_container_width=True,
-            )
+            st.markdown("Do you wish to download the generated output now?")
+            col_yes, col_no = st.columns(2)
+            with col_yes:
+                st.download_button(
+                    label="",
+                    data=payload,
+                    file_name=st.session_state.last_exported_name,
+                    mime=(
+                        "application/vnd.openxmlformats-officedocument."
+                        "spreadsheetml.sheet"
+                    ),
+                    on_click=controller.queue_download_toasts,
+                    args=(st.session_state.pending_download_action,),
+                    use_container_width=True,
+                    icon=":material/download:",
+                )
+            with col_no:
+                if st.button(
+                    "",
+                    use_container_width=True,
+                    icon=":material/close:",
+                ):
+                    st.session_state.pending_download_action = ""
+                    st.rerun()
 
 
 def render_current_work() -> None:

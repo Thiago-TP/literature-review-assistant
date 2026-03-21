@@ -66,6 +66,64 @@ def read_uploaded_excel(uploaded_file: Any) -> tuple[pd.DataFrame, list[str]]:
     return adapted, input_columns
 
 
+def find_input_label_columns(
+    input_df: pd.DataFrame,
+) -> dict[str, str | None]:
+    """Check if input dataframe has label columns and return mapping."""
+    result = {}
+    for label_col in constants.LABEL_COLUMNS:
+        result[label_col] = find_matching_column(
+            input_df, [label_col]
+        )
+    return result
+
+
+def extract_assignments_from_input(
+    input_df: pd.DataFrame,
+    works_df: pd.DataFrame,
+) -> pd.DataFrame | None:
+    """Extract label assignments from input file if columns exist."""
+    input_label_cols = find_input_label_columns(input_df)
+
+    # If no label columns found, return empty assignments
+    if all(v is None for v in input_label_cols.values()):
+        return None
+
+    # Create a frame with only the label data from input
+    label_data = {"work_id": works_df["work_id"].copy()}
+    for label_col, input_col in input_label_cols.items():
+        if input_col is not None:
+            # Align input data by row index with works_df
+            label_data[label_col] = (
+                input_df[input_col]
+                .iloc[:len(works_df)]
+                .map(safe_str)
+                .values
+            )
+        else:
+            label_data[label_col] = constants.PENDING_DIAGNOSTIC
+
+    input_assignments = pd.DataFrame(label_data)
+    return input_assignments
+
+
+def extract_tags_from_input(
+    input_df: pd.DataFrame,
+) -> dict[str, list[str]]:
+    """Extract unique values from label columns to populate tags."""
+    input_label_cols = find_input_label_columns(input_df)
+    tags = {col: [] for col in constants.LABEL_COLUMNS}
+
+    for label_col, input_col in input_label_cols.items():
+        if input_col is not None:
+            unique_vals = set(input_df[input_col].map(safe_str).unique())
+            unique_vals.discard("")
+            unique_vals.discard(constants.PENDING_DIAGNOSTIC)
+            tags[label_col] = sorted(list(unique_vals))
+
+    return tags
+
+
 def empty_assignments_frame(works_df: pd.DataFrame) -> pd.DataFrame:
     assignments = pd.DataFrame({"work_id": works_df["work_id"]})
     for col in constants.LABEL_COLUMNS:
