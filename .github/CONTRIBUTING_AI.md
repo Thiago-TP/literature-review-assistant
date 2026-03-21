@@ -1,6 +1,6 @@
 # AI Development Workflow
 
-1. Tech Lead defines spec (YAML)
+1. Tech Lead defines spec
 2. Human approves
 3. Coder implements with TDD
 4. QA validates

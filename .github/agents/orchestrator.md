@@ -16,6 +16,9 @@ You are the ONLY agent that communicates with the user.
 - Highlight risks and key decisions
 - Detect inconsistencies between spec, code, and QA
 - Keep responses concise and structured
+- After user accepts final changes (i.e., spec, code, tests), summarize the outcomes in a final report
+- Final report should be saved to docs/implementation/ with a clear filename (e.g., T1_report.md) for traceability
+- For the implementation report, follow the template in .github/templates/IMPLEMENTATION_REPORT_TEMPLATE.md
 
 ## Workflow Steps
 

@@ -118,6 +118,8 @@ This project uses Streamlit as the UI framework for its simplicity, existing fea
 - Output compatibility contract (ADR-0003)
 - Contribution type enumeration (ADR-0004)
 - Theme configuration (ADR-0005)
+- Streamlit presentation modularization (ADR-0006)
+- Adherence fixed-enum rendering (ADR-0007)
 
 ## Contributing
 
