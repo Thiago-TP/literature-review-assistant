@@ -1,9 +1,10 @@
 from __future__ import annotations
+
 from datetime import datetime
 from io import BytesIO
 
-import streamlit as st
 import pandas as pd
+import streamlit as st
 from matplotlib.colors import LinearSegmentedColormap, rgb2hex
 
 # Global variables
@@ -91,13 +92,15 @@ if "tags_dict" not in st.session_state or "tags" not in st.session_state:
 
 def clear_session_state() -> None:
     # Clear pill button selections for all tags and works
-    for key in st.session_state.keys():
+    for key in list(st.session_state.keys()):
         for tag in st.session_state.tags:
             if f"{tag}_" in st.session_state:
                 if isinstance(st.session_state[key], list):
                     st.session_state[key] = []
                 else:
                     st.session_state[key] = None
+        if key.startswith("notes_"):
+            del st.session_state[key]
     st.session_state.works_df = None
     st.session_state.current_work_index = None
     st.session_state.total_works = 0
@@ -139,6 +142,10 @@ def process_uploaded_file() -> None:
     if "Tags Done" not in st.session_state.works_df.columns:
         st.session_state.works_df["Tags Done"] = 0
 
+    # Add a dedicated notes column if it doesn't exist
+    if "Notes" not in st.session_state.works_df.columns:
+        st.session_state.works_df["Notes"] = None
+
 
 def process_tag_selections(tag, options, key):
     # If new selections are empty, we set the tag value to None
@@ -155,6 +162,19 @@ def process_tag_selections(tag, options, key):
     ordered_selections = sorted(tag_selections, key=lambda x: options.index(x))
     st.session_state.works_df.at[st.session_state.current_work_index, tag] = ", ".join(
         ordered_selections
+    )
+
+
+def process_note_change(note_key: str) -> None:
+    if (
+        st.session_state.works_df is None
+        or st.session_state.current_work_index is None
+        or note_key not in st.session_state
+    ):
+        return
+
+    st.session_state.works_df.at[st.session_state.current_work_index, "Notes"] = (
+        st.session_state[note_key]
     )
 
 
@@ -198,6 +218,7 @@ def main() -> None:
             for default_tag in [
                 "Adherence",
                 "Contribution Type",
+                "Notes",
                 "Tags Done",
             ] + scopus_fields:
                 if default_tag in possible_tags:
@@ -323,6 +344,20 @@ def main() -> None:
                 current_work["Abstract"]
                 if "Abstract" in current_work
                 else "No abstract available."
+            )
+            note_key = f"notes_{st.session_state.current_work_index}"
+            if note_key not in st.session_state:
+                current_note = current_work.get("Notes", "")
+                if pd.isna(current_note):
+                    current_note = ""
+                st.session_state[note_key] = current_note
+            st.text_area(
+                "Work Notes",
+                key=note_key,
+                height=140,
+                placeholder="Write notes for this work here.",
+                on_change=process_note_change,
+                args=(note_key,),
             )
     with tags_col:
         st.subheader("**Assign Tags**")
@@ -707,7 +742,9 @@ def main() -> None:
     # Dataframe display for debugging purposes
     with st.expander("Dataframe Debug View", expanded=True):
         st.dataframe(
-            st.session_state.works_df[st.session_state.tags + ["Tags Done"]],
+            st.session_state.works_df[
+                st.session_state.tags + ["Tags Done"] + ["Notes"]
+            ],
             width="stretch",
         )
 
