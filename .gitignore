@@ -128,9 +128,3 @@ dmypy.json
 # OS
 .DS_Store
 Thumbs.db
-
-# Project-specific
-results/
-!results/.gitkeep
-input_examples/
-!input_examples/.gitkeep
