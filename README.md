@@ -1,140 +1,332 @@
-# Revisionator
+# Literature Review Assistant
 
-A interactive web application for systematic literature review and academic paper assessment built with Streamlit.
+A modern, interactive web application for systematic literature reviews and academic paper assessment built with **Streamlit**. Streamline the paper review process with structured tagging, progress tracking, and session management.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Workflow](#workflow)
+- [Data Format](#data-format)
+- [FAQ](#faq)
 
 ## Overview
 
-Revisionator helps researchers and reviewers systematically evaluate and label academic papers. The application guides users through importing paper metadata, reviewing each work, and assigning contribution types and adherence classifications for classification and tracking.
+The Literature Review Assistant helps researchers and academic reviewers efficiently evaluate and categorize academic papers. Instead of managing spreadsheets and notes across multiple applications, this tool provides an integrated interface to:
 
-### Key Features
+- **Import** paper metadata (title, abstract, DOI) from Excel exports
+- **Review** papers one at a time with full article information
+- **Classify** papers using customizable tag fields and categories
+- **Track** your progress with real-time visual indicators
+- **Save** your work and resume at any time
+- **Export** results for further analysis
 
-- **Interactive Paper Review**: Navigate through imported papers with an intuitive interface
-- **Structured Labeling**: Assign papers to categories like "New Method", "Improvement", "Review", etc.
-- **Adherence Assessment**: Rate how well papers align with defined scope and methodology criteria
-- **Progress Tracking**: Monitor review progress with real-time statistics
-- **Data Export**: Export review results in multiple formats for downstream analysis
-- **Session Management**: Save work progress and resume reviews at any time
+The application is ideal for:
+- Conducting systematic literature reviews
+- Pre-screening papers for research projects
+- Team-based peer review workflows
+- Building research databases with structured metadata
+
+## Key Features
+
+### 📄 **Interactive Paper Review**
+- One-paper-at-a-time interface minimizes cognitive load
+- Display title, abstract, and DOI with direct links to papers
+- Navigation controls to move between papers (next, previous, go-to-specific)
+- Quick DOI links to access full articles
+
+### 🏷️ **Structured Tagging System**
+- **Pre-defined fields**: "Adherence" and "Contribution Type" (protected fields)
+- **Custom fields**: Create unlimited custom classification fields
+- **Multi-select tags**: Assign multiple tags per field per paper
+- **Field management**: Add, rename, and delete custom fields (keep protected fields intact)
+- **Tag management**: Add, rename, and delete tags within each field
+
+### 📊 **Progress Tracking**
+- **Visual matrix**: Color-coded grid showing review status for all papers
+  - Gray: No fields completed
+  - Red → Yellow → Green: Increasing completion as fields are tagged
+- **Interactive shortcuts**: Click any paper in the matrix to jump to it
+- **Progress persistence**: Track which papers are fully reviewed vs. partial
+
+### 📝 **Notes & Metadata**
+- Write detailed notes for each paper
+- Notes are automatically saved with your session
+- View previous notes while reviewing
+
+### 💾 **Session Management**
+- **Auto-save**: Progress is saved in session state
+- **Export sessions**: Download review progress as JSON for sharing or backup
+- **Resume sessions**: Upload previously saved JSON to continue reviewing
+- **Session naming**: Exports include timestamp for easy identification
+
+### 📥 **Data Import/Export**
+- **Import**: Upload Excel files with paper metadata
+- **Export**: Download review results as JSON with all tags and notes
+- Compatible with Scopus, Web of Science, and custom exports
 
 ## Requirements
 
-- Python 3.x
-- Dependencies listed in [src/requirements.txt](src/requirements.txt)
+- **Python 3.10+**
+- **Streamlit 1.55.0+**
+- **Pandas 1.x+** (via openpyxl for Excel support)
+- **Matplotlib 3.x+** (for progress visualization)
+
+See [requirements.txt](src/requirements.txt) for exact versions.
 
 ## Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/revisionator.git
-cd revisionator
-```
+### Option 1: Quick Start (Recommended)
 
-2. Create a virtual environment:
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/literature-review-assistant.git
+cd literature-review-assistant
+
+# Create and activate virtual environment
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -r src/requirements.txt
+
+# Run the application
+streamlit run src/app.py
 ```
 
-3. Install dependencies:
+The app will open automatically at `http://localhost:8501` in your default browser.
+
+### Option 2: Docker (Optional)
+
 ```bash
-pip install -r src/requirements.txt
+docker build -t literature-review .
+docker run -p 8501:8501 literature-review
 ```
 
 ## Usage
 
-Launch the application:
-```bash
-streamlit run src/app.py
+### Starting a Review
+
+1. **Launch the app**: `streamlit run src/app.py`
+2. **Upload Excel file**: Use the sidebar to upload your paper metadata (must contain "Title" and "Abstract" columns)
+3. **Review papers**: Navigate through papers using the main interface
+4. **Assign tags**: Use the tag section to classify each paper
+5. **Save progress**: Click the download button to export your work as JSON
+6. **Resume later**: Upload the JSON file to continue where you left off
+
+### Excel File Format
+
+Required columns:
+- **Title**: Paper title (string)
+- **Abstract**: Paper abstract (string)
+
+Optional columns:
+- **DOI**: Digital Object Identifier (string) - enables direct paper links
+- **Notes**: Your preliminary notes (string)
+- Any other columns are preserved but not displayed in the review interface
+
+Example structure:
+```
+| Title                              | Abstract                    | DOI            |
+|------------------------------------|-----------------------------|-----------------
+| "Machine Learning in Healthcare"  | "This paper explores..."    | "10.1234/xyz"  |
+| ...                                | ...                         | ...            |
 ```
 
-The application will open in your default web browser at `http://localhost:8501`.
+### Tagging Workflow
 
-### Workflow
+1. **Pre-defined tags** (cannot be modified):
+   - **Adherence**: Insufficient | Partial | Sufficient
+   - **Contribution Type**: New Method | Improvement | Review | Other
 
-1. **Upload Dataset**: Import an Excel file containing paper metadata (typically from Scopus export)
-   - **Expected Format**: Scopus CSV/Excel export format
-   - **Required Fields**: At minimum, the file must contain an `Abstract` column
-   - **Supported Fields**: The app automatically maps common column names (Title, Authors, Source title, Year, Abstract, etc.)
-2. **Review Papers**: Navigate through each paper using "Previous" and "Next" buttons
-3. **Label Contributions**: Assign each paper a contribution type
-4. **Assess Adherence**: Rate the paper's adherence to your research scope and methodology
-5. **Export Results**: Save your labeled dataset for analysis
+2. **Custom tags** (editable):
+   - Add new fields in the "Manage Tag Fields" section
+   - Each field can have multiple tags
+   - Select tags for each paper using multi-select interface
+   - Delete or rename custom fields and tags anytime
+
+3. **Saving tags**:
+   - Tags are saved automatically when selected
+   - Download JSON to persist your progress
+   - Upload JSON to resume reviewing
+
+### Exporting Results
+
+Your review progress is exported as JSON with the structure:
+```json
+[
+  {
+    "Title": "Paper 1 Title",
+    "Adherence": ["Sufficient"],
+    "Contribution Type": ["New Method"],
+    "Your Custom Field": ["custom_tag1", "custom_tag2"],
+    "Notes": "Your notes about this paper..."
+  },
+  ...
+]
+```
 
 ## Project Structure
 
 ```
-revisionator/
+literature-review-assistant/
+├── README.md                          # This file
+├── LICENSE                            # Project license
+├── requirements.txt → src/requirements.txt
 ├── src/
-│   ├── app.py                 # Streamlit application entry point
-│   ├── requirements.txt        # Python package dependencies
-│   └── web_gui/               # Core application module
-│       ├── README.md           # Module documentation
-│       ├── constants.py        # Configuration and constants
-│       ├── domain.py           # Business logic and data utilities
-│       ├── controller.py       # Application logic and workflow
-│       ├── models.py           # Data models
-│       └── persistence.py      # Data storage and file operations
-├── tests/                      # Unit tests
-├── docs/
-│   └── adr/                   # Architecture Decision Records
-├── input_examples/            # Sample input files
-├── results/                   # Review output files
-└── README.md                  # This file
+│   ├── app.py                        # Main Streamlit application
+│   ├── constants.py                  # Configuration constants
+│   └── requirements.txt               # Python dependencies
+├── input_examples/
+│   └── scopus_export_*.json          # Example input files
+└── .streamlit/
+    └── config.toml                   # Streamlit configuration (optional)
 ```
 
-See [src/web_gui/README.md](src/web_gui/README.md) for details on the core application module.
+### File Descriptions
 
-## Architecture
+- **app.py**: Main application logic
+  - Session state initialization
+  - UI components and layout
+  - Tag and progress management
+  - File I/O operations
 
-Revisionator follows a **layered architecture** with clear separation of concerns:
+- **constants.py**: Configuration and constants
+  - Tag definitions (adherence options, contribution types)
+  - Column names for Excel data
+  - UI parameters (color scheme, layout settings)
 
-- **UI Layer** (`app.py`): Streamlit-based presentation and user interaction
-- **Controller Layer** (`web_gui/controller.py`): Application workflow and orchestration
-- **Domain Layer** (`web_gui/domain.py`): Business logic and domain entities
-- **Persistence Layer** (`web_gui/persistence.py`): Data storage and file I/O
+- **requirements.txt**: Python package dependencies
+  - Streamlit (web framework)
+  - Pandas (data handling)
+  - Matplotlib (visualization)
+  - openpyxl (Excel support)
 
-For detailed architecture decisions, see the [ADRs](docs/adr/).
+## Workflow
 
-## Development
+### Typical Review Session
 
-### Running Tests
-
-Execute the test suite:
-```bash
-python -m pytest tests/
+```
+1. START
+   ↓
+2. Upload Excel file with papers
+   ↓
+3. Review Progress Overview (see color-coded matrix)
+   ↓
+4. For each paper:
+   ├─ Read title and abstract
+   ├─ Check DOI link if available
+   ├─ Write notes
+   ├─ Assign tags (required: Adherence, Contribution Type)
+   ├─ Add custom tags as needed
+   └─ Move to next paper
+   ↓
+5. Download session as JSON
+   ↓
+6. (Optional) Resume later by uploading saved JSON
+   ↓
+7. END
 ```
 
-### Project Configuration
+### Managing Custom Tags
 
-- **Theme Configuration**: Streamlit theme settings are in `.streamlit/config.toml`
-- **Label Definitions**: Paper classification options are defined in `web_gui/constants.py`
-- **Field Mapping**: Excel column mapping logic is in `web_gui/domain.py`
+**Add a new field:**
+1. Go to "Manage Tag Fields" → "Add a new field"
+2. Enter field name (e.g., "Domain", "Year Range")
+3. Press Enter to create
 
-## Key Design Decisions
+**Add tags to a field:**
+1. Go to "Manage Tag Entries" → Expand the field
+2. Enter tag name (e.g., "Machine Learning", "2024")
+3. Press Enter to add
 
-This project uses Streamlit as the UI framework for its simplicity, existing feature set, and rapid development capability. See [Architecture Decision Records](docs/adr/) for details on:
+**Rename or delete:**
+1. Use the "Select a field/tag to rename" or "Delete" options
+2. Protected fields (Adherence, Contribution Type) cannot be modified
 
-- Framework selection (ADR-0001)
-- Layered architecture (ADR-0002)
-- Output compatibility contract (ADR-0003)
-- Contribution type enumeration (ADR-0004)
-- Theme configuration (ADR-0005)
-- Streamlit presentation modularization (ADR-0006)
-- Adherence fixed-enum rendering (ADR-0007)
+## Data Format
+
+### Input: Excel Format
+
+Papers are imported from Excel files. Required structure:
+
+| Required Column | Type   | Example                          |
+|-----------------|--------|----------------------------------|
+| Title           | String | "Attention is All You Need"      |
+| Abstract        | String | "The dominant sequence transduction models..." |
+
+| Optional Column | Type   | Example                    |
+|-----------------|--------|----------------------------|
+| DOI             | String | "10.48550/arXiv.1706.03762" |
+| Notes           | String | "Foundational transformer paper" |
+
+### Output: JSON Format
+
+Reviews are exported as JSON arrays. Each object represents one paper:
+
+```json
+{
+  "Adherence": ["Sufficient"],
+  "Contribution Type": ["New Method"],
+  "Your_Field_1": ["tag_a", "tag_b"],
+  "Your_Field_2": [],
+  "Notes": "This paper is highly relevant..."
+}
+```
+
+## FAQ
+
+**Q: Can I use this with papers from Scopus or Web of Science?**
+A: Yes! Export from Scopus/WoS to Excel format (including Title, Abstract, DOI columns) and upload.
+
+**Q: How do I backup my progress?**
+A: Click the download button to save a JSON file with your entire review session. Keep this file safe.
+
+**Q: Can multiple people review the same papers?**
+A: Each person should have their own session. Export individual JSON files and compare results afterward.
+
+**Q: What if a paper doesn't have a DOI?**
+A: The DOI link won't display, but the paper can still be reviewed. This is normal for older or non-traditional publications.
+
+**Q: Can I edit papers or add new ones mid-review?**
+A: Upload a new Excel file to start a fresh review. To add papers to an existing review, combine them in Excel before uploading.
+
+**Q: How large can my dataset be?**
+A: Streamlit comfortably handles 500-1000 papers. For larger datasets (10,000+ papers), consider splitting into batches.
+
+**Q: Can I use this offline?**
+A: Yes. Install Streamlit and run locally - no internet required (except for DOI links).
 
 ## Contributing
 
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin feature/your-feature`)
-5. Open a Pull Request
+Contributions welcome! Areas for improvement:
+- Batch tagging capabilities
+- Advanced filtering and search
+- Export formats (CSV, PDF reports)
+- Dark mode support
+- Collaborative features
 
 ## License
 
-[Add your license information here]
+See [LICENSE](LICENSE) file for details.
 
-## Contact
+## Citation
 
-[Add contact information or maintainer details]
+If you use this tool in your research, please cite:
+
+```
+@software{literature_review_assistant_2024,
+  title = {Literature Review Assistant},
+  author = {Thiago Tomás de Paula},
+  year = {2026},
+  url = {https://github.com/yourusername/literature-review-assistant}
+}
+```
+
+---
+
+**Questions or issues?** Open an issue on GitHub or contact the maintainers.
