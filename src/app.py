@@ -331,20 +331,19 @@ def _display_goto_widget() -> None:
         [2, 1], gap="small", vertical_alignment="bottom"
     )
     with work_number_input_col:
-        st.number_input(
+        goto_number = st.number_input(
             "Go to",
             min_value=1,
             max_value=len(st.session_state.session_progress),
             value=st.session_state.current_work_index + 1,
             step=1,
-            key="goto_work_input",
             width="stretch",
         )
     with goto_button_col:
         st.button(
             ":material/search:",
             on_click=_goto_work_by_index,
-            args=[st.session_state.goto_work_input - 1],
+            args=[goto_number - 1],
             width="stretch",
             type="primary",
         )
