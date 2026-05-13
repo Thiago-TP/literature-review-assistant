@@ -319,7 +319,7 @@ def _display_doi_button() -> None:
     _type = "primary"
     current_work = st.session_state.works_df.loc[st.session_state.current_work_index]
     doi = current_work.get(DOI_COLUMN)
-    if doi is None:
+    if doi is None or pd.isna(doi) or doi.strip() == "":
         st.button(
             label=label,
             type=_type,
