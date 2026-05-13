@@ -176,7 +176,7 @@ def _display_progress_overview() -> None:
     responsive layout that respects MAX_COLS_IN_OVERVIEW for mobile compatibility.
     """
     _n_fields = len(st.session_state.tags)
-    _n_works = len(st.session_state.session_progress)
+    _n_works = len(st.session_state.works_df)
 
     color_code = matplotlib.colormaps[COLORMAP](
         [i / _n_fields for i in range(_n_fields + 1)]
@@ -298,7 +298,7 @@ def _display_doi_button() -> None:
     """Displays a button that links to the work's DOI if available, or a disabled button if not."""
     label = (
         f"**Work {st.session_state.current_work_index + 1} "
-        f"of {len(st.session_state.session_progress)}**"
+        f"of {len(st.session_state.works_df)}**"
     )
     _type = "primary"
     current_work = st.session_state.works_df.loc[st.session_state.current_work_index]
@@ -334,7 +334,7 @@ def _display_goto_widget() -> None:
         goto_number = st.number_input(
             "Go to",
             min_value=1,
-            max_value=len(st.session_state.session_progress),
+            max_value=len(st.session_state.works_df),
             value=st.session_state.current_work_index + 1,
             step=1,
             width="stretch",
@@ -353,7 +353,7 @@ def _goto_work_by_index(goto_index: int) -> None:
     """Go to a specific work by its index in the dataframe."""
     if goto_index is not None:
         st.session_state.current_work_index = (goto_index) % len(
-            st.session_state.session_progress
+            st.session_state.works_df
         )
 
 
