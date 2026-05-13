@@ -127,7 +127,8 @@ def _display_sidebar() -> None:
     )
 
     if export_file is not None:
-        _load_excel_file_into_dataframe()
+        st.session_state.works_df = pd.read_excel(export_file)
+        _initialize_session_progress()
 
     st.divider()
     if st.session_state.get("file_uploader") is not None:
@@ -142,27 +143,10 @@ def _display_sidebar() -> None:
             st.success("Previous progress loaded successfully!")
 
 
-def _load_excel_file_into_dataframe() -> None:
+def _initialize_session_progress() -> None:
     """
-    Load and initialize session state from an uploaded Excel file.
-
-    Performs the following initialization steps:
-    1. Reads the Excel file into a pandas DataFrame
-    2. Validates required columns are present (Title, Abstract)
-    3. Initializes session_progress tracking structure:
-       - Creates a progress entry for each paper
-       - Pre-populates Notes field and tag fields with empty values
-    4. Sets current_work_index to 0 (first paper)
-
-    The loaded DataFrame is stored in session state for display and reference.
-    Progress tracking is initialized with empty dictionaries for each paper,
-    ready to be populated as the user assigns tags during review.
-
-    Raises:
-        KeyError: If required columns (Title, Abstract) are missing
-        pd.errors.ParserError: If file is not a valid Excel format
+    Initializes the session progress structure based on the number of works in the uploaded dataframe.
     """
-    st.session_state.works_df = pd.read_excel(st.session_state.file_uploader)
     st.session_state.session_progress = [
         {} for _ in range(len(st.session_state.works_df))
     ]
@@ -323,7 +307,7 @@ def _display_doi_button() -> None:
         st.button(
             label=label,
             type=_type,
-            icon=":material/bookmark:",
+            icon=":material/wifi_off:",
             width="stretch",
         )
     else:
@@ -332,7 +316,6 @@ def _display_doi_button() -> None:
             label=label,
             type=_type,
             icon=":material/arrow_outward:",
-            icon_position="right",
             url=url,
             help=url,
             width="stretch",
