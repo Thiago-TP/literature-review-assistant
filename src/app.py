@@ -402,7 +402,6 @@ def _display_work_note() -> None:
     _current_note = st.session_state.session_progress[
         st.session_state.current_work_index
     ][NOTE_COLUMN]
-    st.info(f"Note: {_current_note}")
     st.subheader("**Your Notes**")
     new_note = st.text_area(
         "Write your notes about this work here.",
