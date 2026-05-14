@@ -140,6 +140,16 @@ def _display_sidebar() -> None:
         )
         if previous_progress_file is not None:
             st.session_state.session_progress = json.load(previous_progress_file)
+
+            st.session_state.tags = {}
+            new_fields = st.session_state.session_progress[0].keys()
+
+            for field in new_fields:
+                if field != NOTE_COLUMN:
+                    assignments = [v for work in st.session_state.session_progress for v in work[field]]
+                    unique_options = set(assignments)
+                    st.session_state.tags[field] = list(unique_options)
+
             st.success("Previous progress loaded successfully!")
 
 
