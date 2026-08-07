@@ -41,6 +41,10 @@ class TagOptionRead(BaseModel):
     id: int
     value: str
     position: int
+    children: list[TagOptionRead] = []
+
+
+TagOptionRead.model_rebuild()
 
 
 class TagFieldRead(BaseModel):
@@ -61,6 +65,7 @@ class TagFieldUpdate(BaseModel):
 
 class TagOptionCreate(BaseModel):
     value: str
+    parent_option_id: int | None = None
 
 
 class TagOptionUpdate(BaseModel):

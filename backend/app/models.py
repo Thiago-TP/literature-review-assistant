@@ -7,6 +7,7 @@ assignments, and deleting a field/option cascades cleanly.
 
 from datetime import datetime, timezone
 from enum import Enum
+from typing import Optional
 
 from sqlalchemy import JSON, Column, Index, text
 from sqlmodel import Field, Relationship, SQLModel
@@ -99,14 +100,46 @@ class TagField(SQLModel, table=True):
 
 
 class TagOption(SQLModel, table=True):
-    __table_args__ = (Index("ix_tagoption_field_value_unique", "field_id", "value", unique=True),)
+    """A tag within a field. Self-referential `parent_id` allows nesting
+    (topic -> subtopic -> subsubtopic, to arbitrary depth), while `field_id`
+    is always set directly on every node regardless of depth so field-level
+    queries (e.g. "how many fields does this paper have tags in") don't need
+    to walk the tree."""
+
+    __table_args__ = (
+        Index(
+            "ix_tagoption_root_value_unique",
+            "field_id",
+            "value",
+            unique=True,
+            sqlite_where=text("parent_id IS NULL"),
+        ),
+        Index(
+            "ix_tagoption_parent_value_unique",
+            "parent_id",
+            "value",
+            unique=True,
+            sqlite_where=text("parent_id IS NOT NULL"),
+        ),
+    )
 
     id: int | None = Field(default=None, primary_key=True)
     field_id: int = Field(foreign_key="tagfield.id", ondelete="CASCADE", index=True)
+    parent_id: int | None = Field(
+        default=None, foreign_key="tagoption.id", ondelete="CASCADE", index=True
+    )
     value: str
     position: int = Field(default=0)
 
     field: TagField = Relationship(back_populates="options")
+    parent: Optional["TagOption"] = Relationship(
+        back_populates="children",
+        sa_relationship_kwargs={"remote_side": "TagOption.id"},
+    )
+    children: list["TagOption"] = Relationship(
+        back_populates="parent",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
+    )
     assignments: list["TagAssignment"] = Relationship(
         back_populates="tag_option",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
