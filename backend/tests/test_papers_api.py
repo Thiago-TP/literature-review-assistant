@@ -139,3 +139,59 @@ def test_last_viewed_paper_persists(client, project):
 
     refetched = client.get(f"/api/projects/{project['id']}").json()
     assert refetched["last_viewed_paper_id"] == paper["id"]
+
+
+def test_assign_tag_is_idempotent(client, project):
+    fields = client.get(f"/api/projects/{project['id']}/fields").json()
+    adherence = next(f for f in fields if f["name"] == "Adherence")
+    option = adherence["options"][0]
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+
+    first = client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{option['id']}")
+    second = client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{option['id']}")
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert second.json()["tags"][str(adherence["id"])] == [option["id"]]
+
+
+def test_unassign_tag_is_idempotent_when_not_assigned(client, project):
+    fields = client.get(f"/api/projects/{project['id']}/fields").json()
+    option = fields[0]["options"][0]
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+
+    resp = client.delete(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{option['id']}")
+    assert resp.status_code == 200
+    assert resp.json()["tags"] == {}
+
+
+def test_assigning_two_different_tags_in_sequence_keeps_both(client, project):
+    """Regression test: the old PATCH-with-full-list approach could drop an
+    earlier selection if a second click's payload was computed from a
+    slightly-stale snapshot. The per-option assign endpoint must never do
+    that, since each call only ever asserts one option, never a full list."""
+    field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
+    topic = client.post(f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "Topic"}).json()
+    subtopic = client.post(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options",
+        json={"value": "Sub", "parent_option_id": topic["id"]},
+    ).json()
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+
+    client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{topic['id']}")
+    final = client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{subtopic['id']}")
+
+    assigned = set(final.json()["tags"][str(field["id"])])
+    assert assigned == {topic["id"], subtopic["id"]}
+
+
+def test_unassign_one_tag_leaves_other_selected(client, project):
+    field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
+    a = client.post(f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A"}).json()
+    b = client.post(f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "B"}).json()
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+
+    client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{a['id']}")
+    client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{b['id']}")
+    final = client.delete(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{a['id']}")
+
+    assert final.json()["tags"][str(field["id"])] == [b["id"]]

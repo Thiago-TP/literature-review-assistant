@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
 from app.deps import SessionDep, get_paper_or_404, get_project_or_404
-from app.models import TagField
+from app.models import TagAssignment, TagField
 from app.schemas import DuplicateInfo, PaperCreate, PaperCreateResult, PaperDetail, PaperListItem, PaperUpdate
 from app.services import dedup
 from app.services.paper_repo import (
@@ -47,6 +47,44 @@ def update_paper(project_id: int, paper_id: int, payload: PaperUpdate, session: 
     if payload.tags is not None:
         apply_tag_updates(session, paper, payload.tags)
     session.commit()
+    session.refresh(paper)
+    return paper_to_detail(paper)
+
+
+@router.post("/{paper_id}/tags/{option_id}", response_model=PaperDetail)
+def assign_tag(project_id: int, paper_id: int, option_id: int, session: SessionDep) -> PaperDetail:
+    """Assign a single tag, idempotently. Used by the UI instead of the
+    replace-the-whole-field PATCH above so that clicking a topic and then a
+    subtopic in quick succession can't race: each click only ever asserts
+    "this one option is assigned", never a client-computed full list that a
+    slightly-stale response could clobber."""
+    paper = get_paper_or_404(project_id, paper_id, session)
+    already_assigned = session.exec(
+        select(TagAssignment).where(
+            TagAssignment.paper_id == paper_id, TagAssignment.tag_option_id == option_id
+        )
+    ).first()
+    if not already_assigned:
+        session.add(TagAssignment(paper_id=paper_id, tag_option_id=option_id))
+        try:
+            session.commit()
+        except IntegrityError:
+            session.rollback()  # a concurrent request already assigned it -- that's the desired end state
+    session.refresh(paper)
+    return paper_to_detail(paper)
+
+
+@router.delete("/{paper_id}/tags/{option_id}", response_model=PaperDetail)
+def unassign_tag(project_id: int, paper_id: int, option_id: int, session: SessionDep) -> PaperDetail:
+    paper = get_paper_or_404(project_id, paper_id, session)
+    assignment = session.exec(
+        select(TagAssignment).where(
+            TagAssignment.paper_id == paper_id, TagAssignment.tag_option_id == option_id
+        )
+    ).first()
+    if assignment:
+        session.delete(assignment)
+        session.commit()
     session.refresh(paper)
     return paper_to_detail(paper)
 
