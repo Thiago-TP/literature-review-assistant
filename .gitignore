@@ -128,3 +128,11 @@ dmypy.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Backend local database (local-first persistence, never committed)
+backend/data/*.db
+backend/data/*.db-journal
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
