@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+:root {
+  --color-bg: #f2efe6;
+  --color-surface: #f8f6ef;
+  --color-surface-muted: #eae5d6;
+  --color-border: #d9d2bd;
+  --color-text: #1c1b17;
+  --color-text-muted: #6b6a5d;
+  --color-accent: #1d3557;
+  --color-accent-hover: #142840;
+  --color-accent-fg: #f5f3ec;
+  --color-danger: #a8391f;
+  --color-danger-fg: #f5f3ec;
+  --color-success: #3f6b4a;
+  --color-success-fg: #f5f3ec;
+}
+
+/* System dark preference applies only when the user hasn't explicitly chosen light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-bg: #15161a;
+    --color-surface: #1c1d22;
+    --color-surface-muted: #26272e;
+    --color-border: #35363f;
+    --color-text: #eeece4;
+    --color-text-muted: #9c9a90;
+    --color-accent: #8fa8c9;
+    --color-accent-hover: #aabedc;
+    --color-accent-fg: #12141a;
+    --color-danger: #d98a6f;
+    --color-danger-fg: #12141a;
+    --color-success: #8bb096;
+    --color-success-fg: #12141a;
+  }
+}
+
+/* Explicit toggle wins over both the default and the system preference. */
+:root[data-theme='dark'] {
+  --color-bg: #15161a;
+  --color-surface: #1c1d22;
+  --color-surface-muted: #26272e;
+  --color-border: #35363f;
+  --color-text: #eeece4;
+  --color-text-muted: #9c9a90;
+  --color-accent: #8fa8c9;
+  --color-accent-hover: #aabedc;
+  --color-accent-fg: #12141a;
+  --color-danger: #d98a6f;
+  --color-danger-fg: #12141a;
+  --color-success: #8bb096;
+  --color-success-fg: #12141a;
+}
+
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-surface-muted: var(--color-surface-muted);
+  --color-border: var(--color-border);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-fg: var(--color-accent-fg);
+  --color-danger: var(--color-danger);
+  --color-danger-fg: var(--color-danger-fg);
+  --color-success: var(--color-success);
+  --color-success-fg: var(--color-success-fg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+}
+
+.tracked-label {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
