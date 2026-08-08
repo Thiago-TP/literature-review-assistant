@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
-import { Label, Textarea } from './ui'
+import { useEffect, useState } from 'react'
+import { Check, Pencil } from 'lucide-react'
+import { Button, Label, Textarea } from './ui'
 
 export default function NotesPanel({
   paperId,
@@ -10,29 +11,56 @@ export default function NotesPanel({
   notes: string
   onSave: (value: string) => void
 }) {
-  const [value, setValue] = useState(notes)
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(notes)
 
-  // Reset local draft when navigating to a different paper.
+  // Reset only when navigating to a different paper -- NOT on every `notes`
+  // change, since that prop also updates right after our own save (once the
+  // query refetches), which would otherwise stomp on text as it's typed.
   useEffect(() => {
-    setValue(notes)
-  }, [paperId, notes])
+    setDraft(notes)
+    setEditing(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paperId])
 
-  function handleChange(next: string) {
-    setValue(next)
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    timeoutRef.current = setTimeout(() => onSave(next), 400)
+  function startEditing() {
+    setDraft(notes)
+    setEditing(true)
+  }
+
+  function handleSave() {
+    onSave(draft)
+    setEditing(false)
   }
 
   return (
     <div>
-      <Label className="mb-1.5">Suas notas</Label>
-      <Textarea
-        rows={4}
-        placeholder="Escreva suas notas sobre este artigo..."
-        value={value}
-        onChange={(e) => handleChange(e.target.value)}
-      />
+      <div className="mb-1.5 flex items-center justify-between">
+        <Label>Suas notas</Label>
+        {editing ? (
+          <Button variant="secondary" onClick={handleSave}>
+            <Check size={14} /> OK
+          </Button>
+        ) : (
+          <Button variant="ghost" onClick={startEditing}>
+            <Pencil size={14} /> Editar
+          </Button>
+        )}
+      </div>
+
+      {editing ? (
+        <Textarea
+          rows={4}
+          autoFocus
+          placeholder="Escreva suas notas sobre este artigo..."
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+        />
+      ) : (
+        <p className="min-h-[2.5rem] whitespace-pre-line border border-border bg-surface-muted px-3 py-2 text-sm text-text">
+          {notes ? notes : <span className="text-text-muted">Nenhuma nota ainda.</span>}
+        </p>
+      )}
     </div>
   )
 }
