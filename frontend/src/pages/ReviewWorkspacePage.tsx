@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, FilePlus, UploadCloud } from 'lucide-react'
+import { ArrowLeft, FilePlus, LayoutDashboard, UploadCloud } from 'lucide-react'
 import { useProject, useSetLastViewed } from '../hooks/useProjects'
-import { usePaper, usePapers, useToggleTag, useUpdatePaper } from '../hooks/usePapers'
+import { usePaper, usePapers, useRating, useToggleTag, useUpdatePaper } from '../hooks/usePapers'
 import { useTagFields } from '../hooks/useTagFields'
 import ProgressOverview from '../components/ProgressOverview'
 import PaperNav from '../components/PaperNav'
@@ -12,6 +12,7 @@ import NotesPanel from '../components/NotesPanel'
 import FieldManagementPanel from '../components/FieldManagementPanel'
 import BulkImportModal from '../components/BulkImportModal'
 import AddPaperModal from '../components/AddPaperModal'
+import StarRating from '../components/StarRating'
 import { Button, Card, EmptyState, Label, Spinner, StepBadge } from '../components/ui'
 import ThemeToggle from '../components/ThemeToggle'
 
@@ -25,6 +26,7 @@ export default function ReviewWorkspacePage() {
   const setLastViewed = useSetLastViewed(projectId)
   const updatePaper = useUpdatePaper(projectId)
   const toggleTag = useToggleTag(projectId)
+  const rating = useRating(projectId)
 
   const [currentPaperId, setCurrentPaperId] = useState<number | null>(null)
   const [initialized, setInitialized] = useState(false)
@@ -74,6 +76,11 @@ export default function ReviewWorkspacePage() {
           <span className="font-serif text-lg text-text">{project.name}</span>
         </div>
         <div className="flex items-center gap-2">
+          <Link to={`/projects/${projectId}/dashboard`}>
+            <Button variant="secondary">
+              <LayoutDashboard size={15} /> Dashboard
+            </Button>
+          </Link>
           <Button variant="secondary" onClick={() => setShowImportModal(true)}>
             <UploadCloud size={15} /> Importar planilha
           </Button>
@@ -138,6 +145,21 @@ export default function ReviewWorkspacePage() {
             <>
               <Card className="p-5">
                 <PaperNav currentIndex={currentIndex} total={papers?.length ?? 0} onGoTo={goToIndex} />
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-y border-border py-3">
+                  <div className="flex items-center gap-2">
+                    <Label>Sua avaliação</Label>
+                    <StarRating
+                      rating={paper.rating}
+                      onChange={(value) => rating.mutate({ paperId: paper.id, rating: value })}
+                    />
+                    {paper.rating !== null && (
+                      <span className="text-xs text-text-muted">{paper.rating}/5</span>
+                    )}
+                  </div>
+                  <p className="text-sm text-text-muted">
+                    Pontuação: <span className="font-semibold text-text">{paper.score}</span>
+                  </p>
+                </div>
                 <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-[2fr_1fr]">
                   <PaperDisplay paper={paper} />
                   <TagFieldPanel

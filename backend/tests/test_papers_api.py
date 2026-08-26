@@ -195,3 +195,82 @@ def test_unassign_one_tag_leaves_other_selected(client, project):
     final = client.delete(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{a['id']}")
 
     assert final.json()["tags"][str(field["id"])] == [b["id"]]
+
+
+def test_new_paper_has_zero_score_and_no_rating(client, project):
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+    assert paper["rating"] is None
+    assert paper["score"] == 0
+
+
+def test_set_and_clear_rating(client, project):
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+
+    set_resp = client.put(f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 4})
+    assert set_resp.status_code == 200
+    assert set_resp.json()["rating"] == 4
+    assert set_resp.json()["score"] == 4
+
+    clear_resp = client.delete(f"/api/projects/{project['id']}/papers/{paper['id']}/rating")
+    assert clear_resp.status_code == 200
+    assert clear_resp.json()["rating"] is None
+    assert clear_resp.json()["score"] == 0
+
+
+def test_rating_out_of_range_rejected(client, project):
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+    resp = client.put(f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 5.5})
+    assert resp.status_code == 422
+    resp = client.put(f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 0})
+    assert resp.status_code == 422
+
+
+def test_rating_must_be_a_half_step(client, project):
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+    resp = client.put(f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 3.3})
+    assert resp.status_code == 422
+
+
+def test_half_star_rating_accepted(client, project):
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+    resp = client.put(f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 0.5})
+    assert resp.status_code == 200
+    assert resp.json()["rating"] == 0.5
+
+    resp = client.put(f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 4.5})
+    assert resp.status_code == 200
+    assert resp.json()["rating"] == 4.5
+    assert resp.json()["score"] == 4.5
+
+
+def test_score_combines_tag_weights_and_rating(client, project):
+    field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
+    option_a = client.post(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A", "weight": 3}
+    ).json()
+    option_b = client.post(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "B", "weight": 1.5}
+    ).json()
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+
+    client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{option_a['id']}")
+    client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{option_b['id']}")
+    rated = client.put(f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 5})
+
+    assert rated.json()["score"] == 3 + 1.5 + 5
+
+    list_item = next(
+        p for p in client.get(f"/api/projects/{project['id']}/papers").json() if p["id"] == paper["id"]
+    )
+    assert list_item["score"] == 3 + 1.5 + 5
+    assert list_item["rating"] == 5
+
+
+def test_paper_list_item_includes_notes(client, project):
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+    client.patch(f"/api/projects/{project['id']}/papers/{paper['id']}", json={"notes": "Very relevant paper"})
+
+    list_item = next(
+        p for p in client.get(f"/api/projects/{project['id']}/papers").json() if p["id"] == paper["id"]
+    )
+    assert list_item["notes"] == "Very relevant paper"

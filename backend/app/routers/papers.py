@@ -6,7 +6,15 @@ from sqlmodel import select
 
 from app.deps import SessionDep, get_paper_or_404, get_project_or_404
 from app.models import TagAssignment, TagField
-from app.schemas import DuplicateInfo, PaperCreate, PaperCreateResult, PaperDetail, PaperListItem, PaperUpdate
+from app.schemas import (
+    DuplicateInfo,
+    PaperCreate,
+    PaperCreateResult,
+    PaperDetail,
+    PaperListItem,
+    PaperUpdate,
+    RatingUpdate,
+)
 from app.services import dedup
 from app.services.paper_repo import (
     apply_tag_updates,
@@ -85,6 +93,26 @@ def unassign_tag(project_id: int, paper_id: int, option_id: int, session: Sessio
     if assignment:
         session.delete(assignment)
         session.commit()
+    session.refresh(paper)
+    return paper_to_detail(paper)
+
+
+@router.put("/{paper_id}/rating", response_model=PaperDetail)
+def set_rating(project_id: int, paper_id: int, payload: RatingUpdate, session: SessionDep) -> PaperDetail:
+    paper = get_paper_or_404(project_id, paper_id, session)
+    paper.rating = payload.rating
+    session.add(paper)
+    session.commit()
+    session.refresh(paper)
+    return paper_to_detail(paper)
+
+
+@router.delete("/{paper_id}/rating", response_model=PaperDetail)
+def clear_rating(project_id: int, paper_id: int, session: SessionDep) -> PaperDetail:
+    paper = get_paper_or_404(project_id, paper_id, session)
+    paper.rating = None
+    session.add(paper)
+    session.commit()
     session.refresh(paper)
     return paper_to_detail(paper)
 

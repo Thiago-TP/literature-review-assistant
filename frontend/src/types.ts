@@ -11,6 +11,7 @@ export interface TagOption {
   id: number
   value: string
   position: number
+  weight: number
   children: TagOption[]
 }
 
@@ -31,6 +32,9 @@ export interface PaperListItem {
   order_index: number
   filled_field_count: number
   total_field_count: number
+  notes: string
+  rating: number | null
+  score: number
 }
 
 export type PaperSource = 'xlsx_import' | 'crossref_doi' | 'crossref_title' | 'manual'
@@ -48,6 +52,8 @@ export interface PaperDetail {
   source: PaperSource
   order_index: number
   tags: Record<number, number[]>
+  rating: number | null
+  score: number
 }
 
 export interface DuplicateInfo {
@@ -105,4 +111,24 @@ export interface LookupCandidate {
 
 export interface ApiErrorBody {
   detail?: string | { message: string; affected_paper_ids?: number[] }
+}
+
+export interface TagDistributionEntry {
+  field_id: number
+  field_name: string
+  option_id: number
+  option_path: string
+  weight: number
+  count: number
+}
+
+export interface DashboardStats {
+  total_papers: number
+  fully_tagged_count: number
+  rated_count: number
+  with_notes_count: number
+  average_rating: number | null
+  average_score: number
+  tag_distribution: TagDistributionEntry[]
+  top_papers: PaperListItem[]
 }

@@ -32,6 +32,15 @@ def option_id_to_field_id(session: Session, project_id: int) -> dict[int, int]:
     return {option_id: field_id for option_id, field_id in rows}
 
 
+def paper_score(paper: Paper) -> float:
+    """A paper's score combines the weight of every tag assigned to it
+    (at any depth) with the reader's own star rating, so a quick numeric
+    signal reflects both "what was found" and "how good the reader judged
+    it to be"."""
+    tag_weight_sum = sum(a.tag_option.weight for a in paper.tag_assignments)
+    return tag_weight_sum + (paper.rating or 0)
+
+
 def paper_to_detail(paper: Paper) -> PaperDetail:
     tags: dict[int, list[int]] = {}
     for assignment in paper.tag_assignments:
@@ -49,6 +58,8 @@ def paper_to_detail(paper: Paper) -> PaperDetail:
         source=paper.source,
         order_index=paper.order_index,
         tags=tags,
+        rating=paper.rating,
+        score=paper_score(paper),
     )
 
 
@@ -69,6 +80,9 @@ def paper_to_list_item(
         order_index=paper.order_index,
         filled_field_count=len(filled_fields),
         total_field_count=total_field_count,
+        notes=paper.notes,
+        rating=paper.rating,
+        score=paper_score(paper),
     )
 
 

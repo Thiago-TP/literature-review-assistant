@@ -13,6 +13,12 @@ export function usePaper(projectId: number, paperId: number | null) {
   })
 }
 
+function invalidatePaperQueries(queryClient: ReturnType<typeof useQueryClient>, projectId: number, paperId: number) {
+  queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'papers'] })
+  queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'papers', paperId] })
+  queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'dashboard'] })
+}
+
 export function useUpdatePaper(projectId: number) {
   const queryClient = useQueryClient()
   return useMutation({
@@ -23,10 +29,7 @@ export function useUpdatePaper(projectId: number) {
       paperId: number
       payload: { notes?: string; tags?: Record<number, number[]> }
     }) => papersApi.update(projectId, paperId, payload),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'papers'] })
-      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'papers', variables.paperId] })
-    },
+    onSuccess: (_data, variables) => invalidatePaperQueries(queryClient, projectId, variables.paperId),
   })
 }
 
@@ -40,10 +43,18 @@ export function useToggleTag(projectId: number) {
       assign
         ? papersApi.assignTag(projectId, paperId, optionId)
         : papersApi.unassignTag(projectId, paperId, optionId),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'papers'] })
-      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'papers', variables.paperId] })
-    },
+    onSuccess: (_data, variables) => invalidatePaperQueries(queryClient, projectId, variables.paperId),
+  })
+}
+
+export function useRating(projectId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ paperId, rating }: { paperId: number; rating: number | null }) =>
+      rating === null
+        ? papersApi.clearRating(projectId, paperId)
+        : papersApi.setRating(projectId, paperId, rating),
+    onSuccess: (_data, variables) => invalidatePaperQueries(queryClient, projectId, variables.paperId),
   })
 }
 
@@ -51,7 +62,10 @@ export function useCreatePaper(projectId: number) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (payload: PaperCreatePayload) => papersApi.create(projectId, payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'papers'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'papers'] })
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'dashboard'] })
+    },
   })
 }
 
@@ -59,6 +73,9 @@ export function useDeletePaper(projectId: number) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (paperId: number) => papersApi.remove(projectId, paperId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'papers'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'papers'] })
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'dashboard'] })
+    },
   })
 }

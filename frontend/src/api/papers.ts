@@ -30,4 +30,8 @@ export const papersApi = {
     api.post<PaperDetail>(`/projects/${projectId}/papers/${paperId}/tags/${optionId}`),
   unassignTag: (projectId: number, paperId: number, optionId: number) =>
     api.delete<PaperDetail>(`/projects/${projectId}/papers/${paperId}/tags/${optionId}`),
+  setRating: (projectId: number, paperId: number, rating: number) =>
+    api.put<PaperDetail>(`/projects/${projectId}/papers/${paperId}/rating`, { rating }),
+  clearRating: (projectId: number, paperId: number) =>
+    api.delete<PaperDetail>(`/projects/${projectId}/papers/${paperId}/rating`),
 }
