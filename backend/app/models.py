@@ -68,6 +68,7 @@ class Paper(SQLModel, table=True):
     year: int | None = None
     source_title: str | None = None
     notes: str = Field(default="")
+    rating: float | None = Field(default=None)
     source: PaperSource = Field(default=PaperSource.MANUAL)
     raw_metadata: dict | list | None = Field(default=None, sa_column=Column(JSON))
     order_index: int = Field(default=0)
@@ -130,6 +131,7 @@ class TagOption(SQLModel, table=True):
     )
     value: str
     position: int = Field(default=0)
+    weight: float = Field(default=0)
 
     field: TagField = Relationship(back_populates="options")
     parent: Optional["TagOption"] = Relationship(

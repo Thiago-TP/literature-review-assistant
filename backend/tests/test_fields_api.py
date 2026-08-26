@@ -159,3 +159,81 @@ def test_delete_topic_cascades_to_unassigned_subtopics(client, project):
     fields = client.get(f"/api/projects/{project['id']}/fields").json()
     domain = next(f for f in fields if f["id"] == fid)
     assert domain["options"] == []
+
+
+def test_option_defaults_to_zero_weight(client, project):
+    field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
+    option = client.post(f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A"}).json()
+    assert option["weight"] == 0
+
+
+def test_create_option_with_weight(client, project):
+    field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
+    option = client.post(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A", "weight": 2.5}
+    ).json()
+    assert option["weight"] == 2.5
+
+
+def test_create_option_weight_above_cap_rejected(client, project):
+    field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
+    resp = client.post(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A", "weight": 5.5}
+    )
+    assert resp.status_code == 422
+
+
+def test_create_option_weight_off_step_rejected(client, project):
+    field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
+    resp = client.post(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A", "weight": 2.3}
+    )
+    assert resp.status_code == 422
+
+
+def test_create_option_weight_at_cap_accepted(client, project):
+    field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
+    resp = client.post(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A", "weight": 5}
+    )
+    assert resp.status_code == 201
+    assert resp.json()["weight"] == 5
+
+
+def test_reweight_option_above_cap_rejected(client, project):
+    field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
+    option = client.post(f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A"}).json()
+    resp = client.patch(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options/{option['id']}", json={"weight": 10}
+    )
+    assert resp.status_code == 422
+
+
+def test_reweight_option_without_changing_value(client, project):
+    field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
+    option = client.post(f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A"}).json()
+
+    resp = client.patch(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options/{option['id']}", json={"weight": 4}
+    )
+    assert resp.status_code == 200
+    assert resp.json()["value"] == "A"
+    assert resp.json()["weight"] == 4
+
+
+def test_protected_field_option_can_be_reweighted_but_not_renamed(client, project):
+    fields = client.get(f"/api/projects/{project['id']}/fields").json()
+    protected = next(f for f in fields if f["is_protected"])
+    option = protected["options"][0]
+
+    reweight_resp = client.patch(
+        f"/api/projects/{project['id']}/fields/{protected['id']}/options/{option['id']}", json={"weight": 3}
+    )
+    assert reweight_resp.status_code == 200
+    assert reweight_resp.json()["weight"] == 3
+
+    rename_resp = client.patch(
+        f"/api/projects/{project['id']}/fields/{protected['id']}/options/{option['id']}",
+        json={"value": "Something Else"},
+    )
+    assert rename_resp.status_code == 400

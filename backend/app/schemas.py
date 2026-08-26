@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.models import PaperSource
 
@@ -41,6 +41,7 @@ class TagOptionRead(BaseModel):
     id: int
     value: str
     position: int
+    weight: float
     children: list[TagOptionRead] = []
 
 
@@ -66,10 +67,12 @@ class TagFieldUpdate(BaseModel):
 class TagOptionCreate(BaseModel):
     value: str
     parent_option_id: int | None = None
+    weight: float = Field(default=0, ge=0, le=5, multiple_of=0.5)
 
 
 class TagOptionUpdate(BaseModel):
-    value: str
+    value: str | None = None
+    weight: float | None = Field(default=None, ge=0, le=5, multiple_of=0.5)
 
 
 # ---- Papers --------------------------------------------------------------
@@ -84,6 +87,9 @@ class PaperListItem(BaseModel):
     order_index: int
     filled_field_count: int
     total_field_count: int
+    notes: str
+    rating: float | None
+    score: float
 
 
 class PaperDetail(BaseModel):
@@ -99,11 +105,17 @@ class PaperDetail(BaseModel):
     source: PaperSource
     order_index: int
     tags: dict[int, list[int]]
+    rating: float | None
+    score: float
 
 
 class PaperUpdate(BaseModel):
     notes: str | None = None
     tags: dict[int, list[int]] | None = None
+
+
+class RatingUpdate(BaseModel):
+    rating: float = Field(ge=0.5, le=5, multiple_of=0.5)
 
 
 class PaperCreate(BaseModel):
@@ -196,3 +208,26 @@ class LookupDoiResponse(BaseModel):
 
 class LookupTitleResponse(BaseModel):
     candidates: list[LookupCandidate]
+
+
+# ---- Dashboard -------------------------------------------------------------
+
+
+class TagDistributionEntry(BaseModel):
+    field_id: int
+    field_name: str
+    option_id: int
+    option_path: str
+    weight: float
+    count: int
+
+
+class DashboardStats(BaseModel):
+    total_papers: int
+    fully_tagged_count: int
+    rated_count: int
+    with_notes_count: int
+    average_rating: float | None
+    average_score: float
+    tag_distribution: list[TagDistributionEntry]
+    top_papers: list[PaperListItem]

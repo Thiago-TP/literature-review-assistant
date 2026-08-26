@@ -4,6 +4,8 @@ import type { TagField, TagOption } from '../types'
 import { useFieldMutations } from '../hooks/useTagFields'
 import { Button, Card, Input } from './ui'
 
+const MAX_TAG_WEIGHT = 5
+
 function extractErrorMessage(error: unknown): string {
   if (error && typeof error === 'object' && 'message' in error) {
     return String((error as { message: unknown }).message)
@@ -28,11 +30,31 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
 
   const customFields = fields.filter((f) => !f.is_protected)
 
+  function saveWeight(fieldId: number, optionId: number, raw: string) {
+    const weight = Number(raw)
+    if (Number.isNaN(weight)) return
+    mutations.updateOption.mutate(
+      { fieldId, optionId, weight },
+      { onError: (error) => alert(extractErrorMessage(error)) }
+    )
+  }
+
   function renderOptionNode(option: TagOption, fieldId: number, isProtected: boolean, depth: number) {
     return (
       <div key={option.id} style={{ marginLeft: depth * 18 }}>
         <div className="flex items-center gap-1 rounded-full bg-surface-muted py-1 pl-2.5 pr-1 text-xs text-text">
           <span>{option.value}</span>
+          <input
+            type="number"
+            step="0.5"
+            min={0}
+            max={MAX_TAG_WEIGHT}
+            defaultValue={option.weight}
+            onBlur={(e) => saveWeight(fieldId, option.id, e.target.value)}
+            title={`Valor desta tag na pontuação do artigo (0 a ${MAX_TAG_WEIGHT}, em passos de 0,5)`}
+            aria-label={`Valor de ${option.value} na pontuação`}
+            className="ml-1 w-12 border border-border bg-surface px-1 py-0.5 text-right text-xs text-text"
+          />
           {!isProtected && (
             <>
               <button
@@ -78,7 +100,7 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
               e.preventDefault()
               const value = optionRenameValue.trim()
               if (!value) return
-              mutations.renameOption.mutate(
+              mutations.updateOption.mutate(
                 { fieldId, optionId: option.id, value },
                 {
                   onSuccess: () => setRenamingOptionId(null),
@@ -227,7 +249,8 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
                 <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
                   <p className="text-xs text-text-muted">
                     Use o + em cada tag para adicionar um subtópico (e dentro dele, um subsubtópico, e assim por
-                    diante).
+                    diante). O número ao lado de cada tag é o valor dela na pontuação do artigo (de 0 a{' '}
+                    {MAX_TAG_WEIGHT}, em passos de 0,5).
                   </p>
                   <div className="flex flex-col gap-1.5">
                     {field.options.map((option) => renderOptionNode(option, field.id, field.is_protected, 0))}

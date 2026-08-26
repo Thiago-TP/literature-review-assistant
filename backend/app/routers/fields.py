@@ -21,7 +21,9 @@ def _build_option_tree(options: list[TagOption], parent_id: int | None = None) -
     """Turn the flat list of a field's options (all depths) into a nested tree."""
     children = sorted((o for o in options if o.parent_id == parent_id), key=lambda o: o.position)
     return [
-        TagOptionRead(id=o.id, value=o.value, position=o.position, children=_build_option_tree(options, o.id))
+        TagOptionRead(
+            id=o.id, value=o.value, position=o.position, weight=o.weight, children=_build_option_tree(options, o.id)
+        )
         for o in children
     ]
 
@@ -129,38 +131,48 @@ def create_option(
     ).all()
     next_position = (max(sibling_positions) + 1) if sibling_positions else 0
 
-    option = TagOption(field_id=field_id, parent_id=parent_id, value=value, position=next_position)
+    option = TagOption(field_id=field_id, parent_id=parent_id, value=value, position=next_position, weight=payload.weight)
     session.add(option)
     session.commit()
     session.refresh(option)
-    return TagOptionRead(id=option.id, value=option.value, position=option.position, children=[])
+    return TagOptionRead(id=option.id, value=option.value, position=option.position, weight=option.weight, children=[])
 
 
 @router.patch("/{field_id}/options/{option_id}", response_model=TagOptionRead)
-def rename_option(
+def update_option(
     project_id: int,
     field_id: int,
     option_id: int,
     payload: TagOptionUpdate,
     session: SessionDep,
 ) -> TagOptionRead:
+    """Rename and/or reweight a tag. Renaming is blocked for protected
+    fields (Adherence, Contribution Type) same as before, but reweighting
+    isn't -- assigning point values to the built-in options is expected,
+    just not renaming/deleting them."""
     field = get_field_or_404(project_id, field_id, session)
     option = get_option_or_404(field_id, option_id, session)
-    if field.is_protected:
-        raise HTTPException(status_code=400, detail="Tags in protected fields cannot be renamed")
-    new_value = payload.value.strip()
-    if not new_value:
-        raise HTTPException(status_code=400, detail="Tag value cannot be empty")
-    if session.exec(
-        select(TagOption).where(
-            TagOption.field_id == field_id,
-            TagOption.parent_id == option.parent_id,
-            TagOption.value == new_value,
-            TagOption.id != option_id,
-        )
-    ).first():
-        raise HTTPException(status_code=400, detail=f"Tag '{new_value}' already exists at this level")
-    option.value = new_value
+
+    if payload.value is not None:
+        if field.is_protected:
+            raise HTTPException(status_code=400, detail="Tags in protected fields cannot be renamed")
+        new_value = payload.value.strip()
+        if not new_value:
+            raise HTTPException(status_code=400, detail="Tag value cannot be empty")
+        if session.exec(
+            select(TagOption).where(
+                TagOption.field_id == field_id,
+                TagOption.parent_id == option.parent_id,
+                TagOption.value == new_value,
+                TagOption.id != option_id,
+            )
+        ).first():
+            raise HTTPException(status_code=400, detail=f"Tag '{new_value}' already exists at this level")
+        option.value = new_value
+
+    if payload.weight is not None:
+        option.weight = payload.weight
+
     session.add(option)
     session.commit()
     session.refresh(option)
@@ -168,6 +180,7 @@ def rename_option(
         id=option.id,
         value=option.value,
         position=option.position,
+        weight=option.weight,
         children=_build_option_tree(option.field.options, option.id),
     )
 

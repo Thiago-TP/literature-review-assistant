@@ -10,6 +10,7 @@ export function useFieldMutations(projectId: number) {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'fields'] })
     queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'papers'] })
+    queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'dashboard'] })
   }
 
   const addField = useMutation({
@@ -26,13 +27,31 @@ export function useFieldMutations(projectId: number) {
     onSuccess: invalidate,
   })
   const addOption = useMutation({
-    mutationFn: ({ fieldId, value, parentOptionId }: { fieldId: number; value: string; parentOptionId?: number }) =>
-      fieldsApi.addOption(projectId, fieldId, value, parentOptionId),
+    mutationFn: ({
+      fieldId,
+      value,
+      parentOptionId,
+      weight,
+    }: {
+      fieldId: number
+      value: string
+      parentOptionId?: number
+      weight?: number
+    }) => fieldsApi.addOption(projectId, fieldId, value, parentOptionId, weight),
     onSuccess: invalidate,
   })
-  const renameOption = useMutation({
-    mutationFn: ({ fieldId, optionId, value }: { fieldId: number; optionId: number; value: string }) =>
-      fieldsApi.renameOption(projectId, fieldId, optionId, value),
+  const updateOption = useMutation({
+    mutationFn: ({
+      fieldId,
+      optionId,
+      value,
+      weight,
+    }: {
+      fieldId: number
+      optionId: number
+      value?: string
+      weight?: number
+    }) => fieldsApi.updateOption(projectId, fieldId, optionId, { value, weight }),
     onSuccess: invalidate,
   })
   const deleteOption = useMutation({
@@ -41,5 +60,5 @@ export function useFieldMutations(projectId: number) {
     onSuccess: invalidate,
   })
 
-  return { addField, renameField, deleteField, addOption, renameOption, deleteOption }
+  return { addField, renameField, deleteField, addOption, updateOption, deleteOption }
 }
