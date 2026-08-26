@@ -11,6 +11,13 @@ export class ApiError extends Error {
 
 function detailToMessage(detail: unknown): string {
   if (typeof detail === 'string') return detail
+  // FastAPI's default 422 shape: a list of Pydantic validation errors, each with a `msg`.
+  if (Array.isArray(detail) && detail.length > 0) {
+    const first = detail[0]
+    if (first && typeof first === 'object' && 'msg' in first) {
+      return String((first as { msg: unknown }).msg)
+    }
+  }
   if (detail && typeof detail === 'object' && 'message' in detail) {
     return String((detail as { message: unknown }).message)
   }
@@ -50,5 +57,7 @@ export const api = {
   postForm: <T>(path: string, form: FormData) => request<T>(path, { method: 'POST', body: form }),
   patch: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: 'PATCH', body: body !== undefined ? JSON.stringify(body) : undefined }),
+  put: <T>(path: string, body?: unknown) =>
+    request<T>(path, { method: 'PUT', body: body !== undefined ? JSON.stringify(body) : undefined }),
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 }
