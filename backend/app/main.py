@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import CORS_ORIGINS
 from app.db import init_db
-from app.routers import export, fields, import_, papers, projects
+from app.routers import dashboard, export, fields, import_, papers, projects
 
 
 @asynccontextmanager
@@ -31,6 +31,7 @@ app.include_router(papers.router)
 app.include_router(fields.router)
 app.include_router(import_.router)
 app.include_router(export.router)
+app.include_router(dashboard.router)
 
 
 @app.get("/api/health")
