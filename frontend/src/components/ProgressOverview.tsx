@@ -1,5 +1,15 @@
-import { Check } from 'lucide-react'
+import { Check, Star } from 'lucide-react'
 import type { PaperListItem } from '../types'
+
+/**
+ * Tiles are painted with a five-step ramp plus a success green, so a corner
+ * badge sits on anything from near-white to near-black depending on progress
+ * and theme. A thin light halo keeps the badges legible on every one of them
+ * without needing a per-background colour.
+ */
+const BADGE_HALO = 'drop-shadow(0 0 1.2px rgba(255, 255, 255, 0.95))'
+const STAR_FILL = '#f5c518'
+const STAR_STROKE = '#6b4e00'
 
 /**
  * Sequential blue ramp (validated for CVD/contrast, light->dark) used to encode
@@ -41,19 +51,38 @@ export default function ProgressOverview({
       {papers.map((paper) => {
         const complete = paper.total_field_count > 0 && paper.filled_field_count === paper.total_field_count
         const isCurrent = paper.id === currentPaperId
+        const rated = paper.rating !== null
+        const summary = [
+          paper.title,
+          `${paper.filled_field_count}/${paper.total_field_count} fields filled`,
+          rated ? `rated ${paper.rating}/5` : null,
+        ]
+          .filter(Boolean)
+          .join('\n')
         return (
           <button
             key={paper.id}
             role="listitem"
-            title={`${paper.title}\n${paper.filled_field_count}/${paper.total_field_count} fields filled`}
+            title={summary}
             onClick={() => onSelect(paper.id)}
             style={{ backgroundColor: colorFor(paper.filled_field_count, paper.total_field_count) }}
-            className={`relative h-6 w-6 transition-transform hover:scale-110 ${
+            className={`relative h-7 w-7 transition-transform hover:scale-110 ${
               isCurrent ? 'ring-2 ring-offset-2 ring-accent ring-offset-[var(--color-surface)]' : ''
             }`}
           >
+            {rated && (
+              <Star
+                size={10}
+                fill={STAR_FILL}
+                stroke={STAR_STROKE}
+                strokeWidth={2}
+                style={{ filter: BADGE_HALO }}
+                className="absolute left-[1px] top-[1px]"
+                aria-hidden="true"
+              />
+            )}
             {complete && (
-              <Check size={14} strokeWidth={3} className="absolute inset-0 m-auto text-[var(--color-success-fg)]" />
+              <Check size={12} strokeWidth={3} className="absolute inset-0 m-auto text-[var(--color-success-fg)]" />
             )}
           </button>
         )
