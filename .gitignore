@@ -139,3 +139,6 @@ frontend/dist/
 
 # Local TODO file
 TODO.md
+
+# Agent settings
+.claude/
