@@ -1,4 +1,4 @@
-import { Check, Star } from 'lucide-react'
+import { Check, Pencil, Star } from 'lucide-react'
 import type { PaperListItem } from '../types'
 
 /**
@@ -10,6 +10,7 @@ import type { PaperListItem } from '../types'
 const BADGE_HALO = 'drop-shadow(0 0 1.2px rgba(255, 255, 255, 0.95))'
 const STAR_FILL = '#f5c518'
 const STAR_STROKE = '#6b4e00'
+const PENCIL_STROKE = '#15161a'
 
 /**
  * Sequential blue ramp (validated for CVD/contrast, light->dark) used to encode
@@ -52,10 +53,12 @@ export default function ProgressOverview({
         const complete = paper.total_field_count > 0 && paper.filled_field_count === paper.total_field_count
         const isCurrent = paper.id === currentPaperId
         const rated = paper.rating !== null
+        const hasNotes = paper.notes.trim().length > 0
         const summary = [
           paper.title,
           `${paper.filled_field_count}/${paper.total_field_count} fields filled`,
           rated ? `rated ${paper.rating}/5` : null,
+          hasNotes ? 'has notes' : null,
         ]
           .filter(Boolean)
           .join('\n')
@@ -78,6 +81,16 @@ export default function ProgressOverview({
                 strokeWidth={2}
                 style={{ filter: BADGE_HALO }}
                 className="absolute left-[1px] top-[1px]"
+                aria-hidden="true"
+              />
+            )}
+            {hasNotes && (
+              <Pencil
+                size={9}
+                stroke={PENCIL_STROKE}
+                strokeWidth={2.5}
+                style={{ filter: BADGE_HALO }}
+                className="absolute right-[1px] top-[1px]"
                 aria-hidden="true"
               />
             )}
