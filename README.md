@@ -2,6 +2,12 @@
 
 A local-first tool for systematic literature reviews: import papers, tag and take notes on them one at a time, and track progress — all saved automatically to a local database, with a FastAPI backend and a React frontend.
 
+| Light | Dark |
+| :---: | :---: |
+| [![The review workspace in light mode](docs/screenshots/workspace-light.png)](docs/screenshots/workspace-light.png) | [![The review workspace in dark mode](docs/screenshots/workspace-dark.png)](docs/screenshots/workspace-dark.png) |
+
+*The review workspace: the progress overview at the top, then one paper at a time with its rating, tags and notes. The theme follows your system setting and can be toggled in the top right. (The papers shown are fabricated example data.)*
+
 ## Overview
 
 This app helps you evaluate and categorize academic papers without juggling spreadsheets and JSON exports by hand. It supports:
@@ -34,6 +40,7 @@ literature_review_assistant/
 │       ├── hooks/           # React Query hooks wrapping the API
 │       └── api/             # Typed API client
 ├── examples/           # Example .xlsx imports + a description of the format
+├── docs/screenshots/   # Images used by this README
 ├── run.py              # Cross-platform launcher (backend + frontend together)
 └── run.sh, run.cmd     # Thin wrappers around run.py
 ```
