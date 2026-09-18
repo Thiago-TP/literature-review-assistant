@@ -1,8 +1,25 @@
-import type { ReactNode } from 'react'
-import { Check, Pencil, Star } from 'lucide-react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { Check, ChevronDown, ChevronRight, Pencil, Star } from 'lucide-react'
 import type { PaperListItem } from '../types'
 
 const HEADING_ID = 'review-progress-heading'
+const GRID_ID = 'review-progress-grid'
+
+/**
+ * Whether the panel is retracted, remembered per browser. It is a display
+ * preference, not review data, so it belongs in localStorage rather than on
+ * the project -- and a browser that refuses storage just gets the open
+ * default rather than an error.
+ */
+const COLLAPSED_KEY = 'progressOverviewCollapsed'
+
+function readCollapsed(): boolean {
+  try {
+    return localStorage.getItem(COLLAPSED_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
 
 /**
  * Tiles are painted with a five-step ramp plus a success green, so a corner
@@ -98,20 +115,42 @@ export default function ProgressOverview({
   currentPaperId: number | null
   onSelect: (paperId: number) => void
 }) {
+  const [collapsed, setCollapsed] = useState(readCollapsed)
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(COLLAPSED_KEY, String(collapsed))
+    } catch {
+      // Storage unavailable (private browsing, blocked site data); the panel
+      // still works, it just reopens on the next visit.
+    }
+  }, [collapsed])
+
   const fullyTagged = papers.filter(
     (paper) => paper.total_field_count > 0 && paper.filled_field_count === paper.total_field_count
   ).length
 
   return (
     <section aria-labelledby={HEADING_ID}>
-      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2 id={HEADING_ID} className="tracked-label text-xs font-semibold text-text">
-          Review progress
-        </h2>
-        <p className="text-xs text-text-muted">
-          {fullyTagged} of {papers.length} fully tagged
-        </p>
-      </div>
+      <h2 id={HEADING_ID}>
+        <button
+          type="button"
+          onClick={() => setCollapsed((value) => !value)}
+          aria-expanded={!collapsed}
+          aria-controls={GRID_ID}
+          className="flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-1 text-left"
+        >
+          <span className="flex items-center gap-1.5 text-text">
+            {collapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+            <span className="tracked-label text-xs font-semibold">Review progress</span>
+          </span>
+          <span className="text-xs font-normal text-text-muted">
+            {fullyTagged} of {papers.length} fully tagged
+          </span>
+        </button>
+      </h2>
+
+      <div id={GRID_ID} className={collapsed ? 'hidden' : 'mt-3'}>
       <div className="flex flex-wrap gap-1.5" role="list">
       {papers.map((paper) => {
         const complete = paper.total_field_count > 0 && paper.filled_field_count === paper.total_field_count
@@ -165,7 +204,8 @@ export default function ProgressOverview({
         )
       })}
       </div>
-      <Legend />
+        <Legend />
+      </div>
     </section>
   )
 }
