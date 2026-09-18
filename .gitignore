@@ -136,3 +136,6 @@ backend/data/*.db-journal
 # Frontend
 frontend/node_modules/
 frontend/dist/
+
+# Local TODO file
+TODO.md
