@@ -74,6 +74,8 @@ Or use the wrapper for your platform: `./run.sh` on macOS/Linux, `run.cmd` on Wi
 
 This starts the backend at `http://localhost:8000` (API docs at `/docs`) and the frontend at `http://localhost:5173`. Open the frontend URL in your browser. Press Ctrl+C to stop both.
 
+If either default port is already taken — a second copy of the app, or anything else on 8000/5173 — the launcher falls forward to the next free port and prints the URLs it actually used.
+
 Or run them separately in two terminals:
 
 ```bash

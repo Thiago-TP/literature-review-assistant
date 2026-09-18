@@ -20,6 +20,9 @@ so the app always talks to a same-origin URL and there is no CORS handling in
 the client. The backend has to be running separately — or use `python run.py`
 from the repository root to start both.
 
+The proxy target is overridable with `LRA_API_PORT`, which is how the launcher
+tells Vite where the backend ended up when port 8000 was already taken.
+
 | Script | What it does |
 | --- | --- |
 | `npm run dev` | Vite dev server with HMR |

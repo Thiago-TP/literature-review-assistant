@@ -16,6 +16,7 @@ from __future__ import annotations
 import os
 import shutil
 import signal
+import socket
 import subprocess
 import sys
 import time
@@ -27,8 +28,10 @@ BACKEND_DIR = ROOT / "backend"
 FRONTEND_DIR = ROOT / "frontend"
 IS_WINDOWS = os.name == "nt"
 
-BACKEND_URL = "http://localhost:8000"
-FRONTEND_URL = "http://localhost:5173"
+DEFAULT_BACKEND_PORT = 8000
+DEFAULT_FRONTEND_PORT = 5173
+# How far past the default to look before giving up on a tidy port number.
+PORT_SEARCH_RANGE = 20
 
 SETUP_BACKEND = (
     "Backend not set up yet. From the repository root:\n"
@@ -65,6 +68,40 @@ def npm_executable() -> str | None:
     return shutil.which("npm")
 
 
+def port_is_free(port: int) -> bool:
+    """Whether a server could bind this port on localhost right now.
+
+    Deliberately without SO_REUSEADDR: we want to know whether something is
+    *already listening*, which is exactly what that option would paper over.
+    """
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        try:
+            probe.bind(("127.0.0.1", port))
+        except OSError:
+            return False
+    return True
+
+
+def pick_port(preferred: int, taken: set[int]) -> int:
+    """The preferred port if it is free, else the next free one after it.
+
+    Another instance of the app, or anything else on 8000/5173, otherwise
+    leaves the servers unable to start at all. Falling forward keeps a second
+    copy of the app usable instead of failing on a port collision.
+
+    There is a small race here -- the port is free when we look and could be
+    taken by the time the child binds it -- but the child then fails loudly
+    and the launcher stops the other half rather than leaving it half-up.
+    """
+    for port in range(preferred, preferred + PORT_SEARCH_RANGE):
+        if port not in taken and port_is_free(port):
+            return port
+    # Nothing tidy was free; let the OS hand out whatever it has.
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        probe.bind(("127.0.0.1", 0))
+        return probe.getsockname()[1]
+
+
 class _ChildExited(Exception):
     """Internal: one of the two servers exited, so tear the other one down."""
 
@@ -91,7 +128,7 @@ def fail(message: str) -> NoReturn:
     raise SystemExit(1)
 
 
-def spawn(command: list[str], cwd: Path) -> subprocess.Popen:
+def spawn(command: list[str], cwd: Path, env: dict[str, str] | None = None) -> subprocess.Popen:
     """Start a long-running child in its own process group.
 
     The new group is what lets `stop` later take down the child *and* the
@@ -100,6 +137,8 @@ def spawn(command: list[str], cwd: Path) -> subprocess.Popen:
     order.
     """
     kwargs: dict = {"cwd": str(cwd)}
+    if env is not None:
+        kwargs["env"] = {**os.environ, **env}
     if IS_WINDOWS:
         kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
     else:
@@ -144,12 +183,32 @@ def main() -> int:
     if npm is None:
         fail("npm not found on PATH. Install Node.js 20+ from https://nodejs.org/.")
 
+    backend_port = pick_port(DEFAULT_BACKEND_PORT, taken=set())
+    frontend_port = pick_port(DEFAULT_FRONTEND_PORT, taken={backend_port})
+    frontend_url = f"http://localhost:{frontend_port}"
+
     processes: list[subprocess.Popen] = []
     try:
         processes.append(
-            spawn([str(uvicorn), "app.main:app", "--port", "8000"], BACKEND_DIR)
+            spawn(
+                [str(uvicorn), "app.main:app", "--port", str(backend_port)],
+                BACKEND_DIR,
+                # The dev server proxies /api, so requests are same-origin and
+                # CORS never applies -- but keep the allowed origin in step
+                # with the port actually in use for anything hitting the API
+                # directly from the browser.
+                env={"LRA_CORS_ORIGINS": f"{frontend_url},http://127.0.0.1:{frontend_port}"},
+            )
         )
-        processes.append(spawn([npm, "run", "dev"], FRONTEND_DIR))
+        processes.append(
+            spawn(
+                # --strictPort: without it Vite silently walks to another port
+                # of its own choosing, and the URL printed below would be wrong.
+                [npm, "run", "dev", "--", "--port", str(frontend_port), "--strictPort"],
+                FRONTEND_DIR,
+                env={"LRA_API_PORT": str(backend_port)},
+            )
+        )
     except OSError as error:
         for process in processes:
             stop(process)
@@ -157,8 +216,10 @@ def main() -> int:
 
     # flush: stdout is block-buffered when the launcher's output is piped or
     # redirected, which would otherwise hold these lines back until exit.
-    print(f"Backend:  {BACKEND_URL}/docs", flush=True)
-    print(f"Frontend: {FRONTEND_URL}", flush=True)
+    if backend_port != DEFAULT_BACKEND_PORT or frontend_port != DEFAULT_FRONTEND_PORT:
+        print("Default port(s) already in use; falling forward.", flush=True)
+    print(f"Backend:  http://localhost:{backend_port}/docs", flush=True)
+    print(f"Frontend: {frontend_url}", flush=True)
     print("Press Ctrl+C to stop both.", flush=True)
 
     exit_code = 0
