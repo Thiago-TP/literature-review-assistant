@@ -1,5 +1,14 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { papersApi, type PaperCreatePayload } from '../api/papers'
+import type { PaperListItem } from '../types'
+
+/**
+ * A fetched paper stays usable for this long without a refetch. Mutations
+ * invalidate it explicitly, so this only affects revisiting a paper you have
+ * already seen -- which is exactly what stepping back and forth does.
+ */
+const PAPER_STALE_TIME_MS = 30_000
 
 export function usePapers(projectId: number) {
   return useQuery({ queryKey: ['projects', projectId, 'papers'], queryFn: () => papersApi.list(projectId) })
@@ -10,7 +19,36 @@ export function usePaper(projectId: number, paperId: number | null) {
     queryKey: ['projects', projectId, 'papers', paperId],
     queryFn: () => papersApi.get(projectId, paperId as number),
     enabled: paperId !== null,
+    // Keep the paper already on screen while the next one loads. Without this
+    // every step through the list unmounts the whole workspace for the length
+    // of one request, which reads as a flicker when stepping quickly.
+    placeholderData: keepPreviousData,
+    staleTime: PAPER_STALE_TIME_MS,
   })
+}
+
+/**
+ * Warms the cache for the papers on either side of `index`, so the next step
+ * in either direction renders from cache instead of waiting on a request.
+ */
+export function usePrefetchAdjacentPapers(
+  projectId: number,
+  papers: PaperListItem[] | undefined,
+  index: number
+) {
+  const queryClient = useQueryClient()
+  useEffect(() => {
+    if (!papers || index < 0) return
+    for (const neighbour of [papers[index - 1], papers[index + 1]]) {
+      if (!neighbour) continue
+      const id = neighbour.id
+      queryClient.prefetchQuery({
+        queryKey: ['projects', projectId, 'papers', id],
+        queryFn: () => papersApi.get(projectId, id),
+        staleTime: PAPER_STALE_TIME_MS,
+      })
+    }
+  }, [queryClient, projectId, papers, index])
 }
 
 function invalidatePaperQueries(queryClient: ReturnType<typeof useQueryClient>, projectId: number, paperId: number) {

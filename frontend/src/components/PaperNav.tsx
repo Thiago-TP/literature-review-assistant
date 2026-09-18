@@ -28,6 +28,7 @@ export default function PaperNav({
         <Button
           variant="secondary"
           aria-label="Previous paper"
+          title="Previous paper (left arrow)"
           disabled={currentIndex <= 0}
           onClick={() => onGoTo(currentIndex - 1)}
         >
@@ -36,6 +37,7 @@ export default function PaperNav({
         <Button
           variant="secondary"
           aria-label="Next paper"
+          title="Next paper (right arrow)"
           disabled={currentIndex >= total - 1}
           onClick={() => onGoTo(currentIndex + 1)}
         >

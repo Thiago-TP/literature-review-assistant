@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, FilePlus, LayoutDashboard, UploadCloud } from 'lucide-react'
-import { useProject, useSetLastViewed } from '../hooks/useProjects'
-import { usePaper, usePapers, useRating, useToggleTag, useUpdatePaper } from '../hooks/usePapers'
+import { useProject, useRememberLastViewed } from '../hooks/useProjects'
+import {
+  usePaper,
+  usePapers,
+  usePrefetchAdjacentPapers,
+  useRating,
+  useToggleTag,
+  useUpdatePaper,
+} from '../hooks/usePapers'
 import { useTagFields } from '../hooks/useTagFields'
 import ProgressOverview from '../components/ProgressOverview'
 import PaperNav from '../components/PaperNav'
@@ -23,7 +30,7 @@ export default function ReviewWorkspacePage() {
   const { data: project } = useProject(projectId)
   const { data: papers, isLoading: papersLoading } = usePapers(projectId)
   const { data: fields } = useTagFields(projectId)
-  const setLastViewed = useSetLastViewed(projectId)
+  const rememberLastViewed = useRememberLastViewed(projectId)
   const updatePaper = useUpdatePaper(projectId)
   const toggleTag = useToggleTag(projectId)
   const rating = useRating(projectId)
@@ -44,17 +51,48 @@ export default function ReviewWorkspacePage() {
     setInitialized(true)
   }, [initialized, project, papers])
 
-  const { data: paper } = usePaper(projectId, currentPaperId)
+  const { data: paper, isPlaceholderData } = usePaper(projectId, currentPaperId)
+  const currentIndex = papers?.findIndex((p) => p.id === currentPaperId) ?? -1
+
+  usePrefetchAdjacentPapers(projectId, papers, currentIndex)
+
+  // While the next paper loads we keep the previous one on screen rather than
+  // blanking the workspace. Fade it and lock it so a click can't land a rating
+  // or a tag on the paper being navigated away from.
+  const staleClass = isPlaceholderData ? 'pointer-events-none opacity-50 transition-opacity' : 'transition-opacity'
 
   function goToPaperId(paperId: number) {
     setCurrentPaperId(paperId)
-    setLastViewed.mutate(paperId)
+    rememberLastViewed(paperId)
   }
 
   function goToIndex(index: number) {
     if (!papers || index < 0 || index >= papers.length) return
     goToPaperId(papers[index].id)
   }
+
+  // Left/right arrows step through papers, mirroring the "<" and ">" buttons.
+  // Skipped while typing, while a modal is open, and for modified presses, so
+  // they never steal a keystroke meant for a field or the browser.
+  const modalOpen = showImportModal || showAddPaperModal
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+      if (event.metaKey || event.ctrlKey || event.altKey || modalOpen) return
+      const target = event.target as HTMLElement | null
+      if (target?.isContentEditable) return
+      if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return
+      if (!papers || currentIndex < 0) return
+
+      const next = currentIndex + (event.key === 'ArrowRight' ? 1 : -1)
+      if (next < 0 || next >= papers.length) return
+      event.preventDefault()
+      setCurrentPaperId(papers[next].id)
+      rememberLastViewed(papers[next].id)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [papers, currentIndex, modalOpen, rememberLastViewed])
 
   if (!project || papersLoading || !fields) {
     return (
@@ -63,8 +101,6 @@ export default function ReviewWorkspacePage() {
       </div>
     )
   }
-
-  const currentIndex = papers?.findIndex((p) => p.id === currentPaperId) ?? -1
 
   return (
     <div>
@@ -145,6 +181,7 @@ export default function ReviewWorkspacePage() {
             <>
               <Card className="p-5">
                 <PaperNav currentIndex={currentIndex} total={papers?.length ?? 0} onGoTo={goToIndex} />
+                <div className={staleClass}>
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-y border-border py-3">
                   <div className="flex items-center gap-2">
                     <Label>Your rating</Label>
@@ -170,9 +207,10 @@ export default function ReviewWorkspacePage() {
                     }
                   />
                 </div>
+                </div>
               </Card>
 
-              <Card className="p-5">
+              <Card className={`p-5 ${staleClass}`}>
                 <NotesPanel
                   paperId={paper.id}
                   notes={paper.notes}
