@@ -50,7 +50,7 @@ def main() -> None:
         )
 
     field_names_in_json = {
-        key for entry in progress for key in entry.keys() if key != "Notes"
+        key for entry in progress for key in entry if key != "Notes"
     }
     extra_field_names = field_names_in_json - set(REQUIRED_FIELDS.keys())
 
@@ -84,7 +84,7 @@ def main() -> None:
                 session.flush()
                 option_lookup[(field_name, value)] = option
 
-        for index, (row, entry) in enumerate(zip(rows, progress)):
+        for index, (row, entry) in enumerate(zip(rows, progress, strict=True)):
             paper = build_paper(
                 project_id=project.id,
                 title=row.title,

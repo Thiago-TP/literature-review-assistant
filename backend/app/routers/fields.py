@@ -122,7 +122,11 @@ def create_option(
         get_option_or_404(field_id, parent_id, session)  # 404s if missing or in a different field
 
     if session.exec(
-        select(TagOption).where(TagOption.field_id == field_id, TagOption.parent_id == parent_id, TagOption.value == value)
+        select(TagOption).where(
+            TagOption.field_id == field_id,
+            TagOption.parent_id == parent_id,
+            TagOption.value == value,
+        )
     ).first():
         raise HTTPException(status_code=400, detail=f"Tag '{value}' already exists at this level")
 
@@ -131,11 +135,23 @@ def create_option(
     ).all()
     next_position = (max(sibling_positions) + 1) if sibling_positions else 0
 
-    option = TagOption(field_id=field_id, parent_id=parent_id, value=value, position=next_position, weight=payload.weight)
+    option = TagOption(
+        field_id=field_id,
+        parent_id=parent_id,
+        value=value,
+        position=next_position,
+        weight=payload.weight,
+    )
     session.add(option)
     session.commit()
     session.refresh(option)
-    return TagOptionRead(id=option.id, value=option.value, position=option.position, weight=option.weight, children=[])
+    return TagOptionRead(
+        id=option.id,
+        value=option.value,
+        position=option.position,
+        weight=option.weight,
+        children=[],
+    )
 
 
 @router.patch("/{field_id}/options/{option_id}", response_model=TagOptionRead)

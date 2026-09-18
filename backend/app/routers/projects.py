@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException
 from sqlmodel import select
@@ -71,7 +71,7 @@ def update_project(project_id: int, payload: ProjectUpdate, session: SessionDep)
         if not name:
             raise HTTPException(status_code=400, detail="Project name cannot be empty")
         project.name = name
-    project.updated_at = datetime.now(timezone.utc)
+    project.updated_at = datetime.now(UTC)
     session.add(project)
     session.commit()
     session.refresh(project)

@@ -38,7 +38,7 @@ def _rows_for_export(session: SessionDep, project_id: int) -> tuple[list[dict], 
                 "Authors": paper.authors,
                 "Year": paper.year,
                 "Notes": paper.notes,
-                **{name: tags for name, tags in tags_by_field_name.items()},
+                **tags_by_field_name,
             }
         )
     return rows, field_names
@@ -54,7 +54,10 @@ def export_json(project_id: int, session: SessionDep):
 def export_xlsx(project_id: int, session: SessionDep):
     rows, field_names = _rows_for_export(session, project_id)
     flattened = [
-        {**{k: v for k, v in row.items() if k not in field_names}, **{name: ", ".join(row[name]) for name in field_names}}
+        {
+            **{k: v for k, v in row.items() if k not in field_names},
+            **{name: ", ".join(row[name]) for name in field_names},
+        }
         for row in rows
     ]
     df = pd.DataFrame(flattened)

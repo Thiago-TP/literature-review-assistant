@@ -78,7 +78,8 @@ def test_dashboard_fully_tagged_count(client, project):
 
 def test_dashboard_with_notes_count(client, project):
     with_notes = client.post(f"/api/projects/{project['id']}/papers", json={"title": "A"}).json()["paper"]
-    without_notes = client.post(f"/api/projects/{project['id']}/papers", json={"title": "B"}).json()["paper"]
+    # Created but never given notes, so it must not be counted.
+    client.post(f"/api/projects/{project['id']}/papers", json={"title": "B"})
     blank_notes = client.post(f"/api/projects/{project['id']}/papers", json={"title": "C"}).json()["paper"]
 
     client.patch(f"/api/projects/{project['id']}/papers/{with_notes['id']}", json={"notes": "Interesting"})

@@ -52,7 +52,7 @@ async def preview_xlsx_import(project_id: int, session: SessionDep, file: Upload
             matched_title=classification.matched_title,
             default_action=classification.default_action,
         )
-        for index, (parsed, classification) in enumerate(zip(parsed_rows, classifications))
+        for index, (parsed, classification) in enumerate(zip(parsed_rows, classifications, strict=True))
     ]
     duplicate_count = sum(1 for r in rows if r.is_duplicate)
     return ImportPreviewResponse(rows=rows, new_count=len(rows) - duplicate_count, duplicate_count=duplicate_count)

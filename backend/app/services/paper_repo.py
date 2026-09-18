@@ -29,7 +29,7 @@ def option_id_to_field_id(session: Session, project_id: int) -> dict[int, int]:
         .join(TagField, TagOption.field_id == TagField.id)
         .where(TagField.project_id == project_id)
     ).all()
-    return {option_id: field_id for option_id, field_id in rows}
+    return dict(rows)
 
 
 def paper_score(paper: Paper) -> float:

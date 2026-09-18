@@ -5,7 +5,7 @@ design with ID-based relations: renaming a field/tag no longer breaks existing
 assignments, and deleting a field/option cascades cleanly.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Optional
 
@@ -14,7 +14,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class PaperSource(str, Enum):

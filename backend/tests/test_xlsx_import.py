@@ -1,3 +1,5 @@
+import pytest
+
 from app.services.xlsx_import import XlsxImportError, parse_xlsx
 from tests.conftest import SAMPLE_XLSX_PATH
 
@@ -23,8 +25,6 @@ def test_parse_rejects_missing_required_columns():
     pd.DataFrame({"Foo": ["bar"]}).to_excel(buffer, index=False)
     buffer.seek(0)
 
-    try:
+    with pytest.raises(XlsxImportError) as excinfo:
         parse_xlsx(buffer.getvalue())
-        assert False, "expected XlsxImportError"
-    except XlsxImportError as exc:
-        assert "Title" in str(exc)
+    assert "Title" in str(excinfo.value)

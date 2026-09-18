@@ -1,0 +1,36 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    name: Pytest (backend)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+          # Pinned rather than read from .python-version, which is gitignored.
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      # The suite builds its own throwaway SQLite database per test, so there
+      # is no migration step or service container to set up here.
+      - name: Pytest
+        run: uv run pytest -q
