@@ -68,7 +68,7 @@ export default function TagFieldPanel({
               {field.name}
             </p>
             {field.options.length === 0 && (
-              <p className="text-xs text-text-muted">Nenhuma tag cadastrada ainda.</p>
+              <p className="text-xs text-text-muted">No tags defined yet.</p>
             )}
             {hasNesting ? (
               <div className="flex flex-col gap-1.5">

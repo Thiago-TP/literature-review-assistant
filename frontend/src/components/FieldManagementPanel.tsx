@@ -10,7 +10,7 @@ function extractErrorMessage(error: unknown): string {
   if (error && typeof error === 'object' && 'message' in error) {
     return String((error as { message: unknown }).message)
   }
-  return 'Algo deu errado'
+  return 'Something went wrong'
 }
 
 export default function FieldManagementPanel({ projectId, fields }: { projectId: number; fields: TagField[] }) {
@@ -51,14 +51,14 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
             max={MAX_TAG_WEIGHT}
             defaultValue={option.weight}
             onBlur={(e) => saveWeight(fieldId, option.id, e.target.value)}
-            title={`Valor desta tag na pontuação do artigo (0 a ${MAX_TAG_WEIGHT}, em passos de 0,5)`}
-            aria-label={`Valor de ${option.value} na pontuação`}
+            title={`This tag's contribution to the paper score (0 to ${MAX_TAG_WEIGHT}, in steps of 0.5)`}
+            aria-label={`Score contribution of ${option.value}`}
             className="ml-1 w-12 border border-border bg-surface px-1 py-0.5 text-right text-xs text-text"
           />
           {!isProtected && (
             <>
               <button
-                aria-label={`Adicionar subtópico em ${option.value}`}
+                aria-label={`Add subtopic under ${option.value}`}
                 onClick={() => {
                   setAddingChildToOptionId(option.id)
                   setNewChildValue('')
@@ -68,7 +68,7 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
                 <Plus size={12} />
               </button>
               <button
-                aria-label={`Renomear ${option.value}`}
+                aria-label={`Rename ${option.value}`}
                 onClick={() => {
                   setRenamingOptionId(option.id)
                   setOptionRenameValue(option.value)
@@ -78,7 +78,7 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
                 <Pencil size={11} />
               </button>
               <button
-                aria-label={`Apagar ${option.value}`}
+                aria-label={`Delete ${option.value}`}
                 onClick={() => {
                   mutations.deleteOption.mutate(
                     { fieldId, optionId: option.id },
@@ -111,7 +111,7 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
           >
             <Input value={optionRenameValue} onChange={(e) => setOptionRenameValue(e.target.value)} autoFocus />
             <Button type="submit" variant="secondary">
-              Salvar
+              Save
             </Button>
           </form>
         )}
@@ -133,13 +133,13 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
             }}
           >
             <Input
-              placeholder="Novo subtópico"
+              placeholder="New subtopic"
               value={newChildValue}
               onChange={(e) => setNewChildValue(e.target.value)}
               autoFocus
             />
             <Button type="submit" variant="secondary">
-              Adicionar
+              Add
             </Button>
           </form>
         )}
@@ -159,7 +159,7 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
         className="flex w-full items-center justify-between text-left"
         onClick={() => setOpen((o) => !o)}
       >
-        <span className="tracked-label text-xs font-semibold text-text">Gerenciar campos e tags</span>
+        <span className="tracked-label text-xs font-semibold text-text">Manage fields and tags</span>
         {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
       </button>
 
@@ -175,12 +175,12 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
             }}
           >
             <Input
-              placeholder="Novo campo (ex: Domínio)"
+              placeholder="New field (e.g. Domain)"
               value={newFieldName}
               onChange={(e) => setNewFieldName(e.target.value)}
             />
             <Button type="submit" variant="secondary">
-              <Plus size={15} /> Adicionar campo
+              <Plus size={15} /> Add field
             </Button>
           </form>
           {mutations.addField.isError && (
@@ -196,13 +196,13 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
                 >
                   {expandedFieldId === field.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                   {field.name}
-                  {field.is_protected && <span className="text-xs font-normal text-text-muted">(protegido)</span>}
+                  {field.is_protected && <span className="text-xs font-normal text-text-muted">(protected)</span>}
                 </button>
                 {!field.is_protected && (
                   <div className="flex gap-1">
                     <Button
                       variant="ghost"
-                      aria-label="Renomear campo"
+                      aria-label="Rename field"
                       onClick={() => {
                         setRenamingFieldId(field.id)
                         setRenameValue(field.name)
@@ -212,9 +212,9 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
                     </Button>
                     <Button
                       variant="ghost"
-                      aria-label="Apagar campo"
+                      aria-label="Delete field"
                       onClick={() => {
-                        if (confirm(`Apagar o campo "${field.name}" e todas as suas tags?`)) {
+                        if (confirm(`Delete the field "${field.name}" and all of its tags?`)) {
                           mutations.deleteField.mutate(field.id)
                         }
                       }}
@@ -240,7 +240,7 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
                 >
                   <Input value={renameValue} onChange={(e) => setRenameValue(e.target.value)} autoFocus />
                   <Button type="submit" variant="secondary">
-                    Salvar
+                    Save
                   </Button>
                 </form>
               )}
@@ -248,9 +248,9 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
               {expandedFieldId === field.id && (
                 <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
                   <p className="text-xs text-text-muted">
-                    Use o + em cada tag para adicionar um subtópico (e dentro dele, um subsubtópico, e assim por
-                    diante). O número ao lado de cada tag é o valor dela na pontuação do artigo (de 0 a{' '}
-                    {MAX_TAG_WEIGHT}, em passos de 0,5).
+                    Use the + on each tag to add a subtopic (and inside it, a sub-subtopic, and so on). The
+                    number next to each tag is how much it contributes to the paper score (0 to{' '}
+                    {MAX_TAG_WEIGHT}, in steps of 0.5).
                   </p>
                   <div className="flex flex-col gap-1.5">
                     {field.options.map((option) => renderOptionNode(option, field.id, field.is_protected, 0))}
@@ -269,7 +269,7 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
                       }}
                     >
                       <Input
-                        placeholder="Novo tópico"
+                        placeholder="New topic"
                         value={newRootOptionValue}
                         onChange={(e) => setNewRootOptionValue(e.target.value)}
                       />
@@ -285,7 +285,7 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
 
           {customFields.length === 0 && (
             <p className="text-xs text-text-muted">
-              Os campos "Adherence" e "Contribution Type" são fixos. Adicione campos próprios acima.
+              The "Adherence" and "Contribution Type" fields are built in. Add your own fields above.
             </p>
           )}
         </div>

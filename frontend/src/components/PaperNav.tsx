@@ -27,7 +27,7 @@ export default function PaperNav({
       <div className="flex items-center gap-1">
         <Button
           variant="secondary"
-          aria-label="Artigo anterior"
+          aria-label="Previous paper"
           disabled={currentIndex <= 0}
           onClick={() => onGoTo(currentIndex - 1)}
         >
@@ -35,7 +35,7 @@ export default function PaperNav({
         </Button>
         <Button
           variant="secondary"
-          aria-label="Próximo artigo"
+          aria-label="Next paper"
           disabled={currentIndex >= total - 1}
           onClick={() => onGoTo(currentIndex + 1)}
         >
@@ -43,20 +43,20 @@ export default function PaperNav({
         </Button>
       </div>
       <span className="text-sm font-medium text-text-muted">
-        Artigo {currentIndex + 1} de {total}
+        Paper {currentIndex + 1} of {total}
       </span>
       <form onSubmit={handleGoTo} className="flex items-center gap-1.5">
         <Input
           type="number"
           min={1}
           max={total}
-          placeholder="Ir para #"
+          placeholder="Go to #"
           value={goToValue}
           onChange={(e) => setGoToValue(e.target.value)}
           className="w-24"
         />
         <Button type="submit" variant="secondary">
-          Ir
+          Go
         </Button>
       </form>
     </div>

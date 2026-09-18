@@ -26,22 +26,22 @@ function CandidateCard({
       </p>
       {!candidate.abstract_available && (
         <p className="mt-1 text-xs text-text-muted">
-          Resumo não disponível no CrossRef — você pode colar manualmente depois de adicionar.
+          No abstract available from CrossRef — you can paste one in manually after adding it.
         </p>
       )}
       {candidate.duplicate.is_duplicate ? (
         <div className="mt-2 flex items-center justify-between gap-2 border border-danger/30 bg-danger/10 px-2 py-1.5 text-xs text-danger">
           <span className="flex items-center gap-1.5">
-            <AlertTriangle size={13} /> Possível duplicata de "{candidate.duplicate.matched_title}"
+            <AlertTriangle size={13} /> Possible duplicate of "{candidate.duplicate.matched_title}"
           </span>
           <Button variant="ghost" className="!px-2 !py-1 text-danger" onClick={() => onAdd(true)} disabled={isPending}>
-            Adicionar mesmo assim
+            Add anyway
           </Button>
         </div>
       ) : (
         <div className="mt-2 flex justify-end">
           <Button variant="primary" className="!px-3 !py-1.5" onClick={() => onAdd(false)} disabled={isPending}>
-            {isPending ? <Spinner className="h-3.5 w-3.5" /> : 'Adicionar'}
+            {isPending ? <Spinner className="h-3.5 w-3.5" /> : 'Add'}
           </Button>
         </div>
       )}
@@ -70,7 +70,7 @@ export default function AddPaperModal({ projectId, onClose }: { projectId: numbe
       const { candidate } = await importApi.lookupByDoi(projectId, doi.trim())
       setDoiCandidate(candidate)
     } catch (error) {
-      setSearchError(error instanceof ApiError ? error.message : 'Erro ao buscar DOI')
+      setSearchError(error instanceof ApiError ? error.message : 'Failed to look up that DOI')
     } finally {
       setSearching(false)
     }
@@ -85,7 +85,7 @@ export default function AddPaperModal({ projectId, onClose }: { projectId: numbe
       const { candidates } = await importApi.lookupByTitle(projectId, titleQuery.trim())
       setTitleCandidates(candidates)
     } catch (error) {
-      setSearchError(error instanceof ApiError ? error.message : 'Erro ao buscar título')
+      setSearchError(error instanceof ApiError ? error.message : 'Failed to search by title')
     } finally {
       setSearching(false)
     }
@@ -135,7 +135,7 @@ export default function AddPaperModal({ projectId, onClose }: { projectId: numbe
   const manualDuplicate = createPaper.data?.duplicate?.is_duplicate ? createPaper.data.duplicate : null
 
   return (
-    <Modal title="Adicionar artigo" onClose={onClose} wide>
+    <Modal title="Add paper" onClose={onClose} wide>
       <div className="mb-4 flex gap-4 border-b border-border">
         {(['doi', 'title', 'manual'] as Tab[]).map((t) => (
           <button
@@ -145,7 +145,7 @@ export default function AddPaperModal({ projectId, onClose }: { projectId: numbe
               tab === t ? 'border-accent text-text' : 'border-transparent text-text-muted hover:text-text'
             }`}
           >
-            {t === 'doi' ? 'Por DOI' : t === 'title' ? 'Por título' : 'Manual'}
+            {t === 'doi' ? 'By DOI' : t === 'title' ? 'By title' : 'Manual'}
           </button>
         ))}
       </div>
@@ -175,7 +175,7 @@ export default function AddPaperModal({ projectId, onClose }: { projectId: numbe
         <div>
           <form onSubmit={handleTitleSearch} className="flex gap-2">
             <Input
-              placeholder="Título do artigo"
+              placeholder="Paper title"
               value={titleQuery}
               onChange={(e) => setTitleQuery(e.target.value)}
             />
@@ -187,7 +187,7 @@ export default function AddPaperModal({ projectId, onClose }: { projectId: numbe
           {titleCandidates && (
             <div className="mt-3 flex max-h-80 flex-col gap-2 overflow-y-auto">
               {titleCandidates.length === 0 && (
-                <p className="text-sm text-text-muted">Nenhum resultado encontrado. Tente a aba "Manual".</p>
+                <p className="text-sm text-text-muted">No results found. Try the "Manual" tab.</p>
               )}
               {titleCandidates.map((candidate, i) => (
                 <CandidateCard
@@ -205,13 +205,13 @@ export default function AddPaperModal({ projectId, onClose }: { projectId: numbe
       {tab === 'manual' && (
         <form onSubmit={handleManualSubmit} className="flex flex-col gap-2.5">
           <Input
-            placeholder="Título *"
+            placeholder="Title *"
             value={manual.title}
             onChange={(e) => setManual((m) => ({ ...m, title: e.target.value }))}
             required
           />
           <Textarea
-            placeholder="Resumo"
+            placeholder="Abstract"
             rows={3}
             value={manual.abstract}
             onChange={(e) => setManual((m) => ({ ...m, abstract: e.target.value }))}
@@ -223,7 +223,7 @@ export default function AddPaperModal({ projectId, onClose }: { projectId: numbe
               onChange={(e) => setManual((m) => ({ ...m, doi: e.target.value }))}
             />
             <Input
-              placeholder="Ano"
+              placeholder="Year"
               type="number"
               value={manual.year}
               onChange={(e) => setManual((m) => ({ ...m, year: e.target.value }))}
@@ -231,14 +231,14 @@ export default function AddPaperModal({ projectId, onClose }: { projectId: numbe
             />
           </div>
           <Input
-            placeholder="Autores"
+            placeholder="Authors"
             value={manual.authors}
             onChange={(e) => setManual((m) => ({ ...m, authors: e.target.value }))}
           />
           {manualDuplicate && (
             <div className="flex items-center justify-between gap-2 border border-danger/30 bg-danger/10 px-2 py-1.5 text-xs text-danger">
               <span className="flex items-center gap-1.5">
-                <AlertTriangle size={13} /> Possível duplicata de "{manualDuplicate.matched_title}"
+                <AlertTriangle size={13} /> Possible duplicate of "{manualDuplicate.matched_title}"
               </span>
               <Button
                 type="button"
@@ -259,13 +259,13 @@ export default function AddPaperModal({ projectId, onClose }: { projectId: numbe
                   )
                 }
               >
-                Adicionar mesmo assim
+                Add anyway
               </Button>
             </div>
           )}
           <div className="mt-1 flex justify-end">
             <Button type="submit" variant="primary" disabled={!manual.title.trim() || createPaper.isPending}>
-              {createPaper.isPending ? <Spinner className="h-4 w-4" /> : 'Adicionar artigo'}
+              {createPaper.isPending ? <Spinner className="h-4 w-4" /> : 'Add paper'}
             </Button>
           </div>
         </form>

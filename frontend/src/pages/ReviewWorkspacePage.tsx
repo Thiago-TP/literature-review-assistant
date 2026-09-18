@@ -70,7 +70,7 @@ export default function ReviewWorkspacePage() {
     <div>
       <nav className="flex items-center justify-between border-b border-border px-8 py-4">
         <div className="flex items-center gap-3">
-          <Link to="/" className="text-text-muted hover:text-text" aria-label="Voltar para revisões">
+          <Link to="/" className="text-text-muted hover:text-text" aria-label="Back to reviews">
             <ArrowLeft size={18} />
           </Link>
           <span className="font-serif text-lg text-text">{project.name}</span>
@@ -82,10 +82,10 @@ export default function ReviewWorkspacePage() {
             </Button>
           </Link>
           <Button variant="secondary" onClick={() => setShowImportModal(true)}>
-            <UploadCloud size={15} /> Importar planilha
+            <UploadCloud size={15} /> Import spreadsheet
           </Button>
           <Button variant="secondary" onClick={() => setShowAddPaperModal(true)}>
-            <FilePlus size={15} /> Adicionar artigo
+            <FilePlus size={15} /> Add paper
           </Button>
           <ThemeToggle />
         </div>
@@ -95,41 +95,41 @@ export default function ReviewWorkspacePage() {
       {papers && papers.length === 0 ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_auto]">
           <EmptyState
-            title="Nenhum artigo nesta revisão ainda"
-            description="Importe uma planilha (.xlsx) ou adicione artigos avulsos por DOI, título ou manualmente."
+            title="No papers in this review yet"
+            description="Import a spreadsheet (.xlsx) or add individual papers by DOI, title, or manually."
             action={
               <div className="flex gap-2">
                 <Button variant="secondary" onClick={() => setShowImportModal(true)}>
-                  <UploadCloud size={15} /> Importar planilha
+                  <UploadCloud size={15} /> Import spreadsheet
                 </Button>
                 <Button variant="primary" onClick={() => setShowAddPaperModal(true)}>
-                  <FilePlus size={15} /> Adicionar artigo
+                  <FilePlus size={15} /> Add paper
                 </Button>
               </div>
             }
           />
           <Card className="w-full p-5 md:w-80">
-            <Label>Fluxo simples</Label>
+            <Label>How it works</Label>
             <div className="mt-4 flex flex-col gap-4">
               <div className="flex items-start gap-3">
                 <StepBadge n={1} tone="a" />
                 <div>
-                  <p className="text-sm font-medium text-text">Adicionar artigos</p>
-                  <p className="text-xs text-text-muted">Importe uma planilha ou busque por DOI/título.</p>
+                  <p className="text-sm font-medium text-text">Add papers</p>
+                  <p className="text-xs text-text-muted">Import a spreadsheet or search by DOI/title.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <StepBadge n={2} tone="b" />
                 <div>
-                  <p className="text-sm font-medium text-text">Avaliar um a um</p>
-                  <p className="text-xs text-text-muted">Leia o resumo, marque tags e escreva notas.</p>
+                  <p className="text-sm font-medium text-text">Review one at a time</p>
+                  <p className="text-xs text-text-muted">Read the abstract, assign tags, write notes.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <StepBadge n={3} tone="c" />
                 <div>
-                  <p className="text-sm font-medium text-text">Progresso salvo</p>
-                  <p className="text-xs text-text-muted">Tudo fica gravado automaticamente.</p>
+                  <p className="text-sm font-medium text-text">Progress saved</p>
+                  <p className="text-xs text-text-muted">Everything is saved automatically.</p>
                 </div>
               </div>
             </div>
@@ -147,7 +147,7 @@ export default function ReviewWorkspacePage() {
                 <PaperNav currentIndex={currentIndex} total={papers?.length ?? 0} onGoTo={goToIndex} />
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-y border-border py-3">
                   <div className="flex items-center gap-2">
-                    <Label>Sua avaliação</Label>
+                    <Label>Your rating</Label>
                     <StarRating
                       rating={paper.rating}
                       onChange={(value) => rating.mutate({ paperId: paper.id, rating: value })}
@@ -157,7 +157,7 @@ export default function ReviewWorkspacePage() {
                     )}
                   </div>
                   <p className="text-sm text-text-muted">
-                    Pontuação: <span className="font-semibold text-text">{paper.score}</span>
+                    Score: <span className="font-semibold text-text">{paper.score}</span>
                   </p>
                 </div>
                 <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-[2fr_1fr]">

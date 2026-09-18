@@ -37,7 +37,7 @@ export default function ProgressOverview({
   onSelect: (paperId: number) => void
 }) {
   return (
-    <div className="flex flex-wrap gap-1.5" role="list" aria-label="Progresso da revisão">
+    <div className="flex flex-wrap gap-1.5" role="list" aria-label="Review progress">
       {papers.map((paper) => {
         const complete = paper.total_field_count > 0 && paper.filled_field_count === paper.total_field_count
         const isCurrent = paper.id === currentPaperId
@@ -45,7 +45,7 @@ export default function ProgressOverview({
           <button
             key={paper.id}
             role="listitem"
-            title={`${paper.title}\n${paper.filled_field_count}/${paper.total_field_count} campos preenchidos`}
+            title={`${paper.title}\n${paper.filled_field_count}/${paper.total_field_count} fields filled`}
             onClick={() => onSelect(paper.id)}
             style={{ backgroundColor: colorFor(paper.filled_field_count, paper.total_field_count) }}
             className={`relative h-6 w-6 transition-transform hover:scale-110 ${

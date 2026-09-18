@@ -20,7 +20,7 @@ export default function Modal({
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-serif text-lg text-text">{title}</h3>
-          <Button variant="ghost" aria-label="Fechar" onClick={onClose}>
+          <Button variant="ghost" aria-label="Close" onClick={onClose}>
             <X size={18} />
           </Button>
         </div>

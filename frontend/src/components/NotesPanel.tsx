@@ -36,14 +36,14 @@ export default function NotesPanel({
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between">
-        <Label>Suas notas</Label>
+        <Label>Your notes</Label>
         {editing ? (
           <Button variant="secondary" onClick={handleSave}>
             <Check size={14} /> OK
           </Button>
         ) : (
           <Button variant="ghost" onClick={startEditing}>
-            <Pencil size={14} /> Editar
+            <Pencil size={14} /> Edit
           </Button>
         )}
       </div>
@@ -52,13 +52,13 @@ export default function NotesPanel({
         <Textarea
           rows={4}
           autoFocus
-          placeholder="Escreva suas notas sobre este artigo..."
+          placeholder="Write your notes about this paper..."
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
         />
       ) : (
         <p className="min-h-[2.5rem] whitespace-pre-line border border-border bg-surface-muted px-3 py-2 text-sm text-text">
-          {notes ? notes : <span className="text-text-muted">Nenhuma nota ainda.</span>}
+          {notes ? notes : <span className="text-text-muted">No notes yet.</span>}
         </p>
       )}
     </div>

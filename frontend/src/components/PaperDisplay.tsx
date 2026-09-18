@@ -22,11 +22,11 @@ export default function PaperDisplay({ paper }: { paper: PaperDetail }) {
             {paper.doi} <ExternalLink size={13} />
           </a>
         ) : (
-          <Badge>Sem DOI</Badge>
+          <Badge>No DOI</Badge>
         )}
       </div>
       <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-text">
-        {paper.abstract || <span className="text-text-muted">Sem resumo disponível.</span>}
+        {paper.abstract || <span className="text-text-muted">No abstract available.</span>}
       </p>
     </div>
   )

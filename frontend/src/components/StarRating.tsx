@@ -27,13 +27,13 @@ function StarSlot({
       )}
       <button
         type="button"
-        aria-label={`${n - 0.5} estrelas`}
+        aria-label={`${n - 0.5} stars`}
         onClick={() => onPick(n - 0.5)}
         className="absolute inset-y-0 left-0 w-1/2"
       />
       <button
         type="button"
-        aria-label={`${n} estrelas`}
+        aria-label={`${n} stars`}
         onClick={() => onPick(n)}
         className="absolute inset-y-0 right-0 w-1/2"
       />

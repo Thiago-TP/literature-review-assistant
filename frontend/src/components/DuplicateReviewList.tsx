@@ -28,7 +28,7 @@ export default function DuplicateReviewList({
               <span className="text-text">{row.title}</span>
               {row.is_duplicate && (
                 <span className="ml-2 text-xs text-danger">
-                  duplicata ({row.duplicate_reason === 'doi' ? 'mesmo DOI' : 'título igual'}) de "
+                  duplicate ({row.duplicate_reason === 'doi' ? 'same DOI' : 'same title'}) of "
                   {row.matched_title}"
                 </span>
               )}

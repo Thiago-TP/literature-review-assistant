@@ -60,7 +60,7 @@ export default function DashboardPage() {
     <div>
       <nav className="flex items-center justify-between border-b border-border px-8 py-4">
         <div className="flex items-center gap-3">
-          <Link to={`/projects/${projectId}`} className="text-text-muted hover:text-text" aria-label="Voltar para a revisão">
+          <Link to={`/projects/${projectId}`} className="text-text-muted hover:text-text" aria-label="Back to the review">
             <ArrowLeft size={18} />
           </Link>
           <span className="font-serif text-lg text-text">{project.name} — Dashboard</span>
@@ -71,30 +71,30 @@ export default function DashboardPage() {
       <div className="mx-auto max-w-5xl px-6 py-8">
         {stats.total_papers === 0 ? (
           <EmptyState
-            title="Nada para analisar ainda"
-            description="Importe ou adicione artigos e comece a marcar tags e notas para ver os dados aqui."
+            title="Nothing to analyse yet"
+            description="Import or add papers, then assign tags and write notes to see the data here."
           />
         ) : (
           <div className="flex flex-col gap-6">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-              <StatTile label="Artigos" value={String(stats.total_papers)} />
+              <StatTile label="Papers" value={String(stats.total_papers)} />
               <StatTile
-                label="Totalmente tagueados"
+                label="Fully tagged"
                 value={`${stats.fully_tagged_count}/${stats.total_papers}`}
               />
-              <StatTile label="Avaliados" value={`${stats.rated_count}/${stats.total_papers}`} />
-              <StatTile label="Com notas" value={`${stats.with_notes_count}/${stats.total_papers}`} />
+              <StatTile label="Rated" value={`${stats.rated_count}/${stats.total_papers}`} />
+              <StatTile label="With notes" value={`${stats.with_notes_count}/${stats.total_papers}`} />
               <StatTile
-                label="Nota média"
+                label="Average rating"
                 value={stats.average_rating !== null ? stats.average_rating.toFixed(1) : '—'}
               />
-              <StatTile label="Pontuação média" value={stats.average_score.toFixed(1)} />
+              <StatTile label="Average score" value={stats.average_score.toFixed(1)} />
             </div>
 
             <Card className="p-5">
-              <Label>Distribuição de tags</Label>
+              <Label>Tag distribution</Label>
               {stats.tag_distribution.length === 0 ? (
-                <p className="mt-3 text-sm text-text-muted">Nenhuma tag atribuída ainda.</p>
+                <p className="mt-3 text-sm text-text-muted">No tags assigned yet.</p>
               ) : (
                 <div className="mt-4 flex flex-col gap-2.5">
                   {stats.tag_distribution.map((entry) => (
@@ -114,7 +114,7 @@ export default function DashboardPage() {
                       </div>
                       {entry.weight !== 0 && (
                         <span className="w-14 shrink-0 text-right text-xs text-text-muted">
-                          peso {entry.weight}
+                          weight {entry.weight}
                         </span>
                       )}
                     </div>
@@ -124,7 +124,7 @@ export default function DashboardPage() {
             </Card>
 
             <Card className="p-5">
-              <Label>Melhores artigos por pontuação</Label>
+              <Label>Top papers by score</Label>
               <div className="mt-3 flex flex-col divide-y divide-border">
                 {stats.top_papers.map((p, i) => (
                   <button
@@ -147,11 +147,11 @@ export default function DashboardPage() {
 
             <Card className="p-5">
               <div className="flex items-center justify-between gap-3">
-                <Label>Todos os artigos</Label>
+                <Label>All papers</Label>
                 <div className="relative w-64">
                   <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" />
                   <Input
-                    placeholder="Buscar por título ou nota..."
+                    placeholder="Search by title or notes..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     className="pl-8"
@@ -160,13 +160,13 @@ export default function DashboardPage() {
               </div>
               <div className="mt-3 flex flex-col divide-y divide-border">
                 <div className="flex items-center gap-3 pb-2 text-xs text-text-muted">
-                  <span className="flex-1">Título</span>
+                  <span className="flex-1">Title</span>
                   <span className="w-20 text-right">Tags</span>
-                  <span className="w-16 text-right">Nota</span>
-                  <span className="w-16 text-right">Pontuação</span>
+                  <span className="w-16 text-right">Rating</span>
+                  <span className="w-16 text-right">Score</span>
                 </div>
                 {filteredPapers.length === 0 && (
-                  <p className="py-4 text-sm text-text-muted">Nenhum artigo encontrado para "{query}".</p>
+                  <p className="py-4 text-sm text-text-muted">No papers found for "{query}".</p>
                 )}
                 {filteredPapers.map((p) => (
                   <button

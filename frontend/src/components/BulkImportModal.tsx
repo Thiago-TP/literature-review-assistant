@@ -28,7 +28,7 @@ export default function BulkImportModal({ projectId, onClose }: { projectId: num
       setPreview(response)
       setActions(Object.fromEntries(response.rows.map((r) => [r.row_index, r.default_action])))
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Erro ao processar o arquivo')
+      setError(err instanceof ApiError ? err.message : 'Failed to read the file')
     } finally {
       setLoading(false)
     }
@@ -43,14 +43,14 @@ export default function BulkImportModal({ projectId, onClose }: { projectId: num
       queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'papers'] })
       queryClient.invalidateQueries({ queryKey: ['projects'] })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Erro ao importar')
+      setError(err instanceof ApiError ? err.message : 'Failed to import')
     } finally {
       setCommitting(false)
     }
   }
 
   return (
-    <Modal title="Importar planilha (.xlsx)" onClose={onClose} wide>
+    <Modal title="Import spreadsheet (.xlsx)" onClose={onClose} wide>
       {!preview && !result && (
         <div>
           <button
@@ -59,7 +59,7 @@ export default function BulkImportModal({ projectId, onClose }: { projectId: num
           >
             <UploadCloud size={28} />
             <span className="text-sm">
-              {loading ? 'Processando...' : 'Clique para escolher um arquivo .xlsx (Scopus, WoS, etc.)'}
+              {loading ? 'Processing...' : 'Click to choose an .xlsx file (Scopus, WoS, etc.)'}
             </span>
             {loading && <Spinner className="h-5 w-5" />}
           </button>
@@ -77,9 +77,9 @@ export default function BulkImportModal({ projectId, onClose }: { projectId: num
       {preview && !result && (
         <div>
           <p className="mb-3 text-sm text-text-muted">
-            <strong className="text-text">{preview.new_count}</strong> novo(s) ·{' '}
-            <strong className="text-text">{preview.duplicate_count}</strong> possível(is) duplicata(s) — desmarcadas
-            por padrão, revise antes de confirmar.
+            <strong className="text-text">{preview.new_count}</strong> new ·{' '}
+            <strong className="text-text">{preview.duplicate_count}</strong> possible duplicate(s) — unchecked by
+            default, review before confirming.
           </p>
           <DuplicateReviewList
             rows={preview.rows}
@@ -91,10 +91,10 @@ export default function BulkImportModal({ projectId, onClose }: { projectId: num
           {error && <p className="mt-2 text-sm text-danger">{error}</p>}
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setPreview(null)} disabled={committing}>
-              Escolher outro arquivo
+              Choose another file
             </Button>
             <Button variant="primary" onClick={handleCommit} disabled={committing}>
-              {committing ? <Spinner className="h-4 w-4" /> : 'Confirmar importação'}
+              {committing ? <Spinner className="h-4 w-4" /> : 'Confirm import'}
             </Button>
           </div>
         </div>
@@ -103,10 +103,10 @@ export default function BulkImportModal({ projectId, onClose }: { projectId: num
       {result && (
         <div className="text-center">
           <p className="text-sm text-text">
-            <strong>{result.added}</strong> artigo(s) adicionado(s), <strong>{result.skipped}</strong> ignorado(s).
+            <strong>{result.added}</strong> paper(s) added, <strong>{result.skipped}</strong> skipped.
           </p>
           <Button variant="primary" className="mt-4" onClick={onClose}>
-            Fechar
+            Close
           </Button>
         </div>
       )}

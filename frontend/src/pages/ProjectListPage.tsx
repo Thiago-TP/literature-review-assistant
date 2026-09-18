@@ -26,10 +26,10 @@ function ProjectRow({ project, onOpen }: { project: Project; onOpen: () => void 
         >
           <Input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
           <Button type="submit" variant="primary">
-            Salvar
+            Save
           </Button>
           <Button type="button" variant="secondary" onClick={() => setRenaming(false)}>
-            Cancelar
+            Cancel
           </Button>
         </form>
       </Card>
@@ -41,19 +41,19 @@ function ProjectRow({ project, onOpen }: { project: Project; onOpen: () => void 
       <button className="flex-1 text-left" onClick={onOpen}>
         <p className="font-serif text-base text-text">{project.name}</p>
         <p className="mt-0.5 text-sm text-text-muted">
-          {project.paper_count} {project.paper_count === 1 ? 'artigo' : 'artigos'} · atualizado em{' '}
-          {new Date(project.updated_at).toLocaleDateString('pt-BR')}
+          {project.paper_count} {project.paper_count === 1 ? 'paper' : 'papers'} · updated{' '}
+          {new Date(project.updated_at).toLocaleDateString()}
         </p>
       </button>
       <div className="flex gap-1">
-        <Button variant="ghost" aria-label="Renomear revisão" onClick={() => setRenaming(true)}>
+        <Button variant="ghost" aria-label="Rename review" onClick={() => setRenaming(true)}>
           <Pencil size={16} />
         </Button>
         <Button
           variant="ghost"
-          aria-label="Apagar revisão"
+          aria-label="Delete review"
           onClick={() => {
-            if (confirm(`Apagar a revisão "${project.name}"? Esta ação não pode ser desfeita.`)) {
+            if (confirm(`Delete the review "${project.name}"? This cannot be undone.`)) {
               deleteProject.mutate(project.id)
             }
           }}
@@ -93,23 +93,23 @@ export default function ProjectListPage() {
       <div className="mx-auto max-w-3xl px-6 py-16">
         <Label>Literature Review Assistant</Label>
         <h1 className="mt-3 font-serif text-4xl leading-tight text-text sm:text-5xl">
-          Suas revisões, <span className="italic text-accent">sempre salvas</span>.
+          Your reviews, <span className="italic text-accent">always saved</span>.
         </h1>
         <p className="mt-4 max-w-xl text-text-muted">
-          Crie uma revisão, importe artigos e avalie um a um. Tudo fica guardado automaticamente — feche e volte
-          quando quiser.
+          Create a review, import papers, and assess them one at a time. Everything is saved automatically —
+          close the app and pick up where you left off.
         </p>
 
         <Card className="mt-10 p-4">
           <form onSubmit={handleCreate} className="flex gap-2">
             <Input
-              placeholder="Nome da nova revisão (ex: Revisão sobre XYZ)"
+              placeholder="Name of the new review (e.g. Review on XYZ)"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
             />
             <Button type="submit" variant="primary" disabled={!newName.trim() || createProject.isPending}>
               <Plus size={14} />
-              Criar
+              Create
             </Button>
           </form>
         </Card>
@@ -123,8 +123,8 @@ export default function ProjectListPage() {
         {!isLoading && projects && projects.length === 0 && (
           <div className="mt-6">
             <EmptyState
-              title="Nenhuma revisão ainda"
-              description="Crie uma revisão acima para começar a importar e avaliar artigos."
+              title="No reviews yet"
+              description="Create a review above to start importing and assessing papers."
             />
           </div>
         )}
