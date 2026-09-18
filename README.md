@@ -33,6 +33,7 @@ literature_review_assistant/
 │       ├── components/      # Progress overview, tag panel, import/add-paper modals, etc.
 │       ├── hooks/           # React Query hooks wrapping the API
 │       └── api/             # Typed API client
+├── examples/           # Example .xlsx imports + a description of the format
 ├── run.py              # Cross-platform launcher (backend + frontend together)
 └── run.sh, run.cmd     # Thin wrappers around run.py
 ```
@@ -77,7 +78,7 @@ cd frontend && npm run dev
 
 1. Create a review project (or open an existing one — they're listed on the home page and persist across restarts).
 2. Add papers:
-   - **Import a spreadsheet**: click "Import spreadsheet", choose an `.xlsx` file with `Title`/`Abstract` columns (`DOI`, `Authors`, `Year`, `Source title` are picked up automatically when present, as in a Scopus export). You'll see a preview flagging likely duplicates (by DOI or title) before anything is saved — uncheck any you don't want to add.
+   - **Import a spreadsheet**: click "Import spreadsheet", choose an `.xlsx` file with `Title`/`Abstract` columns (see [`examples/`](examples/) for sample files and the full column list) (`DOI`, `Authors`, `Year`, `Source title` are picked up automatically when present, as in a Scopus export). You'll see a preview flagging likely duplicates (by DOI or title) before anything is saved — uncheck any you don't want to add.
    - **Add one paper**: click "Add paper" and search by DOI or title (metadata comes from CrossRef automatically) or enter details manually.
 3. Review papers one at a time: read the abstract, assign tags, write notes. Everything saves automatically.
 4. Use the progress overview grid to jump to any paper and see what's left.
