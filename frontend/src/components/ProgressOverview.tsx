@@ -1,5 +1,8 @@
+import type { ReactNode } from 'react'
 import { Check, Pencil, Star } from 'lucide-react'
 import type { PaperListItem } from '../types'
+
+const HEADING_ID = 'review-progress-heading'
 
 /**
  * Tiles are painted with a five-step ramp plus a success green, so a corner
@@ -39,6 +42,53 @@ function colorFor(filled: number, total: number): string {
   return SEQUENTIAL_STEPS[index]
 }
 
+/** One small square in the legend's ramp. */
+function Swatch({ color, children }: { color: string; children?: ReactNode }) {
+  return (
+    <span
+      className="relative flex h-3 w-3 shrink-0 items-center justify-center rounded-[2px]"
+      style={{ backgroundColor: color }}
+    >
+      {children}
+    </span>
+  )
+}
+
+/**
+ * Colour and badges are the only thing carrying meaning in the grid, so the
+ * key that decodes them travels with it.
+ */
+function Legend() {
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-text-muted">
+      <span className="flex items-center gap-1.5">
+        no tags
+        <span className="flex items-center gap-0.5">
+          <Swatch color="var(--color-border)" />
+          {SEQUENTIAL_STEPS.map((step) => (
+            <Swatch key={step} color={step} />
+          ))}
+        </span>
+        most tags
+      </span>
+      <span className="flex items-center gap-1.5">
+        <Swatch color="var(--color-success)">
+          <Check size={8} strokeWidth={3.5} className="text-[var(--color-success-fg)]" />
+        </Swatch>
+        every field tagged
+      </span>
+      <span className="flex items-center gap-1.5">
+        <Star size={11} fill={STAR_FILL} stroke={STAR_STROKE} strokeWidth={2} className="shrink-0" />
+        rated
+      </span>
+      <span className="flex items-center gap-1.5">
+        <Pencil size={11} strokeWidth={2} className="shrink-0" />
+        has notes
+      </span>
+    </div>
+  )
+}
+
 export default function ProgressOverview({
   papers,
   currentPaperId,
@@ -48,8 +98,21 @@ export default function ProgressOverview({
   currentPaperId: number | null
   onSelect: (paperId: number) => void
 }) {
+  const fullyTagged = papers.filter(
+    (paper) => paper.total_field_count > 0 && paper.filled_field_count === paper.total_field_count
+  ).length
+
   return (
-    <div className="flex flex-wrap gap-1.5" role="list" aria-label="Review progress">
+    <section aria-labelledby={HEADING_ID}>
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2 id={HEADING_ID} className="tracked-label text-xs font-semibold text-text">
+          Review progress
+        </h2>
+        <p className="text-xs text-text-muted">
+          {fullyTagged} of {papers.length} fully tagged
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-1.5" role="list">
       {papers.map((paper) => {
         const complete = paper.total_field_count > 0 && paper.filled_field_count === paper.total_field_count
         const isCurrent = paper.id === currentPaperId
@@ -101,6 +164,8 @@ export default function ProgressOverview({
           </button>
         )
       })}
-    </div>
+      </div>
+      <Legend />
+    </section>
   )
 }
