@@ -55,7 +55,7 @@ export default function BulkImportModal({ projectId, onClose }: { projectId: num
         <div>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex w-full flex-col items-center gap-2 border-2 border-dashed border-border py-10 text-text-muted hover:border-accent hover:text-accent"
+            className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-border py-10 text-text-muted hover:border-accent hover:text-accent"
           >
             <UploadCloud size={28} />
             <span className="text-sm">

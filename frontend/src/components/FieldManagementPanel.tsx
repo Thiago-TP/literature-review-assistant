@@ -53,7 +53,7 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
             onBlur={(e) => saveWeight(fieldId, option.id, e.target.value)}
             title={`This tag's contribution to the paper score (0 to ${MAX_TAG_WEIGHT}, in steps of 0.5)`}
             aria-label={`Score contribution of ${option.value}`}
-            className="ml-1 w-12 border border-border bg-surface px-1 py-0.5 text-right text-xs text-text"
+            className="ml-1 w-12 rounded border border-border bg-surface px-1 py-0.5 text-right text-xs text-text"
           />
           {!isProtected && (
             <>
@@ -188,7 +188,7 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
           )}
 
           {fields.map((field) => (
-            <div key={field.id} className="border border-border p-3">
+            <div key={field.id} className="rounded-md border border-border p-3">
               <div className="flex items-center justify-between">
                 <button
                   className="flex items-center gap-1.5 text-sm font-medium text-text"

@@ -19,7 +19,7 @@ function CandidateCard({
   isPending: boolean
 }) {
   return (
-    <div className="border border-border p-3">
+    <div className="rounded-md border border-border p-3">
       <p className="text-sm font-medium text-text">{candidate.title}</p>
       <p className="mt-0.5 text-xs text-text-muted">
         {[candidate.authors, candidate.year, candidate.source_title].filter(Boolean).join(' · ')}
@@ -30,7 +30,7 @@ function CandidateCard({
         </p>
       )}
       {candidate.duplicate.is_duplicate ? (
-        <div className="mt-2 flex items-center justify-between gap-2 border border-danger/30 bg-danger/10 px-2 py-1.5 text-xs text-danger">
+        <div className="mt-2 flex items-center justify-between gap-2 rounded-md border border-danger/30 bg-danger/10 px-2 py-1.5 text-xs text-danger">
           <span className="flex items-center gap-1.5">
             <AlertTriangle size={13} /> Possible duplicate of "{candidate.duplicate.matched_title}"
           </span>
@@ -236,7 +236,7 @@ export default function AddPaperModal({ projectId, onClose }: { projectId: numbe
             onChange={(e) => setManual((m) => ({ ...m, authors: e.target.value }))}
           />
           {manualDuplicate && (
-            <div className="flex items-center justify-between gap-2 border border-danger/30 bg-danger/10 px-2 py-1.5 text-xs text-danger">
+            <div className="flex items-center justify-between gap-2 rounded-md border border-danger/30 bg-danger/10 px-2 py-1.5 text-xs text-danger">
               <span className="flex items-center gap-1.5">
                 <AlertTriangle size={13} /> Possible duplicate of "{manualDuplicate.matched_title}"
               </span>

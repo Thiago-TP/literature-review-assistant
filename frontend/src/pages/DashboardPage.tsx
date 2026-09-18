@@ -104,7 +104,7 @@ export default function DashboardPage() {
                         {' · '}
                         {entry.option_path}
                       </div>
-                      <div className="flex-1 bg-surface-muted">
+                      <div className="flex-1 rounded bg-surface-muted">
                         <div
                           className="flex h-3.5 items-center justify-end rounded-r bg-accent pr-1.5"
                           style={{ width: `${(entry.count / maxCount) * 100}%` }}

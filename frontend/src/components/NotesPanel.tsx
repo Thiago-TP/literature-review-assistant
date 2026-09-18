@@ -57,7 +57,7 @@ export default function NotesPanel({
           onChange={(e) => setDraft(e.target.value)}
         />
       ) : (
-        <p className="min-h-[2.5rem] whitespace-pre-line border border-border bg-surface-muted px-3 py-2 text-sm text-text">
+        <p className="min-h-[2.5rem] whitespace-pre-line rounded-md border border-border bg-surface-muted px-3 py-2 text-sm text-text">
           {notes ? notes : <span className="text-text-muted">No notes yet.</span>}
         </p>
       )}

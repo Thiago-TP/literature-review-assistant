@@ -70,7 +70,7 @@ export default function ProgressOverview({
             title={summary}
             onClick={() => onSelect(paper.id)}
             style={{ backgroundColor: colorFor(paper.filled_field_count, paper.total_field_count) }}
-            className={`relative h-7 w-7 transition-transform hover:scale-110 ${
+            className={`relative h-7 w-7 rounded transition-transform hover:scale-110 ${
               isCurrent ? 'ring-2 ring-offset-2 ring-accent ring-offset-[var(--color-surface)]' : ''
             }`}
           >

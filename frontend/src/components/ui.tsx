@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react'
 
 const baseButton =
-  'inline-flex items-center justify-center gap-1.5 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+  'inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
 
 const variants = {
   primary:
@@ -28,7 +28,7 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className={`w-full border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted outline-none focus:border-accent ${props.className ?? ''}`}
+      className={`w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted outline-none focus:border-accent ${props.className ?? ''}`}
     />
   )
 }
@@ -37,13 +37,13 @@ export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
       {...props}
-      className={`w-full border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted outline-none focus:border-accent ${props.className ?? ''}`}
+      className={`w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted outline-none focus:border-accent ${props.className ?? ''}`}
     />
   )
 }
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`border border-border bg-surface ${className}`}>{children}</div>
+  return <div className={`rounded-lg border border-border bg-surface ${className}`}>{children}</div>
 }
 
 export function Badge({ children, tone = 'default' }: { children: ReactNode; tone?: 'default' | 'accent' }) {
@@ -66,7 +66,7 @@ export function Spinner({ className = '' }: { className?: string }) {
 
 export function EmptyState({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 border border-dashed border-border py-16 text-center">
+    <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
       <p className="font-serif text-lg text-text">{title}</p>
       {description && <p className="max-w-sm text-sm text-text-muted">{description}</p>}
       {action}

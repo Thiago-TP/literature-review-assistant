@@ -10,13 +10,13 @@ export default function DuplicateReviewList({
   onToggle: (rowIndex: number, checked: boolean) => void
 }) {
   return (
-    <div className="flex max-h-72 flex-col gap-1.5 overflow-y-auto border border-border p-2">
+    <div className="flex max-h-72 flex-col gap-1.5 overflow-y-auto rounded-md border border-border p-2">
       {rows.map((row) => {
         const checked = (actions[row.row_index] ?? row.default_action) === 'add'
         return (
           <label
             key={row.row_index}
-            className={`flex items-start gap-2 px-2 py-1.5 text-sm ${row.is_duplicate ? 'bg-danger/5' : ''}`}
+            className={`flex items-start gap-2 rounded px-2 py-1.5 text-sm ${row.is_duplicate ? 'bg-danger/5' : ''}`}
           >
             <input
               type="checkbox"
