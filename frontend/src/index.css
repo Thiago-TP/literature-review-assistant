@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/*
+ * Palette tokens. `--color-progress-*` is the sequential ramp the review
+ * overview paints its tiles with: one hue, monotone lightness, five steps.
+ * It lives here rather than in the component so that it flips with the theme
+ * like every other colour, instead of being sampled once in JavaScript.
+ */
 :root {
   --color-bg: #f2efe6;
   --color-surface: #f8f6ef;
@@ -14,42 +20,63 @@
   --color-danger-fg: #f5f3ec;
   --color-success: #3f6b4a;
   --color-success-fg: #f5f3ec;
+  --color-progress-1: #cde2fb;
+  --color-progress-2: #9ec5f4;
+  --color-progress-3: #6da7ec;
+  --color-progress-4: #3987e5;
+  --color-progress-5: #1c5cab;
 }
+
+/*
+ * The dark palette is written out twice on purpose -- once for the system
+ * preference and once for the explicit toggle, which has to win over both the
+ * default and the preference. Keep the two lists in step.
+ */
 
 /* System dark preference applies only when the user hasn't explicitly chosen light. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --color-bg: #15161a;
-    --color-surface: #1c1d22;
-    --color-surface-muted: #26272e;
-    --color-border: #35363f;
-    --color-text: #eeece4;
-    --color-text-muted: #9c9a90;
-    --color-accent: #8fa8c9;
-    --color-accent-hover: #aabedc;
-    --color-accent-fg: #12141a;
-    --color-danger: #d98a6f;
-    --color-danger-fg: #12141a;
-    --color-success: #8bb096;
-    --color-success-fg: #12141a;
+    --color-bg: #0f1014;
+    --color-surface: #1a1c22;
+    --color-surface-muted: #2b2e37;
+    --color-border: #4e5260;
+    --color-text: #f2f0e8;
+    --color-text-muted: #adaba1;
+    --color-accent: #a3c0e6;
+    --color-accent-hover: #c2d6f2;
+    --color-accent-fg: #0f1014;
+    --color-danger: #ec9c80;
+    --color-danger-fg: #0f1014;
+    --color-success: #93bda0;
+    --color-success-fg: #0f1014;
+    --color-progress-1: #245f9f;
+    --color-progress-2: #2f7cd0;
+    --color-progress-3: #4b95e4;
+    --color-progress-4: #75b0ee;
+    --color-progress-5: #a0c9f6;
   }
 }
 
 /* Explicit toggle wins over both the default and the system preference. */
 :root[data-theme='dark'] {
-  --color-bg: #15161a;
-  --color-surface: #1c1d22;
-  --color-surface-muted: #26272e;
-  --color-border: #35363f;
-  --color-text: #eeece4;
-  --color-text-muted: #9c9a90;
-  --color-accent: #8fa8c9;
-  --color-accent-hover: #aabedc;
-  --color-accent-fg: #12141a;
-  --color-danger: #d98a6f;
-  --color-danger-fg: #12141a;
-  --color-success: #8bb096;
-  --color-success-fg: #12141a;
+  --color-bg: #0f1014;
+  --color-surface: #1a1c22;
+  --color-surface-muted: #2b2e37;
+  --color-border: #4e5260;
+  --color-text: #f2f0e8;
+  --color-text-muted: #adaba1;
+  --color-accent: #a3c0e6;
+  --color-accent-hover: #c2d6f2;
+  --color-accent-fg: #0f1014;
+  --color-danger: #ec9c80;
+  --color-danger-fg: #0f1014;
+  --color-success: #93bda0;
+  --color-success-fg: #0f1014;
+  --color-progress-1: #245f9f;
+  --color-progress-2: #2f7cd0;
+  --color-progress-3: #4b95e4;
+  --color-progress-4: #75b0ee;
+  --color-progress-5: #a0c9f6;
 }
 
 @theme inline {

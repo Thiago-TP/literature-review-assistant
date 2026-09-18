@@ -13,29 +13,30 @@ const STAR_STROKE = '#6b4e00'
 const PENCIL_STROKE = '#15161a'
 
 /**
- * Sequential blue ramp (validated for CVD/contrast, light->dark) used to encode
- * "how many fields are filled in" as magnitude. Full completion gets the
- * app's "success" token + a check icon instead, since "fully reviewed" is a
- * distinct state, not just the top of the magnitude scale.
+ * Sequential ramp encoding "how many fields are filled in" as magnitude. The
+ * steps themselves are palette tokens (see index.css), so each theme gets its
+ * own validated ramp and switching theme repaints the tiles through CSS --
+ * reading the theme from JavaScript here would leave them on the old ramp
+ * until something else happened to re-render the grid.
+ *
+ * Full completion gets the app's "success" token plus a check icon instead,
+ * since "fully reviewed" is a distinct state, not just the top of the scale.
  */
-const SEQUENTIAL_STEPS_LIGHT = ['#cde2fb', '#9ec5f4', '#6da7ec', '#3987e5', '#1c5cab']
-const SEQUENTIAL_STEPS_DARK = ['#184f95', '#1c5cab', '#256abf', '#3987e5', '#6da7ec']
-
-function isDarkMode(): boolean {
-  if (typeof document === 'undefined') return false
-  const explicit = document.documentElement.getAttribute('data-theme')
-  if (explicit === 'dark') return true
-  if (explicit === 'light') return false
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-}
+const SEQUENTIAL_STEPS = [
+  'var(--color-progress-1)',
+  'var(--color-progress-2)',
+  'var(--color-progress-3)',
+  'var(--color-progress-4)',
+  'var(--color-progress-5)',
+]
 
 function colorFor(filled: number, total: number): string {
   if (total === 0 || filled === 0) return 'var(--color-border)'
   if (filled === total) return 'var(--color-success)'
-  const steps = isDarkMode() ? SEQUENTIAL_STEPS_DARK : SEQUENTIAL_STEPS_LIGHT
   const ratio = filled / total
-  const index = Math.min(steps.length - 1, Math.max(0, Math.round(ratio * (steps.length - 1))))
-  return steps[index]
+  const last = SEQUENTIAL_STEPS.length - 1
+  const index = Math.min(last, Math.max(0, Math.round(ratio * last)))
+  return SEQUENTIAL_STEPS[index]
 }
 
 export default function ProgressOverview({
