@@ -29,7 +29,7 @@ literature_review_assistant/
 │   └── data/app.db          # local SQLite database (gitignored)
 ├── frontend/           # React + TypeScript + Vite + Tailwind CSS
 │   └── src/
-│       ├── pages/           # ProjectListPage, ReviewWorkspacePage
+│       ├── pages/           # ProjectListPage, ReviewWorkspacePage, DashboardPage
 │       ├── components/      # Progress overview, tag panel, import/add-paper modals, etc.
 │       ├── hooks/           # React Query hooks wrapping the API
 │       └── api/             # Typed API client
@@ -111,7 +111,7 @@ Covers duplicate-detection logic, xlsx parsing (against a synthetic fixture in `
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, the checks to run before opening a pull request, and how the code is laid out.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, the checks to run before opening a pull request, and how the code is laid out. Each half also has its own README: [`backend/`](backend/README.md) and [`frontend/`](frontend/README.md).
 
 ## License
 
