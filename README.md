@@ -33,12 +33,14 @@ literature_review_assistant/
 │       ├── components/      # Progress overview, tag panel, import/add-paper modals, etc.
 │       ├── hooks/           # React Query hooks wrapping the API
 │       └── api/             # Typed API client
-└── run.sh              # Starts backend + frontend together
+├── run.py              # Cross-platform launcher (backend + frontend together)
+└── run.sh, run.cmd     # Thin wrappers around run.py
 ```
 
 ## Requirements
 
-- Python 3.11+
+- Python 3.13+
+- [uv](https://docs.astral.sh/uv/getting-started/installation/) (manages the backend's Python environment and dependencies)
 - Node.js 20+
 
 ## Setup (first time)
@@ -46,9 +48,8 @@ literature_review_assistant/
 ```bash
 # Backend
 cd backend
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-.venv/bin/alembic upgrade head    # creates backend/data/app.db
+uv sync                        # creates backend/.venv from uv.lock
+uv run alembic upgrade head    # creates backend/data/app.db
 
 # Frontend
 cd ../frontend
@@ -58,15 +59,17 @@ npm install
 ## Running
 
 ```bash
-./run.sh
+python run.py
 ```
 
-This starts the backend at `http://localhost:8000` (API docs at `/docs`) and the frontend at `http://localhost:5173`. Open the frontend URL in your browser.
+Or use the wrapper for your platform: `./run.sh` on macOS/Linux, `run.cmd` on Windows.
+
+This starts the backend at `http://localhost:8000` (API docs at `/docs`) and the frontend at `http://localhost:5173`. Open the frontend URL in your browser. Press Ctrl+C to stop both.
 
 Or run them separately in two terminals:
 
 ```bash
-cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000
+cd backend && uv run uvicorn app.main:app --reload --port 8000
 cd frontend && npm run dev
 ```
 
@@ -74,11 +77,11 @@ cd frontend && npm run dev
 
 1. Create a review project (or open an existing one — they're listed on the home page and persist across restarts).
 2. Add papers:
-   - **Import a spreadsheet**: click "Importar planilha", choose an `.xlsx` file with `Title`/`Abstract` columns (`DOI`, `Authors`, `Year`, `Source title` are picked up automatically when present, as in a Scopus export). You'll see a preview flagging likely duplicates (by DOI or title) before anything is saved — uncheck any you don't want to add.
-   - **Add one paper**: click "Adicionar artigo" and search by DOI or title (metadata comes from CrossRef automatically) or enter details manually.
+   - **Import a spreadsheet**: click "Import spreadsheet", choose an `.xlsx` file with `Title`/`Abstract` columns (`DOI`, `Authors`, `Year`, `Source title` are picked up automatically when present, as in a Scopus export). You'll see a preview flagging likely duplicates (by DOI or title) before anything is saved — uncheck any you don't want to add.
+   - **Add one paper**: click "Add paper" and search by DOI or title (metadata comes from CrossRef automatically) or enter details manually.
 3. Review papers one at a time: read the abstract, assign tags, write notes. Everything saves automatically.
 4. Use the progress overview grid to jump to any paper and see what's left.
-5. Manage tag fields/tags in the "Gerenciar campos e tags" panel. The two built-in fields (`Adherence`, `Contribution Type`) can't be renamed or deleted; custom fields can be freely added, renamed, or removed.
+5. Manage tag fields/tags in the "Manage fields and tags" panel. The two built-in fields (`Adherence`, `Contribution Type`) can't be renamed or deleted; custom fields can be freely added, renamed, or removed.
 
 Your data lives in `backend/data/app.db`. Back it up like any file if you want an extra copy; the app itself never requires you to export/import it manually.
 
@@ -88,7 +91,7 @@ If you have an `.xlsx` + session-JSON pair exported from the previous version of
 
 ```bash
 cd backend
-.venv/bin/python scripts/migrate_legacy.py \
+uv run scripts/migrate_legacy.py \
   --xlsx "/path/to/export.xlsx" \
   --json "/path/to/export_session-*.json" \
   --project-name "My Migrated Review"
@@ -100,7 +103,7 @@ This creates a new project pre-populated with those papers, tags, and notes. It 
 
 ```bash
 cd backend
-.venv/bin/pytest
+uv run pytest
 ```
 
 Covers duplicate-detection logic, xlsx parsing (against a synthetic fixture in `backend/tests/fixtures/`), the CrossRef client (mocked HTTP), and the full API (project/paper/field CRUD, protected-field rules, cascade deletes).
