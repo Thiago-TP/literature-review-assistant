@@ -109,6 +109,10 @@ uv run pytest
 
 Covers duplicate-detection logic, xlsx parsing (against a synthetic fixture in `backend/tests/fixtures/`), the CrossRef client (mocked HTTP), and the full API (project/paper/field CRUD, protected-field rules, cascade deletes).
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, the checks to run before opening a pull request, and how the code is laid out.
+
 ## License
 
 See [LICENSE](LICENSE) file for details.
