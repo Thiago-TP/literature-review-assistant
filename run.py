@@ -8,11 +8,14 @@ neither uvicorn nor Vite is the only process it spawns, so signalling the
 direct child alone would leave a port bound after Ctrl+C.
 
 Usage:
-    python run.py          (or ./run.sh on macOS/Linux, run.cmd on Windows)
+    python run.py                (or ./run.sh on macOS/Linux, run.cmd on Windows)
+    python run.py --no-browser   start the servers without opening a window
 """
 
 from __future__ import annotations
 
+import argparse
+import errno
 import os
 import shutil
 import signal
@@ -20,6 +23,9 @@ import socket
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.request
+import webbrowser
 from pathlib import Path
 from typing import NoReturn
 
@@ -32,6 +38,8 @@ DEFAULT_BACKEND_PORT = 8000
 DEFAULT_FRONTEND_PORT = 5173
 # How far past the default to look before giving up on a tidy port number.
 PORT_SEARCH_RANGE = 20
+# How long to wait for the dev server before opening a window at its URL.
+FRONTEND_READY_TIMEOUT_SECONDS = 40.0
 
 SETUP_BACKEND = (
     "Backend not set up yet. From the repository root:\n"
@@ -68,16 +76,28 @@ def npm_executable() -> str | None:
     return shutil.which("npm")
 
 
+# Both loopback families have to be checked. Vite listens on "localhost",
+# which Node resolves to ::1, while uvicorn takes 127.0.0.1 -- so probing only
+# one family happily reports a port as free that the other server is already
+# sitting on.
+LOOPBACKS = ((socket.AF_INET, "127.0.0.1"), (socket.AF_INET6, "::1"))
+# Errors that mean "this host has no such loopback", not "something is there".
+_FAMILY_UNAVAILABLE = {errno.EAFNOSUPPORT, errno.EADDRNOTAVAIL, errno.EPROTONOSUPPORT}
+
+
 def port_is_free(port: int) -> bool:
-    """Whether a server could bind this port on localhost right now.
+    """Whether a server could bind this port on loopback right now.
 
     Deliberately without SO_REUSEADDR: we want to know whether something is
     *already listening*, which is exactly what that option would paper over.
     """
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+    for family, host in LOOPBACKS:
         try:
-            probe.bind(("127.0.0.1", port))
-        except OSError:
+            with socket.socket(family, socket.SOCK_STREAM) as probe:
+                probe.bind((host, port))
+        except OSError as error:
+            if error.errno in _FAMILY_UNAVAILABLE:
+                continue
             return False
     return True
 
@@ -100,6 +120,25 @@ def pick_port(preferred: int, taken: set[int]) -> int:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
         probe.bind(("127.0.0.1", 0))
         return probe.getsockname()[1]
+
+
+def wait_for_frontend(url: str, processes: list[subprocess.Popen]) -> bool:
+    """Block until the dev server answers, or it becomes pointless to wait.
+
+    Vite has to finish its first optimise pass before it serves anything, and
+    opening a browser at a URL that is not up yet shows an error page the user
+    then has to reload.
+    """
+    deadline = time.monotonic() + FRONTEND_READY_TIMEOUT_SECONDS
+    while time.monotonic() < deadline:
+        if any(process.poll() is not None for process in processes):
+            return False
+        try:
+            with urllib.request.urlopen(url, timeout=1):
+                return True
+        except (urllib.error.URLError, OSError):
+            time.sleep(0.3)
+    return False
 
 
 class _ChildExited(Exception):
@@ -169,7 +208,18 @@ def stop(process: subprocess.Popen) -> None:
         process.kill()
 
 
-def main() -> int:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="start the servers without opening a window (they then stop only on Ctrl+C)",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
     install_shutdown_handler()
 
     uvicorn = venv_executable("uvicorn")
@@ -193,11 +243,17 @@ def main() -> int:
             spawn(
                 [str(uvicorn), "app.main:app", "--port", str(backend_port)],
                 BACKEND_DIR,
-                # The dev server proxies /api, so requests are same-origin and
-                # CORS never applies -- but keep the allowed origin in step
-                # with the port actually in use for anything hitting the API
-                # directly from the browser.
-                env={"LRA_CORS_ORIGINS": f"{frontend_url},http://127.0.0.1:{frontend_port}"},
+                env={
+                    # The dev server proxies /api, so requests are same-origin
+                    # and CORS never applies -- but keep the allowed origin in
+                    # step with the port actually in use for anything hitting
+                    # the API directly from the browser.
+                    "LRA_CORS_ORIGINS": f"{frontend_url},http://127.0.0.1:{frontend_port}",
+                    # Opt the backend into stopping when the app's window goes
+                    # away. Only the launcher sets this, so a hand-started
+                    # uvicorn keeps running regardless of any browser.
+                    "LRA_SESSION_WATCH": "0" if args.no_browser else "1",
+                },
             )
         )
         processes.append(
@@ -220,7 +276,15 @@ def main() -> int:
         print("Default port(s) already in use; falling forward.", flush=True)
     print(f"Backend:  http://localhost:{backend_port}/docs", flush=True)
     print(f"Frontend: {frontend_url}", flush=True)
-    print("Press Ctrl+C to stop both.", flush=True)
+
+    if args.no_browser:
+        print("Press Ctrl+C to stop both.", flush=True)
+    else:
+        if wait_for_frontend(frontend_url, processes):
+            webbrowser.open(frontend_url)
+        else:
+            print("Frontend did not come up in time; open the URL above yourself.", flush=True)
+        print("Close the window, or press Ctrl+C here, to stop both.", flush=True)
 
     exit_code = 0
     try:

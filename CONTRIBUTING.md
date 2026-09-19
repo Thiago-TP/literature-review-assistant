@@ -27,9 +27,14 @@ python run.py     # or ./run.sh on macOS/Linux, run.cmd on Windows
 ```
 
 That starts the API on `http://localhost:8000` (interactive docs at `/docs`) and
-the app on `http://localhost:5173`. Vite proxies `/api` through to the backend,
-so the frontend talks to a same-origin URL and there is no CORS setup to think
-about in development.
+the app on `http://localhost:5173`, and opens a browser window. Closing that
+window stops both servers; `--no-browser` skips opening one and leaves them
+running until Ctrl+C. Vite proxies `/api` through to the backend, so the
+frontend talks to a same-origin URL and there is no CORS setup to think about
+in development.
+
+Either default port being busy is fine — the launcher falls forward to the next
+free one and prints what it used.
 
 To work on one half at a time, run them separately:
 

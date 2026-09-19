@@ -67,6 +67,9 @@ Every setting is an environment variable with a local-first default
 | `CROSSREF_BASE_URL` | `https://api.crossref.org` | Override to point at a mock |
 | `CROSSREF_MAILTO` | maintainer address | Sent to CrossRef for polite-pool access |
 | `CROSSREF_TIMEOUT_SECONDS` | `10` | Lookup timeout |
+| `LRA_SESSION_WATCH` | unset | `1` makes the server stop when the app's browser window closes |
+| `LRA_SESSION_GRACE` | `90` | Seconds without a heartbeat before stopping |
+| `LRA_SESSION_CLOSE_GRACE` | `5` | Seconds after an unload beacon before stopping |
 
 Pointing `LRA_DB_PATH` at a scratch file is the easy way to demo or experiment
 without touching your real review data.
@@ -114,6 +117,7 @@ project.
 | Import | `POST /projects/{id}/import/xlsx/preview`, `.../commit` |
 | Export | `GET /projects/{id}/export.json`, `.../export.xlsx` |
 | Dashboard | `GET /projects/{id}/dashboard` |
+| Session | `GET /session/status`, `POST /session/heartbeat`, `POST /session/closed` |
 
 Two shapes are worth calling out:
 
@@ -121,6 +125,14 @@ Two shapes are worth calling out:
 and unassigning is `DELETE`, rather than sending the full set of tags. Each
 request only asserts one option's state, so clicking a topic and a subtopic in
 quick succession cannot have one request clobber the other's result.
+
+**The session endpoints only matter under the launcher.** `run.py` sets
+`LRA_SESSION_WATCH=1` so that closing the app's window stops the servers; the
+page heartbeats while it is open and beacons `/session/closed` as it unloads.
+`app/session_watch.py` has the reasoning for the two signals. Without that
+variable — a hand-started uvicorn, or anything else pointed at the API —
+`/session/status` reports `watching: false`, the client stays quiet, and
+nothing ever shuts itself down.
 
 **Import is preview-then-commit.** `preview` parses the upload and classifies
 every row against what the project already holds, writing nothing. The client

@@ -89,6 +89,12 @@ Tag toggles assert one option at a time (`POST`/`DELETE` on a single option)
 rather than sending the whole list, so two quick clicks cannot clobber each
 other.
 
+`hooks/useSessionHeartbeat.ts` is the exception to "components never call
+fetch": it is not server state, it is a liveness signal telling the launcher
+this window is still open so that closing it stops both servers. It asks
+`/api/session/status` once and stays completely silent when nothing is
+watching, which is the case under a plain `npm run dev`.
+
 ## Styling and theming
 
 Tailwind v4, configured entirely from `src/index.css` — there is no

@@ -5,14 +5,16 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app import session_watch
 from app.config import CORS_ORIGINS
 from app.db import init_db
-from app.routers import dashboard, export, fields, import_, papers, projects
+from app.routers import dashboard, export, fields, import_, papers, projects, session
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    session_watch.start()
     yield
 
 
@@ -32,6 +34,7 @@ app.include_router(fields.router)
 app.include_router(import_.router)
 app.include_router(export.router)
 app.include_router(dashboard.router)
+app.include_router(session.router)
 
 
 @app.get("/api/health")
