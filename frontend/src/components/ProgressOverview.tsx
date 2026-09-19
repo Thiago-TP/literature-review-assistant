@@ -120,6 +120,22 @@ function Legend() {
   )
 }
 
+/**
+ * The share of papers fully tagged, as a whole percent, or null when there is
+ * nothing to take a share of.
+ *
+ * Rounding is nudged at the ends so the percentage can never contradict the
+ * count beside it: "199 of 200" must not read 100%, and "1 of 300" must not
+ * read 0%.
+ */
+function percentLabel(part: number, total: number): string | null {
+  if (total === 0) return null
+  const rounded = Math.round((part / total) * 100)
+  if (rounded === 100 && part < total) return '99%'
+  if (rounded === 0 && part > 0) return '1%'
+  return `${rounded}%`
+}
+
 export default function ProgressOverview({
   papers,
   currentPaperId,
@@ -143,6 +159,7 @@ export default function ProgressOverview({
   const fullyTagged = papers.filter(
     (paper) => paper.total_field_count > 0 && paper.filled_field_count === paper.total_field_count
   ).length
+  const percent = percentLabel(fullyTagged, papers.length)
 
   return (
     <section aria-labelledby={HEADING_ID}>
@@ -160,6 +177,7 @@ export default function ProgressOverview({
           </span>
           <span className="text-xs font-normal text-text-muted">
             {fullyTagged} of {papers.length} fully tagged
+            {percent !== null && <span className="ml-1.5 font-medium text-text">{percent}</span>}
           </span>
         </button>
       </h2>
