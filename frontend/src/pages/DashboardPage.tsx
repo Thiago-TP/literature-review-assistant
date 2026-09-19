@@ -7,7 +7,13 @@ import { usePapers } from '../hooks/usePapers'
 import { Card, EmptyState, Input, Label, SECTION_HEADING_GAP, SectionHeading, Spinner } from '../components/ui'
 import ThemeToggle from '../components/ThemeToggle'
 import HelpLink from '../components/HelpLink'
-import { percentLabel, trimScale } from '../format'
+import {
+  percentLabel,
+  ratingHint,
+  scoreHint,
+  scorePartsFromTotals,
+  trimScale,
+} from '../format'
 
 function StatTile({
   label,
@@ -126,6 +132,11 @@ export default function DashboardPage() {
                     ? percentLabel(stats.average_rating, stats.max_rating)
                     : null
                 }
+                hint={
+                  stats.average_rating !== null
+                    ? `Out of a fixed scale of ${trimScale(stats.max_rating)}, averaged over the ${stats.rated_count} rated ${stats.rated_count === 1 ? 'paper' : 'papers'} only. Rating is your own judgement; nothing in the app sets it.`
+                    : 'No paper has been rated yet. Rating is your own judgement of a paper, zero to five stars.'
+                }
               />
               <StatTile
                 label="Average score"
@@ -191,11 +202,19 @@ export default function DashboardPage() {
                     <span className="w-5 shrink-0 text-xs text-text-muted">{i + 1}</span>
                     <span className="flex-1 truncate text-sm text-text">{p.title}</span>
                     {p.rating !== null && (
-                      <span className="flex items-center gap-0.5 text-xs text-text-muted">
+                      <span
+                        className="flex items-center gap-0.5 text-xs text-text-muted"
+                        title={ratingHint(p.rating)}
+                      >
                         <Star size={12} fill="currentColor" /> {p.rating}
                       </span>
                     )}
-                    <span className="w-16 shrink-0 text-right text-sm font-semibold text-text">{p.score}</span>
+                    <span
+                      className="w-16 shrink-0 text-right text-sm font-semibold text-text"
+                      title={scoreHint(p.score, scorePartsFromTotals(p.score, p.rating))}
+                    >
+                      {p.score}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -218,8 +237,18 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3 pb-2 text-xs text-text-muted">
                   <span className="flex-1">Title</span>
                   <span className="w-20 text-right">Tags</span>
-                  <span className="w-16 text-right">Rating</span>
-                  <span className="w-16 text-right">Score</span>
+                  <span
+                    className="w-16 text-right"
+                    title="Your own judgement of a paper, zero to five stars. A dash means it is not rated yet."
+                  >
+                    Rating
+                  </span>
+                  <span
+                    className="w-16 text-right"
+                    title="Score is the weights of a paper's tags plus its rating. Hover a number to see the split."
+                  >
+                    Score
+                  </span>
                 </div>
                 {filteredPapers.length === 0 && (
                   <p className="py-4 text-sm text-text-muted">No papers found for "{query}".</p>
@@ -239,8 +268,18 @@ export default function DashboardPage() {
                     <span className="w-20 shrink-0 text-right text-xs text-text-muted">
                       {p.filled_field_count}/{p.total_field_count}
                     </span>
-                    <span className="w-16 shrink-0 text-right text-xs text-text-muted">{p.rating ?? '—'}</span>
-                    <span className="w-16 shrink-0 text-right text-sm font-medium text-text">{p.score}</span>
+                    <span
+                      className="w-16 shrink-0 text-right text-xs text-text-muted"
+                      title={ratingHint(p.rating)}
+                    >
+                      {p.rating ?? '—'}
+                    </span>
+                    <span
+                      className="w-16 shrink-0 text-right text-sm font-medium text-text"
+                      title={scoreHint(p.score, scorePartsFromTotals(p.score, p.rating))}
+                    >
+                      {p.score}
+                    </span>
                   </button>
                 ))}
               </div>

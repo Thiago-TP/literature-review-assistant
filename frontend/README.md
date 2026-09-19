@@ -54,6 +54,7 @@ public/help/        screenshots the help page shows, one pair per theme
 | `/` | `ProjectListPage` | Create, rename, delete and open reviews |
 | `/projects/:projectId` | `ReviewWorkspacePage` | The workspace: overview grid, one paper at a time, tags, notes |
 | `/projects/:projectId/dashboard` | `DashboardPage` | Aggregate stats, tag distribution, sortable/searchable paper list |
+| `/projects/:projectId/plan` | `ReviewPlanPage` | The review plan: why the review exists, what is in scope, and what every field and tag means |
 | `/help` | `HelpPage` | What the app is for, how a review runs, what rating and score mean |
 
 ## Data fetching
@@ -70,6 +71,7 @@ components use the hooks.
 ['projects', id, 'papers']
 ['projects', id, 'papers', paperId]
 ['projects', id, 'dashboard']
+['projects', id, 'plan']
 ```
 
 React Query matches keys by prefix, so `invalidateQueries({ queryKey:
@@ -92,6 +94,16 @@ Tag toggles assert one option at a time (`POST`/`DELETE` on a single option)
 rather than sending the whole list, so two quick clicks cannot clobber each
 other. Highlights work the same way (add one, remove one, clear all) rather
 than posting the whole set.
+
+The review plan's boxes save when they lose focus, rather than behind an
+Edit/OK toggle like `NotesPanel`: the page holds ten or more of them and two
+extra clicks each turns writing a plan into a chore. `components/PlanTextBox.tsx`
+resets its draft only when its `id` changes, never on the value prop, which also
+updates right after its own save once the query refetches — the same trap
+`NotesPanel` documents. Describing a field or tag moves the plan's counts, so
+those mutations invalidate `['projects', id, 'plan']` and the project list too.
+The plan's prompts live in `src/reviewPlanCopy.ts`, apart from the page, since
+the wording is the part most likely to be revised.
 
 `components/HighlightableText.tsx` maps a DOM selection back to character
 offsets into the field's plain text, since the rendered text is split into

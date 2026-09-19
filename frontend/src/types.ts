@@ -5,6 +5,8 @@ export interface Project {
   updated_at: string
   last_viewed_paper_id: number | null
   paper_count: number
+  plan_filled: number
+  plan_total: number
 }
 
 export interface TagOption {
@@ -12,6 +14,7 @@ export interface TagOption {
   value: string
   position: number
   weight: number
+  description: string | null
   children: TagOption[]
 }
 
@@ -20,7 +23,24 @@ export interface TagField {
   name: string
   is_protected: boolean
   position: number
+  description: string | null
   options: TagOption[]
+}
+
+/** The keys of the review plan's written sections, in display order. */
+export type PlanSection = 'purpose' | 'scope' | 'search' | 'weights' | 'other'
+
+export interface ReviewPlan {
+  project_id: number
+  project_name: string
+  purpose: string | null
+  scope: string | null
+  search: string | null
+  weights: string | null
+  other: string | null
+  fields: TagField[]
+  filled: number
+  total: number
 }
 
 export interface PaperListItem {

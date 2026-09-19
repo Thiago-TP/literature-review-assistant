@@ -65,8 +65,19 @@ export function Card({
   )
 }
 
-export function Badge({ children, tone = 'default' }: { children: ReactNode; tone?: 'default' | 'accent' }) {
-  const toneClass = tone === 'accent' ? 'bg-accent/10 text-accent' : 'bg-surface-muted text-text-muted'
+export function Badge({
+  children,
+  tone = 'default',
+}: {
+  children: ReactNode
+  tone?: 'default' | 'accent' | 'warning'
+}) {
+  const tones = {
+    default: 'bg-surface-muted text-text-muted',
+    accent: 'bg-accent/10 text-accent',
+    warning: 'bg-danger/10 text-danger',
+  }
+  const toneClass = tones[tone]
   return (
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${toneClass}`}>
       {children}

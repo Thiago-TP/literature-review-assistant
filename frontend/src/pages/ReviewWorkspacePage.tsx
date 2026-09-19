@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, FilePlus, LayoutDashboard, UploadCloud } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, ClipboardList, FilePlus, LayoutDashboard, UploadCloud, X } from 'lucide-react'
 import { useProject, useRememberLastViewed } from '../hooks/useProjects'
 import {
   usePaper,
@@ -33,6 +33,9 @@ import {
 } from '../components/ui'
 import ThemeToggle from '../components/ThemeToggle'
 import HelpLink from '../components/HelpLink'
+import { usePersistentState } from '../hooks/usePersistentState'
+import { ratingHint, scoreHint, scorePartsForPaper, trimScale } from '../format'
+import { MAX_RATING } from '../constants'
 
 export default function ReviewWorkspacePage() {
   const { projectId: projectIdParam } = useParams()
@@ -50,6 +53,12 @@ export default function ReviewWorkspacePage() {
   const [currentPaperId, setCurrentPaperId] = useState<number | null>(null)
   const [showImportModal, setShowImportModal] = useState(false)
   const [showAddPaperModal, setShowAddPaperModal] = useState(false)
+  // Whether the nudge towards the review plan has been waved away. A display
+  // preference, not part of the review, so it stays on this machine.
+  const [planHintDismissed, setPlanHintDismissed] = usePersistentState(
+    `planHintDismissed:${projectId}`,
+    false
+  )
 
   // Settle on a paper whenever there are papers but none open. Deliberately
   // not a run-once-on-mount effect: a project that was empty when the
@@ -115,6 +124,11 @@ export default function ReviewWorkspacePage() {
     )
   }
 
+  const planIncomplete = project.plan_filled < project.plan_total
+  // Only nag about a plan that is entirely untouched, and only until it is
+  // waved away once. A partly written plan already has the header dot.
+  const showPlanHint = project.plan_filled === 0 && !planHintDismissed
+
   return (
     <div>
       <nav className="flex items-center justify-between border-b border-border px-8 py-4">
@@ -136,12 +150,47 @@ export default function ReviewWorkspacePage() {
           <Button variant="secondary" onClick={() => setShowAddPaperModal(true)}>
             <FilePlus size={15} /> Add paper
           </Button>
+          <Link to={`/projects/${projectId}/plan`}>
+            <Button variant="secondary">
+              <ClipboardList size={15} /> Review plan
+              {planIncomplete && (
+                <span
+                  className="ml-0.5 h-1.5 w-1.5 rounded-full bg-danger"
+                  aria-label="incomplete"
+                />
+              )}
+            </Button>
+          </Link>
           <HelpLink />
           <ThemeToggle />
         </div>
       </nav>
 
       <div className="mx-auto max-w-5xl px-6 py-8">
+      {showPlanHint && (
+        <div className="mb-6 flex items-center justify-between gap-3 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
+          <span className="flex items-center gap-2">
+            <AlertTriangle size={15} className="shrink-0" />
+            This review has no plan yet. Writing down what you are looking for, and what makes a
+            paper adherent, keeps your judgements consistent to the last paper.
+          </span>
+          <span className="flex shrink-0 items-center gap-1">
+            <Link to={`/projects/${projectId}/plan`}>
+              <Button variant="ghost" className="!px-2 !py-1 text-danger">
+                Write it
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              aria-label="Dismiss"
+              className="!px-2 !py-1 text-danger"
+              onClick={() => setPlanHintDismissed(true)}
+            >
+              <X size={14} />
+            </Button>
+          </span>
+        </div>
+      )}
       {papers && papers.length === 0 ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_auto]">
           <EmptyState
@@ -203,13 +252,25 @@ export default function ReviewWorkspacePage() {
                     <Label>Your rating</Label>
                     <StarRating
                       rating={paper.rating}
+                      title={ratingHint(paper.rating)}
                       onChange={(value) => rating.mutate({ paperId: paper.id, rating: value })}
                     />
                     {paper.rating !== null && (
-                      <span className="text-xs text-text-muted">{paper.rating}/5</span>
+                      <span className="text-xs text-text-muted" title={ratingHint(paper.rating)}>
+                        {paper.rating}/{trimScale(MAX_RATING)}
+                      </span>
                     )}
                   </div>
-                  <p className="text-sm text-text-muted">
+                  {/* The workspace has the whole tag tree to hand, so this
+                      hover can name which tag contributed what, rather than
+                      only splitting tags from rating. */}
+                  <p
+                    className="text-sm text-text-muted"
+                    title={scoreHint(
+                      paper.score,
+                      scorePartsForPaper(paper.tags, paper.rating, fields)
+                    )}
+                  >
                     Score: <span className="font-semibold text-text">{paper.score}</span>
                   </p>
                 </div>
