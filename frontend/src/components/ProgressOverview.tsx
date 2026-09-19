@@ -1,27 +1,15 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { Check, ChevronDown, ChevronRight, Pencil, Star } from 'lucide-react'
 import type { PaperListItem } from '../types'
 import { percentLabel } from '../format'
+import { usePersistentState } from '../hooks/usePersistentState'
 import { SectionHeading } from './ui'
 
 const HEADING_ID = 'review-progress-heading'
 const GRID_ID = 'review-progress-grid'
 
-/**
- * Whether the panel is retracted, remembered per browser. It is a display
- * preference, not review data, so it belongs in localStorage rather than on
- * the project -- and a browser that refuses storage just gets the open
- * default rather than an error.
- */
+/** Whether the panel is retracted, remembered per browser. */
 const COLLAPSED_KEY = 'progressOverviewCollapsed'
-
-function readCollapsed(): boolean {
-  try {
-    return localStorage.getItem(COLLAPSED_KEY) === 'true'
-  } catch {
-    return false
-  }
-}
 
 /**
  * Tiles are painted with a five-step ramp plus a success green, so a corner
@@ -131,16 +119,7 @@ export default function ProgressOverview({
   currentPaperId: number | null
   onSelect: (paperId: number) => void
 }) {
-  const [collapsed, setCollapsed] = useState(readCollapsed)
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(COLLAPSED_KEY, String(collapsed))
-    } catch {
-      // Storage unavailable (private browsing, blocked site data); the panel
-      // still works, it just reopens on the next visit.
-    }
-  }, [collapsed])
+  const [collapsed, setCollapsed] = usePersistentState(COLLAPSED_KEY, false)
 
   const fullyTagged = papers.filter(
     (paper) => paper.total_field_count > 0 && paper.filled_field_count === paper.total_field_count

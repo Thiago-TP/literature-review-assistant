@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react'
 import type { TagField, TagOption } from '../types'
 import { useFieldMutations } from '../hooks/useTagFields'
+import { usePersistentState } from '../hooks/usePersistentState'
 import { Button, Card, Input, SectionHeading } from './ui'
 
 const MAX_TAG_WEIGHT = 5
@@ -14,9 +15,17 @@ function extractErrorMessage(error: unknown): string {
 }
 
 export default function FieldManagementPanel({ projectId, fields }: { projectId: number; fields: TagField[] }) {
-  const [open, setOpen] = useState(false)
+  // Persisted, not plain state: leaving for the dashboard unmounts this
+  // page, and coming back to a panel you had deliberately opened -- and a
+  // field you had expanded -- closed again means redoing the clicks every
+  // time. Tag ids are unique across projects, so a field expanded in another
+  // review simply matches nothing here.
+  const [open, setOpen] = usePersistentState('fieldPanelOpen', false)
+  const [expandedFieldId, setExpandedFieldId] = usePersistentState<number | null>(
+    'fieldPanelExpandedField',
+    null
+  )
   const [newFieldName, setNewFieldName] = useState('')
-  const [expandedFieldId, setExpandedFieldId] = useState<number | null>(null)
   const [renamingFieldId, setRenamingFieldId] = useState<number | null>(null)
   const [renameValue, setRenameValue] = useState('')
 
