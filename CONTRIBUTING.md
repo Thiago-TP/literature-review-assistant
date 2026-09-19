@@ -50,6 +50,7 @@ cd frontend && npm run dev
 ```bash
 cd backend
 uv run ruff check .
+uv run ruff format .
 uv run pytest
 
 cd ../frontend
@@ -57,11 +58,10 @@ npm run lint     # oxlint
 npm run build    # tsc --build, then the production bundle
 ```
 
-`ruff check` and `pytest` also run in CI on every push and pull request; see
-[`.github/workflows/`](.github/workflows/). `ruff format` is configured in
-[`backend/ruff.toml`](backend/ruff.toml) but is deliberately **not** a gate,
-because running it today would rewrite most of the tree — please don't reformat
-files you aren't otherwise changing.
+All three backend commands run in CI on every push and pull request; see
+[`.github/workflows/`](.github/workflows/). Formatting is not a matter of taste
+here — run `ruff format` and commit what it produces. Its settings live in
+[`backend/ruff.toml`](backend/ruff.toml).
 
 ## Where things live
 

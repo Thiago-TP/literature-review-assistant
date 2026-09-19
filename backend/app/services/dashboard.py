@@ -34,7 +34,13 @@ def compute_dashboard_stats(session: Session, project_id: int) -> DashboardStats
         1
         for p in papers
         if total_field_count > 0
-        and len({option_to_field[a.tag_option_id] for a in p.tag_assignments if a.tag_option_id in option_to_field})
+        and len(
+            {
+                option_to_field[a.tag_option_id]
+                for a in p.tag_assignments
+                if a.tag_option_id in option_to_field
+            }
+        )
         == total_field_count
     )
 
@@ -44,9 +50,14 @@ def compute_dashboard_stats(session: Session, project_id: int) -> DashboardStats
             counts[assignment.tag_option_id] = counts.get(assignment.tag_option_id, 0) + 1
 
     options = session.exec(
-        select(TagOption).join(TagField, TagOption.field_id == TagField.id).where(TagField.project_id == project_id)
+        select(TagOption)
+        .join(TagField, TagOption.field_id == TagField.id)
+        .where(TagField.project_id == project_id)
     ).all()
-    field_names = {f.id: f.name for f in session.exec(select(TagField).where(TagField.project_id == project_id)).all()}
+    field_names = {
+        f.id: f.name
+        for f in session.exec(select(TagField).where(TagField.project_id == project_id)).all()
+    }
 
     tag_distribution = sorted(
         (
@@ -66,9 +77,7 @@ def compute_dashboard_stats(session: Session, project_id: int) -> DashboardStats
     )
 
     ranked_papers = sorted(papers, key=paper_score, reverse=True)[:10]
-    top_papers = [
-        paper_to_list_item(p, option_to_field, total_field_count) for p in ranked_papers
-    ]
+    top_papers = [paper_to_list_item(p, option_to_field, total_field_count) for p in ranked_papers]
 
     return DashboardStats(
         total_papers=len(papers),

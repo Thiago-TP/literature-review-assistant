@@ -23,7 +23,9 @@ router = APIRouter(prefix="/api/projects/{project_id}", tags=["import"])
 
 
 @router.post("/import/xlsx/preview", response_model=ImportPreviewResponse)
-async def preview_xlsx_import(project_id: int, session: SessionDep, file: UploadFile) -> ImportPreviewResponse:
+async def preview_xlsx_import(
+    project_id: int, session: SessionDep, file: UploadFile
+) -> ImportPreviewResponse:
     get_project_or_404(project_id, session)
     file_bytes = await file.read()
     try:
@@ -32,9 +34,7 @@ async def preview_xlsx_import(project_id: int, session: SessionDep, file: Upload
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     existing = existing_paper_keys(session, project_id)
-    classifications = dedup.classify_batch(
-        [(row.title, row.doi) for row in parsed_rows], existing
-    )
+    classifications = dedup.classify_batch([(row.title, row.doi) for row in parsed_rows], existing)
 
     rows = [
         ImportPreviewRow(
@@ -52,14 +52,20 @@ async def preview_xlsx_import(project_id: int, session: SessionDep, file: Upload
             matched_title=classification.matched_title,
             default_action=classification.default_action,
         )
-        for index, (parsed, classification) in enumerate(zip(parsed_rows, classifications, strict=True))
+        for index, (parsed, classification) in enumerate(
+            zip(parsed_rows, classifications, strict=True)
+        )
     ]
     duplicate_count = sum(1 for r in rows if r.is_duplicate)
-    return ImportPreviewResponse(rows=rows, new_count=len(rows) - duplicate_count, duplicate_count=duplicate_count)
+    return ImportPreviewResponse(
+        rows=rows, new_count=len(rows) - duplicate_count, duplicate_count=duplicate_count
+    )
 
 
 @router.post("/import/xlsx/commit", response_model=ImportCommitResponse)
-def commit_xlsx_import(project_id: int, payload: ImportCommitRequest, session: SessionDep) -> ImportCommitResponse:
+def commit_xlsx_import(
+    project_id: int, payload: ImportCommitRequest, session: SessionDep
+) -> ImportCommitResponse:
     get_project_or_404(project_id, session)
     order_index = next_order_index(session, project_id)
     paper_ids: list[int] = []
@@ -88,7 +94,9 @@ def commit_xlsx_import(project_id: int, payload: ImportCommitRequest, session: S
         paper_ids.append(paper.id)
 
     session.commit()
-    return ImportCommitResponse(added_count=len(paper_ids), skipped_count=skipped_count, paper_ids=paper_ids)
+    return ImportCommitResponse(
+        added_count=len(paper_ids), skipped_count=skipped_count, paper_ids=paper_ids
+    )
 
 
 def _to_candidate(work: crossref.CrossRefWork, existing) -> LookupCandidate:
@@ -113,7 +121,9 @@ def _to_candidate(work: crossref.CrossRefWork, existing) -> LookupCandidate:
 
 
 @router.post("/papers/lookup/doi", response_model=LookupDoiResponse)
-async def lookup_by_doi(project_id: int, payload: LookupDoiRequest, session: SessionDep) -> LookupDoiResponse:
+async def lookup_by_doi(
+    project_id: int, payload: LookupDoiRequest, session: SessionDep
+) -> LookupDoiResponse:
     get_project_or_404(project_id, session)
     try:
         work = await crossref.lookup_by_doi(payload.doi.strip())
@@ -127,7 +137,9 @@ async def lookup_by_doi(project_id: int, payload: LookupDoiRequest, session: Ses
 
 
 @router.post("/papers/lookup/title", response_model=LookupTitleResponse)
-async def lookup_by_title(project_id: int, payload: LookupTitleRequest, session: SessionDep) -> LookupTitleResponse:
+async def lookup_by_title(
+    project_id: int, payload: LookupTitleRequest, session: SessionDep
+) -> LookupTitleResponse:
     get_project_or_404(project_id, session)
     try:
         works = await crossref.search_by_title(payload.title.strip())

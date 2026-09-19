@@ -47,7 +47,9 @@ def get_paper(project_id: int, paper_id: int, session: SessionDep) -> PaperDetai
 
 
 @router.patch("/{paper_id}", response_model=PaperDetail)
-def update_paper(project_id: int, paper_id: int, payload: PaperUpdate, session: SessionDep) -> PaperDetail:
+def update_paper(
+    project_id: int, paper_id: int, payload: PaperUpdate, session: SessionDep
+) -> PaperDetail:
     paper = get_paper_or_404(project_id, paper_id, session)
     if payload.notes is not None:
         paper.notes = payload.notes
@@ -77,13 +79,16 @@ def assign_tag(project_id: int, paper_id: int, option_id: int, session: SessionD
         try:
             session.commit()
         except IntegrityError:
-            session.rollback()  # a concurrent request already assigned it -- that's the desired end state
+            # A concurrent request already assigned it -- that is the desired end state.
+            session.rollback()
     session.refresh(paper)
     return paper_to_detail(paper)
 
 
 @router.delete("/{paper_id}/tags/{option_id}", response_model=PaperDetail)
-def unassign_tag(project_id: int, paper_id: int, option_id: int, session: SessionDep) -> PaperDetail:
+def unassign_tag(
+    project_id: int, paper_id: int, option_id: int, session: SessionDep
+) -> PaperDetail:
     paper = get_paper_or_404(project_id, paper_id, session)
     assignment = session.exec(
         select(TagAssignment).where(
@@ -98,7 +103,9 @@ def unassign_tag(project_id: int, paper_id: int, option_id: int, session: Sessio
 
 
 @router.put("/{paper_id}/rating", response_model=PaperDetail)
-def set_rating(project_id: int, paper_id: int, payload: RatingUpdate, session: SessionDep) -> PaperDetail:
+def set_rating(
+    project_id: int, paper_id: int, payload: RatingUpdate, session: SessionDep
+) -> PaperDetail:
     paper = get_paper_or_404(project_id, paper_id, session)
     paper.rating = payload.rating
     session.add(paper)
@@ -132,7 +139,9 @@ def create_paper(project_id: int, payload: PaperCreate, session: SessionDep) -> 
         raise HTTPException(status_code=400, detail="Title cannot be empty")
 
     if not payload.force:
-        classification = dedup.classify(title, payload.doi, existing_paper_keys(session, project_id))
+        classification = dedup.classify(
+            title, payload.doi, existing_paper_keys(session, project_id)
+        )
         if classification.is_duplicate:
             return PaperCreateResult(
                 duplicate=DuplicateInfo(
@@ -162,7 +171,10 @@ def create_paper(project_id: int, payload: PaperCreate, session: SessionDep) -> 
         session.rollback()
         raise HTTPException(
             status_code=409,
-            detail="This DOI is already used by another paper in the project; a DOI match cannot be forced.",
+            detail=(
+                "This DOI is already used by another paper in the project; "
+                "a DOI match cannot be forced."
+            ),
         ) from exc
     session.refresh(paper)
     return PaperCreateResult(paper=paper_to_detail(paper))

@@ -33,9 +33,13 @@ from app.services.xlsx_import import parse_xlsx  # noqa: E402
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--xlsx", required=True, type=Path, help="Path to the legacy .xlsx export")
-    parser.add_argument("--json", required=True, type=Path, help="Path to the legacy session JSON export")
+    parser.add_argument(
+        "--json", required=True, type=Path, help="Path to the legacy session JSON export"
+    )
     parser.add_argument("--project-name", required=True, help="Name for the new project to create")
     args = parser.parse_args()
 
@@ -44,20 +48,21 @@ def main() -> None:
 
     if len(rows) != len(progress):
         sys.exit(
-            f"Row count mismatch: xlsx has {len(rows)} papers but JSON has {len(progress)} entries. "
+            f"Row count mismatch: xlsx has {len(rows)} papers but JSON has "
+            f"{len(progress)} entries. "
             "The two files are paired positionally and can't be safely merged if they've "
             "diverged (e.g. the xlsx was re-exported/reordered after the JSON was saved). Aborting."
         )
 
-    field_names_in_json = {
-        key for entry in progress for key in entry if key != "Notes"
-    }
+    field_names_in_json = {key for entry in progress for key in entry if key != "Notes"}
     extra_field_names = field_names_in_json - set(REQUIRED_FIELDS.keys())
 
     init_db()
     with Session(engine) as session:
         if session.exec(select(Project).where(Project.name == args.project_name)).first():
-            sys.exit(f"Project '{args.project_name}' already exists. Choose a different --project-name.")
+            sys.exit(
+                f"Project '{args.project_name}' already exists. Choose a different --project-name."
+            )
 
         project = Project(name=args.project_name)
         session.add(project)

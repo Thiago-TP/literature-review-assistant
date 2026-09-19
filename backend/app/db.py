@@ -19,7 +19,10 @@ def _set_sqlite_pragma(dbapi_connection, connection_record) -> None:
 
 
 def init_db() -> None:
-    """Create tables if they don't exist yet (used by tests / first run before Alembic is wired in CI)."""
+    """Create tables if they don't exist yet.
+
+    Used by the tests, and by a first run before Alembic has been applied.
+    """
     SQLModel.metadata.create_all(engine)
 
 

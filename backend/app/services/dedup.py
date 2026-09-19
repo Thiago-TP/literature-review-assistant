@@ -75,7 +75,9 @@ class Candidate:
     doi: str | None
     doi_normalized: str | None
     title_normalized: str
-    classification: Classification = field(default_factory=lambda: Classification(is_duplicate=False))
+    classification: Classification = field(
+        default_factory=lambda: Classification(is_duplicate=False)
+    )
 
 
 def classify(

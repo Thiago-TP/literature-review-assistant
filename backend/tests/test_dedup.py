@@ -25,7 +25,12 @@ def test_normalize_title_strips_punctuation_and_case():
 
 def test_classify_matches_by_doi_even_with_different_title():
     existing = [
-        ExistingPaperKey(paper_id=1, title="Original Title", doi_normalized="10.1/x", title_normalized="original title")
+        ExistingPaperKey(
+            paper_id=1,
+            title="Original Title",
+            doi_normalized="10.1/x",
+            title_normalized="original title",
+        )
     ]
     result = classify("A Completely Different Title", "https://doi.org/10.1/X", existing)
     assert result.is_duplicate
@@ -36,7 +41,12 @@ def test_classify_matches_by_doi_even_with_different_title():
 
 def test_classify_matches_by_title_when_no_doi_match():
     existing = [
-        ExistingPaperKey(paper_id=2, title="Some Paper Title", doi_normalized=None, title_normalized="some paper title")
+        ExistingPaperKey(
+            paper_id=2,
+            title="Some Paper Title",
+            doi_normalized=None,
+            title_normalized="some paper title",
+        )
     ]
     result = classify("Some Paper Title!!", None, existing)
     assert result.is_duplicate
@@ -46,7 +56,9 @@ def test_classify_matches_by_title_when_no_doi_match():
 
 def test_classify_new_paper_no_match():
     existing = [
-        ExistingPaperKey(paper_id=3, title="Other", doi_normalized="10.1/y", title_normalized="other")
+        ExistingPaperKey(
+            paper_id=3, title="Other", doi_normalized="10.1/y", title_normalized="other"
+        )
     ]
     result = classify("Brand New Paper", "10.1/z", existing)
     assert not result.is_duplicate

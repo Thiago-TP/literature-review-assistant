@@ -14,9 +14,7 @@ router = APIRouter(prefix="/api/projects", tags=["projects"])
 
 
 def _to_read(session: SessionDep, project: Project) -> ProjectRead:
-    paper_count = len(
-        session.exec(select(Paper.id).where(Paper.project_id == project.id)).all()
-    )
+    paper_count = len(session.exec(select(Paper.id).where(Paper.project_id == project.id)).all())
     return ProjectRead(
         id=project.id,
         name=project.name,
@@ -40,7 +38,9 @@ def create_project(payload: ProjectCreate, session: SessionDep) -> ProjectRead:
     session.flush()
 
     for position, (field_name, options) in enumerate(REQUIRED_FIELDS.items()):
-        field = TagField(project_id=project.id, name=field_name, is_protected=True, position=position)
+        field = TagField(
+            project_id=project.id, name=field_name, is_protected=True, position=position
+        )
         session.add(field)
         session.flush()
         for option_position, value in enumerate(options):
@@ -90,7 +90,9 @@ def set_last_viewed(project_id: int, payload: LastViewedUpdate, session: Session
     project = get_project_or_404(project_id, session)
     paper = session.get(Paper, payload.paper_id)
     if paper is None or paper.project_id != project_id:
-        raise HTTPException(status_code=404, detail=f"Paper {payload.paper_id} not found in project")
+        raise HTTPException(
+            status_code=404, detail=f"Paper {payload.paper_id} not found in project"
+        )
     project.last_viewed_paper_id = payload.paper_id
     session.add(project)
     session.commit()

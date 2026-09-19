@@ -5,7 +5,13 @@ def _upload_sample(client, project_id):
     with SAMPLE_XLSX_PATH.open("rb") as f:
         return client.post(
             f"/api/projects/{project_id}/import/xlsx/preview",
-            files={"file": ("sample.xlsx", f, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+            files={
+                "file": (
+                    "sample.xlsx",
+                    f,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                )
+            },
         )
 
 

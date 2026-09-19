@@ -17,12 +17,18 @@ from app.schemas import (
 router = APIRouter(prefix="/api/projects/{project_id}/fields", tags=["fields"])
 
 
-def _build_option_tree(options: list[TagOption], parent_id: int | None = None) -> list[TagOptionRead]:
+def _build_option_tree(
+    options: list[TagOption], parent_id: int | None = None
+) -> list[TagOptionRead]:
     """Turn the flat list of a field's options (all depths) into a nested tree."""
     children = sorted((o for o in options if o.parent_id == parent_id), key=lambda o: o.position)
     return [
         TagOptionRead(
-            id=o.id, value=o.value, position=o.position, weight=o.weight, children=_build_option_tree(options, o.id)
+            id=o.id,
+            value=o.value,
+            position=o.position,
+            weight=o.weight,
+            children=_build_option_tree(options, o.id),
         )
         for o in children
     ]
@@ -131,7 +137,9 @@ def create_option(
         raise HTTPException(status_code=400, detail=f"Tag '{value}' already exists at this level")
 
     sibling_positions = session.exec(
-        select(TagOption.position).where(TagOption.field_id == field_id, TagOption.parent_id == parent_id)
+        select(TagOption.position).where(
+            TagOption.field_id == field_id, TagOption.parent_id == parent_id
+        )
     ).all()
     next_position = (max(sibling_positions) + 1) if sibling_positions else 0
 
@@ -171,7 +179,9 @@ def update_option(
 
     if payload.value is not None:
         if field.is_protected:
-            raise HTTPException(status_code=400, detail="Tags in protected fields cannot be renamed")
+            raise HTTPException(
+                status_code=400, detail="Tags in protected fields cannot be renamed"
+            )
         new_value = payload.value.strip()
         if not new_value:
             raise HTTPException(status_code=400, detail="Tag value cannot be empty")
@@ -183,7 +193,9 @@ def update_option(
                 TagOption.id != option_id,
             )
         ).first():
-            raise HTTPException(status_code=400, detail=f"Tag '{new_value}' already exists at this level")
+            raise HTTPException(
+                status_code=400, detail=f"Tag '{new_value}' already exists at this level"
+            )
         option.value = new_value
 
     if payload.weight is not None:
@@ -216,7 +228,10 @@ def delete_option(project_id: int, field_id: int, option_id: int, session: Sessi
         raise HTTPException(
             status_code=400,
             detail={
-                "message": "Cannot delete a tag that is currently assigned to papers (directly or via a subtopic)",
+                "message": (
+                    "Cannot delete a tag that is currently assigned to papers "
+                    "(directly or via a subtopic)"
+                ),
                 "affected_paper_ids": sorted(set(assigned_papers)),
             },
         )

@@ -64,7 +64,9 @@ def test_title_duplicate_without_doi_can_be_forced(client, project):
 def test_doi_duplicate_cannot_be_forced(client, project):
     """Unlike title matches, a DOI collision is a real integrity constraint --
     forcing past it should fail loudly rather than create an inconsistent DB."""
-    client.post(f"/api/projects/{project['id']}/papers", json={"title": "Paper B", "doi": "10.1/force"})
+    client.post(
+        f"/api/projects/{project['id']}/papers", json={"title": "Paper B", "doi": "10.1/force"}
+    )
     forced_resp = client.post(
         f"/api/projects/{project['id']}/papers",
         json={"title": "Paper B", "doi": "10.1/force", "force": True},
@@ -109,7 +111,9 @@ def test_cannot_delete_option_assigned_to_a_paper(client, project):
         json={"tags": {field["id"]: [option["id"]]}},
     )
 
-    delete_resp = client.delete(f"/api/projects/{project['id']}/fields/{field['id']}/options/{option['id']}")
+    delete_resp = client.delete(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options/{option['id']}"
+    )
     assert delete_resp.status_code == 400
     assert paper["id"] in delete_resp.json()["detail"]["affected_paper_ids"]
 
@@ -145,7 +149,9 @@ def test_assign_tag_is_idempotent(client, project):
     fields = client.get(f"/api/projects/{project['id']}/fields").json()
     adherence = next(f for f in fields if f["name"] == "Adherence")
     option = adherence["options"][0]
-    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()[
+        "paper"
+    ]
 
     first = client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{option['id']}")
     second = client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{option['id']}")
@@ -157,7 +163,9 @@ def test_assign_tag_is_idempotent(client, project):
 def test_unassign_tag_is_idempotent_when_not_assigned(client, project):
     fields = client.get(f"/api/projects/{project['id']}/fields").json()
     option = fields[0]["options"][0]
-    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()[
+        "paper"
+    ]
 
     resp = client.delete(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{option['id']}")
     assert resp.status_code == 200
@@ -170,12 +178,16 @@ def test_assigning_two_different_tags_in_sequence_keeps_both(client, project):
     slightly-stale snapshot. The per-option assign endpoint must never do
     that, since each call only ever asserts one option, never a full list."""
     field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
-    topic = client.post(f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "Topic"}).json()
+    topic = client.post(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "Topic"}
+    ).json()
     subtopic = client.post(
         f"/api/projects/{project['id']}/fields/{field['id']}/options",
         json={"value": "Sub", "parent_option_id": topic["id"]},
     ).json()
-    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()[
+        "paper"
+    ]
 
     client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{topic['id']}")
     final = client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{subtopic['id']}")
@@ -186,9 +198,15 @@ def test_assigning_two_different_tags_in_sequence_keeps_both(client, project):
 
 def test_unassign_one_tag_leaves_other_selected(client, project):
     field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
-    a = client.post(f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A"}).json()
-    b = client.post(f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "B"}).json()
-    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+    a = client.post(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A"}
+    ).json()
+    b = client.post(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "B"}
+    ).json()
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()[
+        "paper"
+    ]
 
     client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{a['id']}")
     client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{b['id']}")
@@ -198,15 +216,21 @@ def test_unassign_one_tag_leaves_other_selected(client, project):
 
 
 def test_new_paper_has_zero_score_and_no_rating(client, project):
-    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()[
+        "paper"
+    ]
     assert paper["rating"] is None
     assert paper["score"] == 0
 
 
 def test_set_and_clear_rating(client, project):
-    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()[
+        "paper"
+    ]
 
-    set_resp = client.put(f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 4})
+    set_resp = client.put(
+        f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 4}
+    )
     assert set_resp.status_code == 200
     assert set_resp.json()["rating"] == 4
     assert set_resp.json()["score"] == 4
@@ -218,26 +242,42 @@ def test_set_and_clear_rating(client, project):
 
 
 def test_rating_out_of_range_rejected(client, project):
-    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
-    resp = client.put(f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 5.5})
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()[
+        "paper"
+    ]
+    resp = client.put(
+        f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 5.5}
+    )
     assert resp.status_code == 422
-    resp = client.put(f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 0})
+    resp = client.put(
+        f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 0}
+    )
     assert resp.status_code == 422
 
 
 def test_rating_must_be_a_half_step(client, project):
-    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
-    resp = client.put(f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 3.3})
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()[
+        "paper"
+    ]
+    resp = client.put(
+        f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 3.3}
+    )
     assert resp.status_code == 422
 
 
 def test_half_star_rating_accepted(client, project):
-    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
-    resp = client.put(f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 0.5})
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()[
+        "paper"
+    ]
+    resp = client.put(
+        f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 0.5}
+    )
     assert resp.status_code == 200
     assert resp.json()["rating"] == 0.5
 
-    resp = client.put(f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 4.5})
+    resp = client.put(
+        f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 4.5}
+    )
     assert resp.status_code == 200
     assert resp.json()["rating"] == 4.5
     assert resp.json()["score"] == 4.5
@@ -246,31 +286,45 @@ def test_half_star_rating_accepted(client, project):
 def test_score_combines_tag_weights_and_rating(client, project):
     field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
     option_a = client.post(
-        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A", "weight": 3}
+        f"/api/projects/{project['id']}/fields/{field['id']}/options",
+        json={"value": "A", "weight": 3},
     ).json()
     option_b = client.post(
-        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "B", "weight": 1.5}
+        f"/api/projects/{project['id']}/fields/{field['id']}/options",
+        json={"value": "B", "weight": 1.5},
     ).json()
-    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()[
+        "paper"
+    ]
 
     client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{option_a['id']}")
     client.post(f"/api/projects/{project['id']}/papers/{paper['id']}/tags/{option_b['id']}")
-    rated = client.put(f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 5})
+    rated = client.put(
+        f"/api/projects/{project['id']}/papers/{paper['id']}/rating", json={"rating": 5}
+    )
 
     assert rated.json()["score"] == 3 + 1.5 + 5
 
     list_item = next(
-        p for p in client.get(f"/api/projects/{project['id']}/papers").json() if p["id"] == paper["id"]
+        p
+        for p in client.get(f"/api/projects/{project['id']}/papers").json()
+        if p["id"] == paper["id"]
     )
     assert list_item["score"] == 3 + 1.5 + 5
     assert list_item["rating"] == 5
 
 
 def test_paper_list_item_includes_notes(client, project):
-    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()["paper"]
-    client.patch(f"/api/projects/{project['id']}/papers/{paper['id']}", json={"notes": "Very relevant paper"})
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "P"}).json()[
+        "paper"
+    ]
+    client.patch(
+        f"/api/projects/{project['id']}/papers/{paper['id']}", json={"notes": "Very relevant paper"}
+    )
 
     list_item = next(
-        p for p in client.get(f"/api/projects/{project['id']}/papers").json() if p["id"] == paper["id"]
+        p
+        for p in client.get(f"/api/projects/{project['id']}/papers").json()
+        if p["id"] == paper["id"]
     )
     assert list_item["notes"] == "Very relevant paper"

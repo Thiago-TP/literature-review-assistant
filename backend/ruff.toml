@@ -1,11 +1,14 @@
 # Ruff configuration for the backend. Run from this directory:
 #   uv run ruff check .
+#   uv run ruff format .
 #
-# Only `ruff check` is enforced in CI. `ruff format` is configured below and
-# works if you want it, but running it today rewrites most of the tree, so it
-# is not a gate -- enabling it should be its own deliberate commit.
+# CI enforces both.
 
-line-length = 120
+# 100 rather than a longer limit on purpose: the formatter collapses anything
+# that fits on one line, and at 120 that turned the hand-wrapped query and
+# constructor calls in this codebase into dense single lines. At 100 it wraps
+# them instead, which is how they were written.
+line-length = 100
 target-version = "py313"
 
 # Alembic revisions are generated and then hand-edited around the generated

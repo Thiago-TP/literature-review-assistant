@@ -78,8 +78,12 @@ def test_create_nested_subtopic_and_subsubtopic(client, project):
 def test_same_value_allowed_under_different_parents(client, project):
     field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
     fid = field["id"]
-    topic_a = client.post(f"/api/projects/{project['id']}/fields/{fid}/options", json={"value": "Topic A"}).json()
-    topic_b = client.post(f"/api/projects/{project['id']}/fields/{fid}/options", json={"value": "Topic B"}).json()
+    topic_a = client.post(
+        f"/api/projects/{project['id']}/fields/{fid}/options", json={"value": "Topic A"}
+    ).json()
+    topic_b = client.post(
+        f"/api/projects/{project['id']}/fields/{fid}/options", json={"value": "Topic B"}
+    ).json()
 
     resp_a = client.post(
         f"/api/projects/{project['id']}/fields/{fid}/options",
@@ -96,7 +100,9 @@ def test_same_value_allowed_under_different_parents(client, project):
 def test_duplicate_value_rejected_under_same_parent(client, project):
     field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
     fid = field["id"]
-    topic = client.post(f"/api/projects/{project['id']}/fields/{fid}/options", json={"value": "Topic"}).json()
+    topic = client.post(
+        f"/api/projects/{project['id']}/fields/{fid}/options", json={"value": "Topic"}
+    ).json()
     client.post(
         f"/api/projects/{project['id']}/fields/{fid}/options",
         json={"value": "Sub", "parent_option_id": topic["id"]},
@@ -111,7 +117,9 @@ def test_duplicate_value_rejected_under_same_parent(client, project):
 def test_create_option_rejects_parent_from_different_field(client, project):
     field_a = client.post(f"/api/projects/{project['id']}/fields", json={"name": "A"}).json()
     field_b = client.post(f"/api/projects/{project['id']}/fields", json={"name": "B"}).json()
-    topic = client.post(f"/api/projects/{project['id']}/fields/{field_a['id']}/options", json={"value": "Topic"}).json()
+    topic = client.post(
+        f"/api/projects/{project['id']}/fields/{field_a['id']}/options", json={"value": "Topic"}
+    ).json()
 
     resp = client.post(
         f"/api/projects/{project['id']}/fields/{field_b['id']}/options",
@@ -123,7 +131,9 @@ def test_create_option_rejects_parent_from_different_field(client, project):
 def test_cannot_delete_topic_when_subsubtopic_is_assigned(client, project):
     field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
     fid = field["id"]
-    topic = client.post(f"/api/projects/{project['id']}/fields/{fid}/options", json={"value": "Topic"}).json()
+    topic = client.post(
+        f"/api/projects/{project['id']}/fields/{fid}/options", json={"value": "Topic"}
+    ).json()
     subtopic = client.post(
         f"/api/projects/{project['id']}/fields/{fid}/options",
         json={"value": "Sub", "parent_option_id": topic["id"]},
@@ -133,7 +143,9 @@ def test_cannot_delete_topic_when_subsubtopic_is_assigned(client, project):
         json={"value": "SubSub", "parent_option_id": subtopic["id"]},
     ).json()
 
-    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "Paper"}).json()["paper"]
+    paper = client.post(f"/api/projects/{project['id']}/papers", json={"title": "Paper"}).json()[
+        "paper"
+    ]
     client.patch(
         f"/api/projects/{project['id']}/papers/{paper['id']}",
         json={"tags": {fid: [subsubtopic["id"]]}},
@@ -147,7 +159,9 @@ def test_cannot_delete_topic_when_subsubtopic_is_assigned(client, project):
 def test_delete_topic_cascades_to_unassigned_subtopics(client, project):
     field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
     fid = field["id"]
-    topic = client.post(f"/api/projects/{project['id']}/fields/{fid}/options", json={"value": "Topic"}).json()
+    topic = client.post(
+        f"/api/projects/{project['id']}/fields/{fid}/options", json={"value": "Topic"}
+    ).json()
     client.post(
         f"/api/projects/{project['id']}/fields/{fid}/options",
         json={"value": "Sub", "parent_option_id": topic["id"]},
@@ -163,14 +177,17 @@ def test_delete_topic_cascades_to_unassigned_subtopics(client, project):
 
 def test_option_defaults_to_zero_weight(client, project):
     field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
-    option = client.post(f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A"}).json()
+    option = client.post(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A"}
+    ).json()
     assert option["weight"] == 0
 
 
 def test_create_option_with_weight(client, project):
     field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
     option = client.post(
-        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A", "weight": 2.5}
+        f"/api/projects/{project['id']}/fields/{field['id']}/options",
+        json={"value": "A", "weight": 2.5},
     ).json()
     assert option["weight"] == 2.5
 
@@ -178,7 +195,8 @@ def test_create_option_with_weight(client, project):
 def test_create_option_weight_above_cap_rejected(client, project):
     field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
     resp = client.post(
-        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A", "weight": 5.5}
+        f"/api/projects/{project['id']}/fields/{field['id']}/options",
+        json={"value": "A", "weight": 5.5},
     )
     assert resp.status_code == 422
 
@@ -186,7 +204,8 @@ def test_create_option_weight_above_cap_rejected(client, project):
 def test_create_option_weight_off_step_rejected(client, project):
     field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
     resp = client.post(
-        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A", "weight": 2.3}
+        f"/api/projects/{project['id']}/fields/{field['id']}/options",
+        json={"value": "A", "weight": 2.3},
     )
     assert resp.status_code == 422
 
@@ -194,7 +213,8 @@ def test_create_option_weight_off_step_rejected(client, project):
 def test_create_option_weight_at_cap_accepted(client, project):
     field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
     resp = client.post(
-        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A", "weight": 5}
+        f"/api/projects/{project['id']}/fields/{field['id']}/options",
+        json={"value": "A", "weight": 5},
     )
     assert resp.status_code == 201
     assert resp.json()["weight"] == 5
@@ -202,19 +222,25 @@ def test_create_option_weight_at_cap_accepted(client, project):
 
 def test_reweight_option_above_cap_rejected(client, project):
     field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
-    option = client.post(f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A"}).json()
+    option = client.post(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A"}
+    ).json()
     resp = client.patch(
-        f"/api/projects/{project['id']}/fields/{field['id']}/options/{option['id']}", json={"weight": 10}
+        f"/api/projects/{project['id']}/fields/{field['id']}/options/{option['id']}",
+        json={"weight": 10},
     )
     assert resp.status_code == 422
 
 
 def test_reweight_option_without_changing_value(client, project):
     field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
-    option = client.post(f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A"}).json()
+    option = client.post(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options", json={"value": "A"}
+    ).json()
 
     resp = client.patch(
-        f"/api/projects/{project['id']}/fields/{field['id']}/options/{option['id']}", json={"weight": 4}
+        f"/api/projects/{project['id']}/fields/{field['id']}/options/{option['id']}",
+        json={"weight": 4},
     )
     assert resp.status_code == 200
     assert resp.json()["value"] == "A"
@@ -227,7 +253,8 @@ def test_protected_field_option_can_be_reweighted_but_not_renamed(client, projec
     option = protected["options"][0]
 
     reweight_resp = client.patch(
-        f"/api/projects/{project['id']}/fields/{protected['id']}/options/{option['id']}", json={"weight": 3}
+        f"/api/projects/{project['id']}/fields/{protected['id']}/options/{option['id']}",
+        json={"weight": 3},
     )
     assert reweight_resp.status_code == 200
     assert reweight_resp.json()["weight"] == 3

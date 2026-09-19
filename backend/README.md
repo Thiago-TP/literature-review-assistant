@@ -156,6 +156,7 @@ migrations — and this database holds work people cannot regenerate.
 ```bash
 uv run pytest
 uv run ruff check .
+uv run ruff format --check .
 ```
 
 Each test builds its own in-memory SQLite database and overrides the session
