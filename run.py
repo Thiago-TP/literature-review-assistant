@@ -167,7 +167,9 @@ def fail(message: str) -> NoReturn:
     raise SystemExit(1)
 
 
-def spawn(command: list[str], cwd: Path, env: dict[str, str] | None = None) -> subprocess.Popen:
+def spawn(
+    command: list[str], cwd: Path, env: dict[str, str] | None = None
+) -> subprocess.Popen:
     """Start a long-running child in its own process group.
 
     The new group is what lets `stop` later take down the child *and* the
@@ -283,7 +285,10 @@ def main(argv: list[str] | None = None) -> int:
         if wait_for_frontend(frontend_url, processes):
             webbrowser.open(frontend_url)
         else:
-            print("Frontend did not come up in time; open the URL above yourself.", flush=True)
+            print(
+                "Frontend did not come up in time; open the URL above yourself.",
+                flush=True,
+            )
         print("Close the window, or press Ctrl+C here, to stop both.", flush=True)
 
     exit_code = 0
