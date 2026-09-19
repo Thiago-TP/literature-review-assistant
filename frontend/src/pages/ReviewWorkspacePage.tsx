@@ -31,6 +31,7 @@ import {
   StepBadge,
 } from '../components/ui'
 import ThemeToggle from '../components/ThemeToggle'
+import HelpLink from '../components/HelpLink'
 
 export default function ReviewWorkspacePage() {
   const { projectId: projectIdParam } = useParams()
@@ -133,6 +134,7 @@ export default function ReviewWorkspacePage() {
           <Button variant="secondary" onClick={() => setShowAddPaperModal(true)}>
             <FilePlus size={15} /> Add paper
           </Button>
+          <HelpLink />
           <ThemeToggle />
         </div>
       </nav>

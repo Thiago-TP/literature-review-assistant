@@ -44,7 +44,9 @@ src/
   hooks/            React Query wrappers, one file per resource
   api/              typed fetch client, one file per resource
   types.ts          the response shapes, mirroring the backend's schemas
+  format.ts         percentage and scale formatting shared across pages
   index.css         palette tokens + Tailwind theme wiring
+public/help/        screenshots the help page shows, one pair per theme
 ```
 
 | Route | Page | What it is |
@@ -52,6 +54,7 @@ src/
 | `/` | `ProjectListPage` | Create, rename, delete and open reviews |
 | `/projects/:projectId` | `ReviewWorkspacePage` | The workspace: overview grid, one paper at a time, tags, notes |
 | `/projects/:projectId/dashboard` | `DashboardPage` | Aggregate stats, tag distribution, sortable/searchable paper list |
+| `/help` | `HelpPage` | What the app is for, how a review runs, what rating and score mean |
 
 ## Data fetching
 
@@ -116,6 +119,12 @@ theme's colours until something else re-renders them.
 
 `index.html` sets `data-theme` in a blocking inline script before the bundle
 loads, so there is no flash of the wrong theme on a hard refresh.
+
+The help page's screenshots exist in both themes and are swapped by CSS on the
+same `data-theme` attribute (`.figure-light` / `.figure-dark`), for the same
+reason: a figure chosen in JavaScript would stay on the old theme after a
+toggle. Regenerating them is a manual step — take the shots at the same framing
+and drop the pair into `public/help/`.
 
 Radius scale: `rounded-lg` for surfaces that hold content, `rounded-md` for
 controls and inner blocks, `rounded` for small marks, `rounded-full` for pills

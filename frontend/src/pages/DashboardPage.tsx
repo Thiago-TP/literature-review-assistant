@@ -6,6 +6,7 @@ import { useDashboard } from '../hooks/useDashboard'
 import { usePapers } from '../hooks/usePapers'
 import { Card, EmptyState, Input, Label, SECTION_HEADING_GAP, SectionHeading, Spinner } from '../components/ui'
 import ThemeToggle from '../components/ThemeToggle'
+import HelpLink from '../components/HelpLink'
 import { percentLabel, trimScale } from '../format'
 
 function StatTile({
@@ -82,7 +83,10 @@ export default function DashboardPage() {
           </Link>
           <span className="font-serif text-lg text-text">{project.name} — Dashboard</span>
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <HelpLink />
+          <ThemeToggle />
+        </div>
       </nav>
 
       <div className="mx-auto max-w-5xl px-6 py-8">
@@ -163,7 +167,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       {entry.weight !== 0 && (
-                        <span className="w-14 shrink-0 text-right text-xs text-text-muted">
+                        <span className="w-20 shrink-0 whitespace-nowrap text-right text-xs text-text-muted">
                           weight {entry.weight}
                         </span>
                       )}

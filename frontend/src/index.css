@@ -121,3 +121,28 @@ body {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+
+/*
+ * Help-page figures ship in both themes so a screenshot never sits on the
+ * opposite background. Driven by the same data-theme attribute as the palette,
+ * so it stays in step with the toggle without any JavaScript.
+ */
+.figure-dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .figure-light {
+    display: none;
+  }
+  :root:not([data-theme='light']) .figure-dark {
+    display: block;
+  }
+}
+
+:root[data-theme='dark'] .figure-light {
+  display: none;
+}
+:root[data-theme='dark'] .figure-dark {
+  display: block;
+}

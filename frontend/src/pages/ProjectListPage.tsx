@@ -4,6 +4,7 @@ import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useCreateProject, useDeleteProject, useProjects, useRenameProject } from '../hooks/useProjects'
 import { Button, Card, EmptyState, Input, Label, Spinner } from '../components/ui'
 import ThemeToggle from '../components/ThemeToggle'
+import HelpLink from '../components/HelpLink'
 import type { Project } from '../types'
 
 function ProjectRow({ project, onOpen }: { project: Project; onOpen: () => void }) {
@@ -87,7 +88,10 @@ export default function ProjectListPage() {
     <div>
       <nav className="flex items-center justify-between border-b border-border px-8 py-4">
         <span className="font-serif text-lg text-text">Literature Review Assistant</span>
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <HelpLink />
+          <ThemeToggle />
+        </div>
       </nav>
 
       <div className="mx-auto max-w-3xl px-6 py-16">

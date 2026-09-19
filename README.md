@@ -95,6 +95,8 @@ cd frontend && npm run dev
 4. Use the progress overview grid to jump to any paper and see what's left.
 5. Manage tag fields/tags in the "Manage fields and tags" panel. The two built-in fields (`Adherence`, `Contribution Type`) can't be renamed or deleted; custom fields can be freely added, renamed, or removed.
 
+The **?** button in the top right of any screen opens a help page covering the same ground in more detail: what rating and score mean, how a score is calculated, and how to read the progress overview.
+
 Your data lives in `backend/data/app.db`. Back it up like any file if you want an extra copy; the app itself never requires you to export/import it manually.
 
 ## Migrating data from the old Streamlit version

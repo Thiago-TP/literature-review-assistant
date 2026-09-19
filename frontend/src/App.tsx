@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 import ProjectListPage from './pages/ProjectListPage'
 import ReviewWorkspacePage from './pages/ReviewWorkspacePage'
 import DashboardPage from './pages/DashboardPage'
+import HelpPage from './pages/HelpPage'
 import { useSessionHeartbeat } from './hooks/useSessionHeartbeat'
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
       <Route path="/" element={<ProjectListPage />} />
       <Route path="/projects/:projectId" element={<ReviewWorkspacePage />} />
       <Route path="/projects/:projectId/dashboard" element={<DashboardPage />} />
+      <Route path="/help" element={<HelpPage />} />
     </Routes>
   )
 }
