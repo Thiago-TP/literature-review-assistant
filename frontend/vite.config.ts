@@ -1,0 +1,20 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+// The launcher (run.py) picks a free backend port and passes it through, since
+// 8000 may already be taken. Running `npm run dev` on its own keeps the default.
+const apiPort = process.env.LRA_API_PORT ?? '8000'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  server: {
+    proxy: {
+      '/api': {
+        target: `http://localhost:${apiPort}`,
+        changeOrigin: true,
+      },
+    },
+  },
+})

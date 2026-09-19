@@ -1,0 +1,154 @@
+@import "tailwindcss";
+
+/*
+ * Palette tokens. `--color-progress-*` is the sequential ramp the review
+ * overview paints its tiles with: one hue, monotone lightness, five steps.
+ * It lives here rather than in the component so that it flips with the theme
+ * like every other colour, instead of being sampled once in JavaScript.
+ */
+:root {
+  --color-bg: #ebe7d9;
+  --color-surface: #faf8f2;
+  --color-surface-muted: #e4ddc8;
+  --color-border: #b8ae91;
+  --color-text: #191813;
+  --color-text-muted: #5b5a4d;
+  --color-accent: #17304f;
+  --color-accent-hover: #0f2237;
+  --color-accent-fg: #faf8f2;
+  --color-danger: #8f2e16;
+  --color-danger-fg: #faf8f2;
+  --color-success: #345c3e;
+  --color-success-fg: #faf8f2;
+  --color-highlight: #fcd34d;
+  --color-highlight-fg: #191813;
+  --color-progress-1: #84b2ef;
+  --color-progress-2: #5c93e0;
+  --color-progress-3: #3b74c8;
+  --color-progress-4: #27569e;
+  --color-progress-5: #173c73;
+}
+
+/*
+ * The dark palette is written out twice on purpose -- once for the system
+ * preference and once for the explicit toggle, which has to win over both the
+ * default and the preference. Keep the two lists in step.
+ */
+
+/* System dark preference applies only when the user hasn't explicitly chosen light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-bg: #0f1014;
+    --color-surface: #1a1c22;
+    --color-surface-muted: #2b2e37;
+    --color-border: #4e5260;
+    --color-text: #f2f0e8;
+    --color-text-muted: #adaba1;
+    --color-accent: #a3c0e6;
+    --color-accent-hover: #c2d6f2;
+    --color-accent-fg: #0f1014;
+    --color-danger: #ec9c80;
+    --color-danger-fg: #0f1014;
+    --color-success: #93bda0;
+    --color-success-fg: #0f1014;
+    --color-highlight: #6b5310;
+    --color-highlight-fg: #f2f0e8;
+    --color-progress-1: #245f9f;
+    --color-progress-2: #2f7cd0;
+    --color-progress-3: #4b95e4;
+    --color-progress-4: #75b0ee;
+    --color-progress-5: #a0c9f6;
+  }
+}
+
+/* Explicit toggle wins over both the default and the system preference. */
+:root[data-theme='dark'] {
+  --color-bg: #0f1014;
+  --color-surface: #1a1c22;
+  --color-surface-muted: #2b2e37;
+  --color-border: #4e5260;
+  --color-text: #f2f0e8;
+  --color-text-muted: #adaba1;
+  --color-accent: #a3c0e6;
+  --color-accent-hover: #c2d6f2;
+  --color-accent-fg: #0f1014;
+  --color-danger: #ec9c80;
+  --color-danger-fg: #0f1014;
+  --color-success: #93bda0;
+  --color-success-fg: #0f1014;
+  --color-highlight: #6b5310;
+  --color-highlight-fg: #f2f0e8;
+  --color-progress-1: #245f9f;
+  --color-progress-2: #2f7cd0;
+  --color-progress-3: #4b95e4;
+  --color-progress-4: #75b0ee;
+  --color-progress-5: #a0c9f6;
+}
+
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-surface-muted: var(--color-surface-muted);
+  --color-border: var(--color-border);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-fg: var(--color-accent-fg);
+  --color-danger: var(--color-danger);
+  --color-danger-fg: var(--color-danger-fg);
+  --color-success: var(--color-success);
+  --color-success-fg: var(--color-success-fg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+}
+
+.tracked-label {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/*
+ * Help-page figures ship in both themes so a screenshot never sits on the
+ * opposite background. Driven by the same data-theme attribute as the palette,
+ * so it stays in step with the toggle without any JavaScript.
+ */
+.figure-dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .figure-light {
+    display: none;
+  }
+  :root:not([data-theme='light']) .figure-dark {
+    display: block;
+  }
+}
+
+:root[data-theme='dark'] .figure-light {
+  display: none;
+}
+:root[data-theme='dark'] .figure-dark {
+  display: block;
+}

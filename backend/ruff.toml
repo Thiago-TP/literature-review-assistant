@@ -1,0 +1,51 @@
+# Ruff configuration for the backend. Run from this directory:
+#   uv run ruff check .
+#   uv run ruff format .
+#
+# CI enforces both.
+
+# 100 rather than a longer limit on purpose: the formatter collapses anything
+# that fits on one line, and at 120 that turned the hand-wrapped query and
+# constructor calls in this codebase into dense single lines. At 100 it wraps
+# them instead, which is how they were written.
+line-length = 100
+target-version = "py313"
+
+# Alembic revisions are generated and then hand-edited around the generated
+# shape; linting them produces churn on files that are never read as ordinary
+# source. The virtualenv is not ours to lint at all.
+exclude = ["alembic/versions", ".venv"]
+
+[lint]
+select = [
+    "F",    # pyflakes: real errors (undefined names, unused imports)
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "I",    # import sorting
+    "UP",   # pyupgrade: modern syntax for the target version
+    "B",    # bugbear: likely bugs
+    "C4",   # comprehension rewrites
+    "SIM",  # simplifications
+    "RUF",  # ruff's own checks
+]
+
+ignore = [
+    # FastAPI's dependency injection is expressed as function-call defaults
+    # (Depends(...), File(...)), which B008 exists to flag everywhere else.
+    "B008",
+    # Ruff does not raise E402 for imports that follow a sys.path insertion,
+    # so it reads the `# noqa: E402` markers in alembic/env.py and
+    # scripts/migrate_legacy.py as unused. They document why those imports sit
+    # below the path setup and are what other tools would need; keep them.
+    "RUF100",
+    # `class X(str, Enum)` -> `StrEnum` is not a pure modernisation: it changes
+    # what `str(member)` returns, which these enums are serialised through.
+    "UP042",
+]
+
+[lint.per-file-ignores]
+# Tests deliberately import fixtures for their side effects and shadow names.
+"tests/*" = ["F811"]
+
+[format]
+quote-style = "double"
