@@ -7,6 +7,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.constants import MAX_RATING
 from app.models import PaperSource
 
 # ---- Projects ----------------------------------------------------------
@@ -114,7 +115,7 @@ class PaperUpdate(BaseModel):
 
 
 class RatingUpdate(BaseModel):
-    rating: float = Field(ge=0.5, le=5, multiple_of=0.5)
+    rating: float = Field(ge=0.5, le=MAX_RATING, multiple_of=0.5)
 
 
 class PaperCreate(BaseModel):
@@ -228,5 +229,10 @@ class DashboardStats(BaseModel):
     with_notes_count: int
     average_rating: float | None
     average_score: float
+    # The scale each average is read against. Rating has a fixed ceiling;
+    # score does not -- it is the sum of a paper's tag weights plus its
+    # rating -- so the best score in the project stands in for one.
+    max_rating: float
+    max_score: float
     tag_distribution: list[TagDistributionEntry]
     top_papers: list[PaperListItem]

@@ -7,15 +7,20 @@ import { usePapers } from '../hooks/usePapers'
 import { Card, EmptyState, Input, Label, SECTION_HEADING_GAP, SectionHeading, Spinner } from '../components/ui'
 import ThemeToggle from '../components/ThemeToggle'
 
-function StatTile({ label, value }: { label: string; value: string }) {
+function StatTile({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     // h-full + justify-between so the numbers line up across the row even
     // where a longer label wraps to two lines.
-    <Card className="flex h-full flex-col justify-between p-5">
+    <Card className="flex h-full flex-col justify-between p-5" title={hint}>
       <Label>{label}</Label>
       <p className="mt-1.5 font-serif text-2xl text-text">{value}</p>
     </Card>
   )
+}
+
+/** Drops a trailing ".0" so a scale reads "/5" rather than "/5.0". */
+function trim(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1)
 }
 
 function truncate(text: string, max: number): string {
@@ -88,9 +93,25 @@ export default function DashboardPage() {
               <StatTile label="With notes" value={`${stats.with_notes_count}/${stats.total_papers}`} />
               <StatTile
                 label="Average rating"
-                value={stats.average_rating !== null ? stats.average_rating.toFixed(1) : '—'}
+                value={
+                  stats.average_rating !== null
+                    ? `${stats.average_rating.toFixed(1)}/${trim(stats.max_rating)}`
+                    : '—'
+                }
               />
-              <StatTile label="Average score" value={stats.average_score.toFixed(1)} />
+              <StatTile
+                label="Average score"
+                value={
+                  stats.max_score > 0
+                    ? `${stats.average_score.toFixed(1)}/${trim(stats.max_score)}`
+                    : stats.average_score.toFixed(1)
+                }
+                hint={
+                  stats.max_score > 0
+                    ? 'Out of the highest score in this review. A paper scores the weights of its tags plus its rating.'
+                    : undefined
+                }
+              />
             </div>
 
             <Card className="p-5">

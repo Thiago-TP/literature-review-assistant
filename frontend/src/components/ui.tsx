@@ -48,8 +48,21 @@ export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   )
 }
 
-export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-lg border border-border bg-surface ${className}`}>{children}</div>
+export function Card({
+  children,
+  className = '',
+  title,
+}: {
+  children: ReactNode
+  className?: string
+  /** Native tooltip, for a card whose contents need a word of explanation. */
+  title?: string
+}) {
+  return (
+    <div className={`rounded-lg border border-border bg-surface ${className}`} title={title}>
+      {children}
+    </div>
+  )
 }
 
 export function Badge({ children, tone = 'default' }: { children: ReactNode; tone?: 'default' | 'accent' }) {

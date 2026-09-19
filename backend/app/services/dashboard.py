@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from sqlmodel import Session, select
 
+from app.constants import MAX_RATING
 from app.models import Project, TagField, TagOption
 from app.schemas import DashboardStats, TagDistributionEntry
 from app.services.paper_repo import option_id_to_field_id, paper_score, paper_to_list_item
@@ -86,6 +87,8 @@ def compute_dashboard_stats(session: Session, project_id: int) -> DashboardStats
         with_notes_count=with_notes_count,
         average_rating=(sum(ratings) / len(ratings)) if ratings else None,
         average_score=(sum(scores) / len(scores)) if scores else 0.0,
+        max_rating=MAX_RATING,
+        max_score=max(scores) if scores else 0.0,
         tag_distribution=tag_distribution,
         top_papers=top_papers,
     )

@@ -129,6 +129,8 @@ export interface DashboardStats {
   with_notes_count: number
   average_rating: number | null
   average_score: number
+  max_rating: number
+  max_score: number
   tag_distribution: TagDistributionEntry[]
   top_papers: PaperListItem[]
 }

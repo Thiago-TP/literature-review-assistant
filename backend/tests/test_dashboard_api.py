@@ -113,3 +113,36 @@ def test_dashboard_with_notes_count(client, project):
 
     body = client.get(f"/api/projects/{project['id']}/dashboard").json()
     assert body["with_notes_count"] == 1
+
+
+def test_dashboard_reports_the_scales_the_averages_are_read_against(client, project):
+    fields = client.get(f"/api/projects/{project['id']}/fields").json()
+    adherence = next(f for f in fields if f["name"] == "Adherence")
+    sufficient = next(o for o in adherence["options"] if o["value"] == "Sufficient")
+    client.patch(
+        f"/api/projects/{project['id']}/fields/{adherence['id']}/options/{sufficient['id']}",
+        json={"weight": 2},
+    )
+
+    # An empty project has no best paper to compare against.
+    empty = client.get(f"/api/projects/{project['id']}/dashboard").json()
+    assert empty["max_rating"] == 5
+    assert empty["max_score"] == 0
+
+    low = client.post(f"/api/projects/{project['id']}/papers", json={"title": "Low"}).json()[
+        "paper"
+    ]
+    high = client.post(f"/api/projects/{project['id']}/papers", json={"title": "High"}).json()[
+        "paper"
+    ]
+    client.put(f"/api/projects/{project['id']}/papers/{low['id']}/rating", json={"rating": 1})
+    client.put(f"/api/projects/{project['id']}/papers/{high['id']}/rating", json={"rating": 4})
+    client.post(
+        f"/api/projects/{project['id']}/papers/{high['id']}/tags/{sufficient['id']}",
+    )
+
+    body = client.get(f"/api/projects/{project['id']}/dashboard").json()
+    assert body["max_rating"] == 5
+    # High: rating 4 + a tag weighted 2. Low: rating 1, no tags.
+    assert body["max_score"] == 6
+    assert body["average_score"] == 3.5
