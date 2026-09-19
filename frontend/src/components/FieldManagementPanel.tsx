@@ -247,9 +247,17 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
 
               {expandedFieldId === field.id && (
                 <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
+                  {/* Built-in fields have no +, rename or delete controls, so
+                      only the weight half of this applies to them -- and that
+                      half does, since their tags can still be re-weighted. */}
                   <p className="text-xs text-text-muted">
-                    Use the + on each tag to add a subtopic (and inside it, a sub-subtopic, and so on). The
-                    number next to each tag is how much it contributes to the paper score (0 to{' '}
+                    {!field.is_protected && (
+                      <>
+                        Use the + on each tag to add a subtopic (and inside it, a sub-subtopic, and so
+                        on).{' '}
+                      </>
+                    )}
+                    The number next to each tag is how much it contributes to the paper score (0 to{' '}
                     {MAX_TAG_WEIGHT}, in steps of 0.5).
                   </p>
                   <div className="flex flex-col gap-1.5">
