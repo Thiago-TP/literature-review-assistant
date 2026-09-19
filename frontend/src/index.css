@@ -7,24 +7,24 @@
  * like every other colour, instead of being sampled once in JavaScript.
  */
 :root {
-  --color-bg: #f2efe6;
-  --color-surface: #f8f6ef;
-  --color-surface-muted: #eae5d6;
-  --color-border: #d9d2bd;
-  --color-text: #1c1b17;
-  --color-text-muted: #6b6a5d;
-  --color-accent: #1d3557;
-  --color-accent-hover: #142840;
-  --color-accent-fg: #f5f3ec;
-  --color-danger: #a8391f;
-  --color-danger-fg: #f5f3ec;
-  --color-success: #3f6b4a;
-  --color-success-fg: #f5f3ec;
-  --color-progress-1: #cde2fb;
-  --color-progress-2: #9ec5f4;
-  --color-progress-3: #6da7ec;
-  --color-progress-4: #3987e5;
-  --color-progress-5: #1c5cab;
+  --color-bg: #ebe7d9;
+  --color-surface: #faf8f2;
+  --color-surface-muted: #e4ddc8;
+  --color-border: #b8ae91;
+  --color-text: #191813;
+  --color-text-muted: #5b5a4d;
+  --color-accent: #17304f;
+  --color-accent-hover: #0f2237;
+  --color-accent-fg: #faf8f2;
+  --color-danger: #8f2e16;
+  --color-danger-fg: #faf8f2;
+  --color-success: #345c3e;
+  --color-success-fg: #faf8f2;
+  --color-progress-1: #84b2ef;
+  --color-progress-2: #5c93e0;
+  --color-progress-3: #3b74c8;
+  --color-progress-4: #27569e;
+  --color-progress-5: #173c73;
 }
 
 /*
