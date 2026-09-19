@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react'
 import type { TagField, TagOption } from '../types'
 import { useFieldMutations } from '../hooks/useTagFields'
-import { Button, Card, Input } from './ui'
+import { Button, Card, Input, SectionHeading } from './ui'
 
 const MAX_TAG_WEIGHT = 5
 
@@ -154,17 +154,17 @@ export default function FieldManagementPanel({ projectId, fields }: { projectId:
   }
 
   return (
-    <Card className="p-4">
+    <Card className="p-5">
       <button
         className="flex w-full items-center justify-between text-left"
         onClick={() => setOpen((o) => !o)}
       >
-        <span className="tracked-label text-xs font-semibold text-text">Manage fields and tags</span>
+        <SectionHeading as="p">Manage fields and tags</SectionHeading>
         {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
       </button>
 
       {open && (
-        <div className="mt-4 flex flex-col gap-4">
+        <div className="mt-3 flex flex-col gap-4">
           <form
             className="flex gap-2"
             onSubmit={(e) => {

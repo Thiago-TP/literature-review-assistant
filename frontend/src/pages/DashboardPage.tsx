@@ -4,12 +4,14 @@ import { ArrowLeft, Search, Star } from 'lucide-react'
 import { useProject, useSetLastViewed } from '../hooks/useProjects'
 import { useDashboard } from '../hooks/useDashboard'
 import { usePapers } from '../hooks/usePapers'
-import { Card, EmptyState, Input, Label, Spinner } from '../components/ui'
+import { Card, EmptyState, Input, Label, SECTION_HEADING_GAP, SectionHeading, Spinner } from '../components/ui'
 import ThemeToggle from '../components/ThemeToggle'
 
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
-    <Card className="p-4">
+    // h-full + justify-between so the numbers line up across the row even
+    // where a longer label wraps to two lines.
+    <Card className="flex h-full flex-col justify-between p-5">
       <Label>{label}</Label>
       <p className="mt-1.5 font-serif text-2xl text-text">{value}</p>
     </Card>
@@ -92,11 +94,13 @@ export default function DashboardPage() {
             </div>
 
             <Card className="p-5">
-              <Label>Tag distribution</Label>
+              <SectionHeading as="h2" className={SECTION_HEADING_GAP}>
+                Tag distribution
+              </SectionHeading>
               {stats.tag_distribution.length === 0 ? (
-                <p className="mt-3 text-sm text-text-muted">No tags assigned yet.</p>
+                <p className="text-sm text-text-muted">No tags assigned yet.</p>
               ) : (
-                <div className="mt-4 flex flex-col gap-2.5">
+                <div className="flex flex-col gap-2.5">
                   {stats.tag_distribution.map((entry) => (
                     <div key={entry.option_id} className="flex items-center gap-3">
                       <div className="w-56 shrink-0 truncate text-xs text-text-muted" title={entry.option_path}>
@@ -124,8 +128,10 @@ export default function DashboardPage() {
             </Card>
 
             <Card className="p-5">
-              <Label>Top papers by score</Label>
-              <div className="mt-3 flex flex-col divide-y divide-border">
+              <SectionHeading as="h2" className={SECTION_HEADING_GAP}>
+                Top papers by score
+              </SectionHeading>
+              <div className="flex flex-col divide-y divide-border">
                 {stats.top_papers.map((p, i) => (
                   <button
                     key={p.id}
@@ -146,8 +152,8 @@ export default function DashboardPage() {
             </Card>
 
             <Card className="p-5">
-              <div className="flex items-center justify-between gap-3">
-                <Label>All papers</Label>
+              <div className={`flex items-center justify-between gap-3 ${SECTION_HEADING_GAP}`}>
+                <SectionHeading as="h2">All papers</SectionHeading>
                 <div className="relative w-64">
                   <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" />
                   <Input
@@ -158,7 +164,7 @@ export default function DashboardPage() {
                   />
                 </div>
               </div>
-              <div className="mt-3 flex flex-col divide-y divide-border">
+              <div className="flex flex-col divide-y divide-border">
                 <div className="flex items-center gap-3 pb-2 text-xs text-text-muted">
                   <span className="flex-1">Title</span>
                   <span className="w-20 text-right">Tags</span>

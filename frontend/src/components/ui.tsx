@@ -80,9 +80,41 @@ export function EmptyState({ title, description, action }: { title: string; desc
   )
 }
 
-/** Small tracked-uppercase caption, used for section eyebrows and step labels. */
+/**
+ * Small tracked-uppercase caption: a stat tile's name, an inline label beside
+ * a control, a page eyebrow. For the title *of* a section use SectionHeading —
+ * the two were previously the same component, which is why identical-looking
+ * headings had different weights and spacing.
+ */
 export function Label({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <p className={`tracked-label text-xs text-text-muted ${className}`}>{children}</p>
+}
+
+/** Spacing between a section heading and its content, in one place. */
+export const SECTION_HEADING_GAP = 'mb-3'
+
+/**
+ * The title of a section inside a card. One weight, one colour, one gap below
+ * it, everywhere — pass `as` when the heading should also be a landmark for
+ * assistive tech rather than plain emphasis.
+ */
+export function SectionHeading({
+  children,
+  as: Tag = 'p',
+  className = '',
+}: {
+  children: ReactNode
+  // `span` is for headings already wrapped in a heading element or a button.
+  as?: 'p' | 'span' | 'h2' | 'h3'
+  className?: string
+}) {
+  return (
+    <Tag
+      className={`tracked-label flex items-center gap-1.5 text-xs font-semibold text-text ${className}`}
+    >
+      {children}
+    </Tag>
+  )
 }
 
 /** Numbered circular badge, echoing the pastel step markers in the reference design. */

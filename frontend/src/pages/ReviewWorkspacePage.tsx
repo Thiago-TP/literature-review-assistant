@@ -20,7 +20,16 @@ import FieldManagementPanel from '../components/FieldManagementPanel'
 import BulkImportModal from '../components/BulkImportModal'
 import AddPaperModal from '../components/AddPaperModal'
 import StarRating from '../components/StarRating'
-import { Button, Card, EmptyState, Label, Spinner, StepBadge } from '../components/ui'
+import {
+  Button,
+  Card,
+  EmptyState,
+  Label,
+  SECTION_HEADING_GAP,
+  SectionHeading,
+  Spinner,
+  StepBadge,
+} from '../components/ui'
 import ThemeToggle from '../components/ThemeToggle'
 
 export default function ReviewWorkspacePage() {
@@ -146,8 +155,10 @@ export default function ReviewWorkspacePage() {
             }
           />
           <Card className="w-full p-5 md:w-80">
-            <Label>How it works</Label>
-            <div className="mt-4 flex flex-col gap-4">
+            <SectionHeading as="h2" className={SECTION_HEADING_GAP}>
+              How it works
+            </SectionHeading>
+            <div className="flex flex-col gap-4">
               <div className="flex items-start gap-3">
                 <StepBadge n={1} tone="a" />
                 <div>
@@ -174,7 +185,7 @@ export default function ReviewWorkspacePage() {
         </div>
       ) : (
         <div className="flex flex-col gap-6">
-          <Card className="p-4">
+          <Card className="p-5">
             <ProgressOverview papers={papers ?? []} currentPaperId={currentPaperId} onSelect={goToPaperId} />
           </Card>
 

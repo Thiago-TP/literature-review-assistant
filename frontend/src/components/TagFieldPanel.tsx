@@ -1,5 +1,6 @@
 import { Lock, Pencil } from 'lucide-react'
 import type { PaperDetail, TagField, TagOption } from '../types'
+import { SECTION_HEADING_GAP, SectionHeading } from './ui'
 
 function OptionPill({
   option,
@@ -63,10 +64,14 @@ export default function TagFieldPanel({
         const hasNesting = field.options.some((o) => o.children.length > 0)
         return (
           <div key={field.id}>
-            <p className="tracked-label mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-text">
-              {field.is_protected ? <Lock size={13} className="text-text-muted" /> : <Pencil size={13} className="text-text-muted" />}
+            <SectionHeading className={SECTION_HEADING_GAP}>
+              {field.is_protected ? (
+                <Lock size={13} className="text-text-muted" />
+              ) : (
+                <Pencil size={13} className="text-text-muted" />
+              )}
               {field.name}
-            </p>
+            </SectionHeading>
             {field.options.length === 0 && (
               <p className="text-xs text-text-muted">No tags defined yet.</p>
             )}

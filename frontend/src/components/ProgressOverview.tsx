@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Check, ChevronDown, ChevronRight, Pencil, Star } from 'lucide-react'
 import type { PaperListItem } from '../types'
+import { SectionHeading } from './ui'
 
 const HEADING_ID = 'review-progress-heading'
 const GRID_ID = 'review-progress-grid'
@@ -173,7 +174,7 @@ export default function ProgressOverview({
         >
           <span className="flex items-center gap-1.5 text-text">
             {collapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
-            <span className="tracked-label text-xs font-semibold">Review progress</span>
+            <SectionHeading as="span">Review progress</SectionHeading>
           </span>
           <span className="text-xs font-normal text-text-muted">
             {fullyTagged} of {papers.length} fully tagged

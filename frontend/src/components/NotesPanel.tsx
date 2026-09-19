@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Check, Pencil } from 'lucide-react'
-import { Button, Label, Textarea } from './ui'
+import { Button, SECTION_HEADING_GAP, SectionHeading, Textarea } from './ui'
 
 export default function NotesPanel({
   paperId,
@@ -35,8 +35,8 @@ export default function NotesPanel({
 
   return (
     <div>
-      <div className="mb-1.5 flex items-center justify-between">
-        <Label>Your notes</Label>
+      <div className={`flex items-center justify-between ${SECTION_HEADING_GAP}`}>
+        <SectionHeading>Your notes</SectionHeading>
         {editing ? (
           <Button variant="secondary" onClick={handleSave}>
             <Check size={14} /> OK
