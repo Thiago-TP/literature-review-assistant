@@ -33,6 +33,18 @@ class Project(SQLModel, table=True):
         default=None, foreign_key="paper.id", ondelete="SET NULL"
     )
 
+    # The review plan: what the reader is trying to find out and how they
+    # decide. One nullable column per section rather than a JSON blob,
+    # because the set of sections is small, fixed and named by us -- it maps
+    # straight onto the DTOs and needs no defensive reader. (Contrast
+    # `Paper.highlights`, which is JSON precisely because it is unbounded
+    # user data of uniform shape.) Null and empty both mean "not written".
+    plan_purpose: str | None = Field(default=None)
+    plan_scope: str | None = Field(default=None)
+    plan_search: str | None = Field(default=None)
+    plan_weights: str | None = Field(default=None)
+    plan_other: str | None = Field(default=None)
+
     papers: list["Paper"] = Relationship(
         back_populates="project",
         sa_relationship_kwargs={
@@ -97,6 +109,11 @@ class TagField(SQLModel, table=True):
     name: str
     is_protected: bool = Field(default=False)
     position: int = Field(default=0)
+    # What this field asks of a paper, in the reader's own words. Kept on the
+    # record rather than in the review plan's prose so it survives a rename,
+    # goes away with the field, and can be shown beside the field while
+    # tagging.
+    description: str | None = Field(default=None)
 
     project: Project = Relationship(back_populates="fields_")
     options: list["TagOption"] = Relationship(
@@ -137,6 +154,9 @@ class TagOption(SQLModel, table=True):
     value: str
     position: int = Field(default=0)
     weight: float = Field(default=0)
+    # What this tag means in this review -- for Adherence, what makes a paper
+    # Insufficient, Partial or Sufficient. Same reasoning as TagField.description.
+    description: str | None = Field(default=None)
 
     field: TagField = Relationship(back_populates="options")
     parent: Optional["TagOption"] = Relationship(

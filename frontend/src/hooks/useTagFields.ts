@@ -11,6 +11,12 @@ export function useFieldMutations(projectId: number) {
     queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'fields'] })
     queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'papers'] })
     queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'dashboard'] })
+    // Fields and tags are half the review plan: describing one fills an item,
+    // and adding one adds an item to fill. Both move the counts the plan page
+    // and the project list badge are drawn from.
+    queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'plan'] })
+    // `exact` so this hits only the project list, not every key beneath it.
+    queryClient.invalidateQueries({ queryKey: ['projects'], exact: true })
   }
 
   const addField = useMutation({
@@ -20,6 +26,11 @@ export function useFieldMutations(projectId: number) {
   const renameField = useMutation({
     mutationFn: ({ fieldId, name }: { fieldId: number; name: string }) =>
       fieldsApi.rename(projectId, fieldId, name),
+    onSuccess: invalidate,
+  })
+  const describeField = useMutation({
+    mutationFn: ({ fieldId, description }: { fieldId: number; description: string }) =>
+      fieldsApi.describe(projectId, fieldId, description),
     onSuccess: invalidate,
   })
   const deleteField = useMutation({
@@ -46,12 +57,14 @@ export function useFieldMutations(projectId: number) {
       optionId,
       value,
       weight,
+      description,
     }: {
       fieldId: number
       optionId: number
       value?: string
       weight?: number
-    }) => fieldsApi.updateOption(projectId, fieldId, optionId, { value, weight }),
+      description?: string
+    }) => fieldsApi.updateOption(projectId, fieldId, optionId, { value, weight, description }),
     onSuccess: invalidate,
   })
   const deleteOption = useMutation({
@@ -60,5 +73,13 @@ export function useFieldMutations(projectId: number) {
     onSuccess: invalidate,
   })
 
-  return { addField, renameField, deleteField, addOption, updateOption, deleteOption }
+  return {
+    addField,
+    renameField,
+    describeField,
+    deleteField,
+    addOption,
+    updateOption,
+    deleteOption,
+  }
 }

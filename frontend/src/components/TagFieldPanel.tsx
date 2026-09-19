@@ -15,11 +15,15 @@ function OptionPill({
     <button
       type="button"
       onClick={onClick}
+      // The tag's meaning from the review plan, on hover. A native title
+      // rather than a popover: it costs no markup, works on a button that is
+      // already here, and matches how the progress tiles carry their meaning.
+      title={option.description ?? undefined}
       className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
         isSelected
           ? 'border-accent bg-accent text-accent-fg'
           : 'border-border bg-surface text-text-muted hover:border-accent hover:text-text'
-      }`}
+      } ${option.description ? 'underline decoration-dotted underline-offset-2' : ''}`}
     >
       {option.value}
     </button>
@@ -70,7 +74,7 @@ export default function TagFieldPanel({
               ) : (
                 <Pencil size={13} className="text-text-muted" />
               )}
-              {field.name}
+              <span title={field.description ?? undefined}>{field.name}</span>
             </SectionHeading>
             {field.options.length === 0 && (
               <p className="text-xs text-text-muted">No tags defined yet.</p>

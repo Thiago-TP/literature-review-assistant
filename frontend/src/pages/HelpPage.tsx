@@ -44,6 +44,7 @@ const CONTENTS = [
   ['getting-started', 'Getting started'],
   ['reviewing', 'Reviewing a paper'],
   ['fields-and-tags', 'Fields and tags'],
+  ['review-plan', 'The review plan'],
   ['rating-and-score', 'Rating and score'],
   ['overview', 'The progress overview'],
   ['dashboard', 'The dashboard'],
@@ -189,6 +190,38 @@ export default function HelpPage() {
             />
           </Section>
 
+          <Section id="review-plan" title="The review plan">
+            <p>
+              A review runs on judgements you have to make the same way every time: what you are
+              looking for, what makes a paper relevant, what a tag means, why a weight is what it
+              is. The <strong>Review plan</strong> is where you write those down, once, instead of
+              carrying them in your head from one session to the next.
+            </p>
+            <p>
+              Open it from the clipboard button beside any review on the home page, or from{' '}
+              <strong>Review plan</strong> in the top right while you are working. It holds five
+              written sections, a note on what each field asks, and what each level of{' '}
+              <strong>Adherence</strong> means. Nothing in it is required, and every box saves by
+              itself when you click away.
+            </p>
+            <p>
+              Anything you write about a tag comes back to you where you need it: hover a tag while
+              tagging a paper and its definition appears. Tags that have one are marked with a
+              dotted underline.
+            </p>
+            <p>
+              A review whose plan is unfinished is marked <strong>Plan incomplete</strong> on the
+              home page and with a dot beside the button. That is a nudge, never a block: the count
+              covers the five sections, a note on each field, and the three Adherence levels, so
+              describing individual tags is optional.
+            </p>
+            <Figure
+              name="plan"
+              alt="The review plan page, showing its progress count, contents, and the first written section"
+              caption="The plan page: what is written so far at the top, then a box per section. (Example data.)"
+            />
+          </Section>
+
           <Section id="rating-and-score" title="Rating and score">
             <div className="flex flex-col gap-4">
               <Term name="Rating is what you thought of it">
@@ -221,6 +254,12 @@ export default function HelpPage() {
               The score is worked out fresh every time it is shown, never stored. Change a tag's
               weight and every paper carrying that tag is re-scored at once. This means you can adjust the
               weights as your sense of the literature develops, without redoing any tagging.
+            </p>
+            <p>
+              <strong>Hover any score or rating to see what it is made of.</strong> On a paper, the
+              score spells out the sum tag by tag, so you can see which weight put it where it is.
+              In the dashboard's lists, where the tags are not to hand, it splits the total into
+              what came from tag weights and what came from your rating.
             </p>
           </Section>
 

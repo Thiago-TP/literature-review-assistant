@@ -28,6 +28,10 @@ class ProjectRead(BaseModel):
     updated_at: datetime
     last_viewed_paper_id: int | None
     paper_count: int
+    # How much of the review plan is written, so the project list can badge an
+    # unfinished one without a second request per review.
+    plan_filled: int
+    plan_total: int
 
 
 class LastViewedUpdate(BaseModel):
@@ -42,6 +46,7 @@ class TagOptionRead(BaseModel):
     value: str
     position: int
     weight: float
+    description: str | None = None
     children: list[TagOptionRead] = []
 
 
@@ -53,6 +58,7 @@ class TagFieldRead(BaseModel):
     name: str
     is_protected: bool
     position: int
+    description: str | None = None
     options: list[TagOptionRead]
 
 
@@ -61,7 +67,12 @@ class TagFieldCreate(BaseModel):
 
 
 class TagFieldUpdate(BaseModel):
-    name: str
+    """`name` is optional because a protected field can be described even
+    though it cannot be renamed, so a description-only PATCH has to be a
+    legal request."""
+
+    name: str | None = None
+    description: str | None = None
 
 
 class TagOptionCreate(BaseModel):
@@ -73,6 +84,36 @@ class TagOptionCreate(BaseModel):
 class TagOptionUpdate(BaseModel):
     value: str | None = None
     weight: float | None = Field(default=None, ge=0, le=5, multiple_of=0.5)
+    description: str | None = None
+
+
+# ---- Review plan ---------------------------------------------------------
+
+
+class ReviewPlanUpdate(BaseModel):
+    """Every section optional: the page saves one box at a time, as it loses
+    focus, and must not blank the others on the way through."""
+
+    purpose: str | None = None
+    scope: str | None = None
+    search: str | None = None
+    weights: str | None = None
+    other: str | None = None
+
+
+class ReviewPlanRead(BaseModel):
+    project_id: int
+    project_name: str
+    purpose: str | None
+    scope: str | None
+    search: str | None
+    weights: str | None
+    other: str | None
+    # The review's live fields and tags, carrying their descriptions, so the
+    # plan page renders its generated sections from this one response.
+    fields: list[TagFieldRead]
+    filled: int
+    total: int
 
 
 # ---- Papers --------------------------------------------------------------

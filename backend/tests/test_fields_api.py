@@ -264,3 +264,69 @@ def test_protected_field_option_can_be_reweighted_but_not_renamed(client, projec
         json={"value": "Something Else"},
     )
     assert rename_resp.status_code == 400
+
+
+def test_protected_field_can_be_described_but_not_renamed(client, project):
+    """Saying what Adherence asks of a paper is the point of the review plan,
+    so a description must get through the same guard that blocks a rename."""
+    fields = client.get(f"/api/projects/{project['id']}/fields").json()
+    protected = next(f for f in fields if f["is_protected"])
+
+    describe_resp = client.patch(
+        f"/api/projects/{project['id']}/fields/{protected['id']}",
+        json={"description": "Does the paper actually address the research question?"},
+    )
+    assert describe_resp.status_code == 200
+    assert describe_resp.json()["description"] == (
+        "Does the paper actually address the research question?"
+    )
+
+    rename_resp = client.patch(
+        f"/api/projects/{project['id']}/fields/{protected['id']}",
+        json={"name": "Relevance"},
+    )
+    assert rename_resp.status_code == 400
+
+
+def test_protected_option_can_be_described(client, project):
+    fields = client.get(f"/api/projects/{project['id']}/fields").json()
+    protected = next(f for f in fields if f["name"] == "Adherence")
+    option = next(o for o in protected["options"] if o["value"] == "Sufficient")
+
+    resp = client.patch(
+        f"/api/projects/{project['id']}/fields/{protected['id']}/options/{option['id']}",
+        json={"description": "Directly answers the question with its own data."},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["description"] == "Directly answers the question with its own data."
+
+
+def test_description_survives_a_reweight(client, project):
+    field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
+    option = client.post(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options",
+        json={"value": "Robotics"},
+    ).json()
+
+    client.patch(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options/{option['id']}",
+        json={"description": "Anything with an actuator in the loop."},
+    )
+    resp = client.patch(
+        f"/api/projects/{project['id']}/fields/{field['id']}/options/{option['id']}",
+        json={"weight": 2.5},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["weight"] == 2.5
+    assert resp.json()["description"] == "Anything with an actuator in the loop."
+
+
+def test_blank_description_clears_it(client, project):
+    field = client.post(f"/api/projects/{project['id']}/fields", json={"name": "Domain"}).json()
+    client.patch(
+        f"/api/projects/{project['id']}/fields/{field['id']}", json={"description": "something"}
+    )
+    resp = client.patch(
+        f"/api/projects/{project['id']}/fields/{field['id']}", json={"description": "   "}
+    )
+    assert resp.json()["description"] is None
