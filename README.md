@@ -17,6 +17,7 @@ This app helps you evaluate and categorize academic papers without juggling spre
 - **Add a single paper by DOI or title** — metadata (title, abstract, authors, year) is fetched automatically from [CrossRef](https://www.crossref.org/), no manual typing required.
 - **Real persistence** — everything is saved to a local SQLite database as you work. Close the app, come back later, and you're exactly where you left off. No re-uploading files, no manual export/import to avoid losing progress.
 - **Customizable tagging** — two built-in fields (`Adherence`, `Contribution Type`) plus any custom fields/tags you define.
+- **Highlighting** — mark passages in a title or abstract with a highlighter; the marks are saved with the paper.
 - **Progress overview** — an at-a-glance grid of every paper's review status, click to jump to any paper.
 
 ## Architecture

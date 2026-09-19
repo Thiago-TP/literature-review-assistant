@@ -7,6 +7,7 @@ from sqlmodel import Session, select
 
 from app.models import Paper, TagAssignment, TagField, TagOption
 from app.schemas import PaperDetail, PaperListItem
+from app.services import highlights as highlights_service
 from app.services.dedup import ExistingPaperKey, normalize_doi, normalize_title
 
 
@@ -60,6 +61,12 @@ def paper_to_detail(paper: Paper) -> PaperDetail:
         tags=tags,
         rating=paper.rating,
         score=paper_score(paper),
+        highlights=highlights_service.to_stored(
+            highlights_service.clamp_to_text(
+                highlights_service.from_stored(paper.highlights),
+                {"title": len(paper.title or ""), "abstract": len(paper.abstract or "")},
+            )
+        ),
     )
 
 

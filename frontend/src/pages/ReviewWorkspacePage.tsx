@@ -6,6 +6,7 @@ import {
   usePaper,
   usePapers,
   usePrefetchAdjacentPapers,
+  useHighlights,
   useRating,
   useToggleTag,
   useUpdatePaper,
@@ -44,6 +45,7 @@ export default function ReviewWorkspacePage() {
   const updatePaper = useUpdatePaper(projectId)
   const toggleTag = useToggleTag(projectId)
   const rating = useRating(projectId)
+  const highlights = useHighlights(projectId)
 
   const [currentPaperId, setCurrentPaperId] = useState<number | null>(null)
   const [showImportModal, setShowImportModal] = useState(false)
@@ -212,7 +214,16 @@ export default function ReviewWorkspacePage() {
                   </p>
                 </div>
                 <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-[2fr_1fr]">
-                  <PaperDisplay paper={paper} />
+                  <PaperDisplay
+                    paper={paper}
+                    onAddHighlight={(field, start, end) =>
+                      highlights.add.mutate({ paperId: paper.id, field, start, end })
+                    }
+                    onRemoveHighlight={(highlightId) =>
+                      highlights.remove.mutate({ paperId: paper.id, highlightId })
+                    }
+                    onClearHighlights={() => highlights.clear.mutate({ paperId: paper.id })}
+                  />
                   <TagFieldPanel
                     fields={fields}
                     paper={paper}

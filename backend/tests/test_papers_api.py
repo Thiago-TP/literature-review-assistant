@@ -328,3 +328,58 @@ def test_paper_list_item_includes_notes(client, project):
         if p["id"] == paper["id"]
     )
     assert list_item["notes"] == "Very relevant paper"
+
+
+def _paper_with_text(client, project):
+    return client.post(
+        f"/api/projects/{project['id']}/papers",
+        json={"title": "A Short Title", "abstract": "0123456789abcdefghij"},
+    ).json()["paper"]
+
+
+def test_highlights_round_trip_through_the_api(client, project):
+    paper = _paper_with_text(client, project)
+    base = f"/api/projects/{project['id']}/papers/{paper['id']}"
+    assert paper["highlights"] == []
+
+    added = client.post(f"{base}/highlights", json={"field": "abstract", "start": 2, "end": 6})
+    assert added.status_code == 200
+    highlights = added.json()["highlights"]
+    assert [(h["field"], h["start"], h["end"]) for h in highlights] == [("abstract", 2, 6)]
+
+    # It is on the paper when fetched fresh, not just in the response.
+    assert client.get(base).json()["highlights"] == highlights
+
+    removed = client.delete(f"{base}/highlights/{highlights[0]['id']}")
+    assert removed.status_code == 200
+    assert removed.json()["highlights"] == []
+
+
+def test_clearing_highlights_removes_all_of_them(client, project):
+    paper = _paper_with_text(client, project)
+    base = f"/api/projects/{project['id']}/papers/{paper['id']}"
+    client.post(f"{base}/highlights", json={"field": "abstract", "start": 0, "end": 4})
+    client.post(f"{base}/highlights", json={"field": "title", "start": 0, "end": 5})
+    assert len(client.get(base).json()["highlights"]) == 2
+
+    assert client.delete(f"{base}/highlights").status_code == 200
+    assert client.get(base).json()["highlights"] == []
+
+
+def test_an_invalid_highlight_is_rejected(client, project):
+    paper = _paper_with_text(client, project)
+    base = f"/api/projects/{project['id']}/papers/{paper['id']}"
+    # Entirely past the end of the abstract.
+    assert (
+        client.post(
+            f"{base}/highlights", json={"field": "abstract", "start": 90, "end": 99}
+        ).status_code
+        == 400
+    )
+    # Not a highlightable field.
+    assert (
+        client.post(f"{base}/highlights", json={"field": "notes", "start": 0, "end": 2}).status_code
+        == 422
+    )
+    # Never existed.
+    assert client.delete(f"{base}/highlights/nope").status_code == 404

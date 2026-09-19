@@ -71,6 +71,11 @@ class Paper(SQLModel, table=True):
     rating: float | None = Field(default=None)
     source: PaperSource = Field(default=PaperSource.MANUAL)
     raw_metadata: dict | list | None = Field(default=None, sa_column=Column(JSON))
+    # Highlighted spans over `title` and `abstract`, as
+    # [{id, field, start, end}] with character offsets into the plain
+    # text. JSON rather than a table: they are always read and written
+    # with their paper and never queried across papers.
+    highlights: list | None = Field(default=None, sa_column=Column("highlights", JSON))
     order_index: int = Field(default=0)
     created_at: datetime = Field(default_factory=_utcnow)
 

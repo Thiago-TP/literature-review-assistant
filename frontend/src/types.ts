@@ -39,6 +39,15 @@ export interface PaperListItem {
 
 export type PaperSource = 'xlsx_import' | 'crossref_doi' | 'crossref_title' | 'manual'
 
+export type HighlightField = 'title' | 'abstract'
+
+export interface Highlight {
+  id: string
+  field: HighlightField
+  start: number
+  end: number
+}
+
 export interface PaperDetail {
   id: number
   project_id: number
@@ -54,6 +63,7 @@ export interface PaperDetail {
   tags: Record<number, number[]>
   rating: number | null
   score: number
+  highlights: Highlight[]
 }
 
 export interface DuplicateInfo {

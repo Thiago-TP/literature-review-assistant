@@ -90,7 +90,13 @@ Two deliberate behaviours in `hooks/usePapers.ts` and `hooks/useProjects.ts`:
 
 Tag toggles assert one option at a time (`POST`/`DELETE` on a single option)
 rather than sending the whole list, so two quick clicks cannot clobber each
-other.
+other. Highlights work the same way — add one, remove one, clear all — rather
+than posting the whole set.
+
+`components/HighlightableText.tsx` maps a DOM selection back to character
+offsets into the field's plain text, since the rendered text is split into
+several nodes by the `<mark>` elements themselves. Those offsets are what the
+backend stores, so the two agree as long as neither side re-wraps the text.
 
 `hooks/useSessionHeartbeat.ts` is the exception to "components never call
 fetch": it is not server state, it is a liveness signal telling the launcher

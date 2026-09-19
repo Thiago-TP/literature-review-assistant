@@ -1,5 +1,11 @@
 import { api } from './client'
-import type { PaperCreateResult, PaperDetail, PaperListItem, PaperSource } from '../types'
+import type {
+  HighlightField,
+  PaperCreateResult,
+  PaperDetail,
+  PaperListItem,
+  PaperSource,
+} from '../types'
 
 export interface PaperCreatePayload {
   title: string
@@ -34,4 +40,22 @@ export const papersApi = {
     api.put<PaperDetail>(`/projects/${projectId}/papers/${paperId}/rating`, { rating }),
   clearRating: (projectId: number, paperId: number) =>
     api.delete<PaperDetail>(`/projects/${projectId}/papers/${paperId}/rating`),
+  addHighlight: (
+    projectId: number,
+    paperId: number,
+    field: HighlightField,
+    start: number,
+    end: number
+  ) =>
+    api.post<PaperDetail>(`/projects/${projectId}/papers/${paperId}/highlights`, {
+      field,
+      start,
+      end,
+    }),
+  removeHighlight: (projectId: number, paperId: number, highlightId: string) =>
+    api.delete<PaperDetail>(
+      `/projects/${projectId}/papers/${paperId}/highlights/${highlightId}`
+    ),
+  clearHighlights: (projectId: number, paperId: number) =>
+    api.delete<PaperDetail>(`/projects/${projectId}/papers/${paperId}/highlights`),
 }

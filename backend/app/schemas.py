@@ -92,6 +92,19 @@ class PaperListItem(BaseModel):
     score: float
 
 
+class HighlightRead(BaseModel):
+    id: str
+    field: Literal["title", "abstract"]
+    start: int
+    end: int
+
+
+class HighlightCreate(BaseModel):
+    field: Literal["title", "abstract"]
+    start: int = Field(ge=0)
+    end: int = Field(ge=1)
+
+
 class PaperDetail(BaseModel):
     id: int
     project_id: int
@@ -107,6 +120,7 @@ class PaperDetail(BaseModel):
     tags: dict[int, list[int]]
     rating: float | None
     score: float
+    highlights: list[HighlightRead]
 
 
 class PaperUpdate(BaseModel):

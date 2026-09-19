@@ -8,6 +8,7 @@ from app.deps import SessionDep, get_paper_or_404, get_project_or_404
 from app.models import TagAssignment, TagField
 from app.schemas import (
     DuplicateInfo,
+    HighlightCreate,
     PaperCreate,
     PaperCreateResult,
     PaperDetail,
@@ -16,6 +17,7 @@ from app.schemas import (
     RatingUpdate,
 )
 from app.services import dedup
+from app.services import highlights as highlights_service
 from app.services.paper_repo import (
     apply_tag_updates,
     build_paper,
@@ -122,6 +124,61 @@ def clear_rating(project_id: int, paper_id: int, session: SessionDep) -> PaperDe
     session.commit()
     session.refresh(paper)
     return paper_to_detail(paper)
+
+
+def _text_length(paper, field: str) -> int:
+    return len(getattr(paper, field) or "")
+
+
+def _save_highlights(session: SessionDep, paper, highlights) -> PaperDetail:
+    # Reassigning rather than mutating: SQLAlchemy does not track in-place
+    # edits to a JSON column, so an append alone would never be written.
+    paper.highlights = highlights_service.to_stored(highlights)
+    session.add(paper)
+    session.commit()
+    session.refresh(paper)
+    return paper_to_detail(paper)
+
+
+@router.post("/{paper_id}/highlights", response_model=PaperDetail)
+def add_highlight(
+    project_id: int,
+    paper_id: int,
+    payload: HighlightCreate,
+    session: SessionDep,
+) -> PaperDetail:
+    paper = get_paper_or_404(project_id, paper_id, session)
+    existing = highlights_service.from_stored(paper.highlights)
+    try:
+        updated = highlights_service.add(
+            existing,
+            payload.field,
+            payload.start,
+            payload.end,
+            _text_length(paper, payload.field),
+        )
+    except highlights_service.HighlightError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    return _save_highlights(session, paper, updated)
+
+
+@router.delete("/{paper_id}/highlights/{highlight_id}", response_model=PaperDetail)
+def remove_highlight(
+    project_id: int, paper_id: int, highlight_id: str, session: SessionDep
+) -> PaperDetail:
+    paper = get_paper_or_404(project_id, paper_id, session)
+    existing = highlights_service.from_stored(paper.highlights)
+    try:
+        updated = highlights_service.remove(existing, highlight_id)
+    except highlights_service.HighlightError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    return _save_highlights(session, paper, updated)
+
+
+@router.delete("/{paper_id}/highlights", response_model=PaperDetail)
+def clear_highlights(project_id: int, paper_id: int, session: SessionDep) -> PaperDetail:
+    paper = get_paper_or_404(project_id, paper_id, session)
+    return _save_highlights(session, paper, [])
 
 
 @router.delete("/{paper_id}", status_code=204)

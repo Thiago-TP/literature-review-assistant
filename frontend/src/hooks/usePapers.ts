@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { papersApi, type PaperCreatePayload } from '../api/papers'
+import type { HighlightField } from '../types'
 import type { PaperListItem } from '../types'
 
 /**
@@ -94,6 +95,46 @@ export function useRating(projectId: number) {
         : papersApi.setRating(projectId, paperId, rating),
     onSuccess: (_data, variables) => invalidatePaperQueries(queryClient, projectId, variables.paperId),
   })
+}
+
+/**
+ * Adding, removing and clearing highlights. Each call states one change
+ * rather than posting the whole list, so two quick marks cannot overwrite
+ * each other -- the same reason tag toggles work per option.
+ */
+export function useHighlights(projectId: number) {
+  const queryClient = useQueryClient()
+  const invalidate = (_data: unknown, variables: { paperId: number }) =>
+    invalidatePaperQueries(queryClient, projectId, variables.paperId)
+
+  const add = useMutation({
+    mutationFn: ({
+      paperId,
+      field,
+      start,
+      end,
+    }: {
+      paperId: number
+      field: HighlightField
+      start: number
+      end: number
+    }) => papersApi.addHighlight(projectId, paperId, field, start, end),
+    onSuccess: invalidate,
+  })
+
+  const remove = useMutation({
+    mutationFn: ({ paperId, highlightId }: { paperId: number; highlightId: string }) =>
+      papersApi.removeHighlight(projectId, paperId, highlightId),
+    onSuccess: invalidate,
+  })
+
+  const clear = useMutation({
+    mutationFn: ({ paperId }: { paperId: number }) =>
+      papersApi.clearHighlights(projectId, paperId),
+    onSuccess: invalidate,
+  })
+
+  return { add, remove, clear }
 }
 
 export function useCreatePaper(projectId: number) {

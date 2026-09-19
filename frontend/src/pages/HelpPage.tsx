@@ -146,6 +146,14 @@ export default function HelpPage() {
               the left and right arrow keys, the <strong>Go to #</strong> box, or by clicking any
               tile in the progress overview.
             </p>
+            <p>
+              <strong>Highlighting.</strong> Press <strong>Highlight</strong> above the title to
+              turn the highlighter on, then select any part of the title or abstract to mark it.
+              Marks are saved with the paper and are still there when you come back to it. Click a
+              mark while the highlighter is on to remove it, or <strong>Clear all</strong> to
+              remove every mark on the paper. With the highlighter off, selecting text behaves
+              normally — so copying a sentence does not leave a mark behind.
+            </p>
           </Section>
 
           <Section id="fields-and-tags" title="Fields and tags">

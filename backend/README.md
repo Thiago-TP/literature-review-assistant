@@ -99,6 +99,12 @@ A few properties worth knowing before changing things:
 - A paper's **score** is the sum of the weights of its assigned tags plus its
   star rating, computed on read rather than stored, so changing a tag's weight
   reprices every paper immediately.
+- **Highlights** are a JSON column on `paper`, not a table: they are always
+  read and written with their paper and never queried across papers. Each is
+  `{id, field, start, end}` over the plain text of `title` or `abstract`.
+  Overlapping and touching spans in the same field are merged on write, and
+  spans are clamped to the current text on read, so an abstract edited shorter
+  cannot leave a highlight pointing past its end (`services/highlights.py`).
 
 ## API
 
@@ -111,6 +117,7 @@ project.
 | Papers | `GET|POST /projects/{id}/papers`, `GET|PATCH|DELETE /projects/{id}/papers/{paper_id}` |
 | Rating | `PUT|DELETE /projects/{id}/papers/{paper_id}/rating` |
 | Tagging | `POST|DELETE /projects/{id}/papers/{paper_id}/tags/{option_id}` |
+| Highlights | `POST /projects/{id}/papers/{paper_id}/highlights`, `DELETE .../highlights/{highlight_id}`, `DELETE .../highlights` |
 | Fields | `GET|POST /projects/{id}/fields`, `PATCH|DELETE /projects/{id}/fields/{field_id}` |
 | Tags | `POST /projects/{id}/fields/{field_id}/options`, `PATCH|DELETE .../options/{option_id}` |
 | Lookup | `POST /projects/{id}/papers/lookup/doi`, `.../lookup/title` |
