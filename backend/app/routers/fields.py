@@ -13,25 +13,13 @@ from app.schemas import (
     TagOptionRead,
     TagOptionUpdate,
 )
+from app.services import tag_repo
 
 router = APIRouter(prefix="/api/projects/{project_id}/fields", tags=["fields"])
 
-
-def _build_option_tree(
-    options: list[TagOption], parent_id: int | None = None
-) -> list[TagOptionRead]:
-    """Turn the flat list of a field's options (all depths) into a nested tree."""
-    children = sorted((o for o in options if o.parent_id == parent_id), key=lambda o: o.position)
-    return [
-        TagOptionRead(
-            id=o.id,
-            value=o.value,
-            position=o.position,
-            weight=o.weight,
-            children=_build_option_tree(options, o.id),
-        )
-        for o in children
-    ]
+# Shared with the review plan, which renders the same tree (services/tag_repo.py).
+_build_option_tree = tag_repo.build_option_tree
+_field_to_read = tag_repo.field_to_read
 
 
 def _collect_with_descendants(option: TagOption) -> list[int]:
@@ -40,16 +28,6 @@ def _collect_with_descendants(option: TagOption) -> list[int]:
     for child in option.children:
         ids.extend(_collect_with_descendants(child))
     return ids
-
-
-def _field_to_read(field: TagField) -> TagFieldRead:
-    return TagFieldRead(
-        id=field.id,
-        name=field.name,
-        is_protected=field.is_protected,
-        position=field.position,
-        options=_build_option_tree(field.options),
-    )
 
 
 @router.get("", response_model=list[TagFieldRead])
@@ -85,20 +63,33 @@ def create_field(project_id: int, payload: TagFieldCreate, session: SessionDep) 
 
 
 @router.patch("/{field_id}", response_model=TagFieldRead)
-def rename_field(
+def update_field(
     project_id: int, field_id: int, payload: TagFieldUpdate, session: SessionDep
 ) -> TagFieldRead:
+    """Rename and/or describe a field. Renaming is blocked for protected
+    fields (Adherence, Contribution Type), but describing them is not --
+    saying what Adherence asks of a paper is the whole point of the review
+    plan, and it is the built-in fields that most need saying."""
     field = get_field_or_404(project_id, field_id, session)
-    if field.is_protected:
-        raise HTTPException(status_code=400, detail="Protected fields cannot be renamed")
-    new_name = payload.name.strip()
-    if not new_name:
-        raise HTTPException(status_code=400, detail="Field name cannot be empty")
-    if session.exec(
-        select(TagField).where(TagField.project_id == project_id, TagField.name == new_name)
-    ).first():
-        raise HTTPException(status_code=400, detail=f"Field '{new_name}' already exists")
-    field.name = new_name
+
+    if payload.name is not None:
+        if field.is_protected:
+            raise HTTPException(status_code=400, detail="Protected fields cannot be renamed")
+        new_name = payload.name.strip()
+        if not new_name:
+            raise HTTPException(status_code=400, detail="Field name cannot be empty")
+        if session.exec(
+            select(TagField).where(TagField.project_id == project_id, TagField.name == new_name)
+        ).first():
+            raise HTTPException(status_code=400, detail=f"Field '{new_name}' already exists")
+        field.name = new_name
+
+    if payload.description is not None:
+        # Empty means "not written" everywhere else, so store it as such
+        # rather than as a blank string the progress count would have to
+        # special-case.
+        field.description = payload.description.strip() or None
+
     session.add(field)
     session.commit()
     session.refresh(field)
@@ -170,10 +161,10 @@ def update_option(
     payload: TagOptionUpdate,
     session: SessionDep,
 ) -> TagOptionRead:
-    """Rename and/or reweight a tag. Renaming is blocked for protected
-    fields (Adherence, Contribution Type) same as before, but reweighting
-    isn't -- assigning point values to the built-in options is expected,
-    just not renaming/deleting them."""
+    """Rename, reweight and/or describe a tag. Renaming is blocked for
+    protected fields (Adherence, Contribution Type) same as before, but
+    reweighting and describing aren't -- assigning point values and meanings
+    to the built-in options is expected, just not renaming/deleting them."""
     field = get_field_or_404(project_id, field_id, session)
     option = get_option_or_404(field_id, option_id, session)
 
@@ -201,6 +192,9 @@ def update_option(
     if payload.weight is not None:
         option.weight = payload.weight
 
+    if payload.description is not None:
+        option.description = payload.description.strip() or None
+
     session.add(option)
     session.commit()
     session.refresh(option)
@@ -209,6 +203,7 @@ def update_option(
         value=option.value,
         position=option.position,
         weight=option.weight,
+        description=option.description,
         children=_build_option_tree(option.field.options, option.id),
     )
 

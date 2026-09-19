@@ -1,4 +1,8 @@
 import { Star } from 'lucide-react'
+import { MAX_RATING } from '../constants'
+
+/** One slot per whole star on the scale: [1, 2, ... MAX_RATING]. */
+const SLOTS = Array.from({ length: MAX_RATING }, (_, i) => i + 1)
 
 /** One star, visually 0/half/fully filled, with two overlaid invisible
  * buttons so clicking the left half sets a .5 value and the right half
@@ -45,10 +49,13 @@ export default function StarRating({
   rating,
   onChange,
   size = 18,
+  title,
 }: {
   rating: number | null
   onChange: (rating: number | null) => void
   size?: number
+  /** Native tooltip explaining what the rating is, shown over the stars. */
+  title?: string
 }) {
   const value = rating ?? 0
 
@@ -57,8 +64,8 @@ export default function StarRating({
   }
 
   return (
-    <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((n) => (
+    <div className="flex items-center gap-0.5" title={title}>
+      {SLOTS.map((n) => (
         <StarSlot
           key={n}
           n={n}

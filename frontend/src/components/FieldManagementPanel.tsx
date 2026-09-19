@@ -4,8 +4,7 @@ import type { TagField, TagOption } from '../types'
 import { useFieldMutations } from '../hooks/useTagFields'
 import { usePersistentState } from '../hooks/usePersistentState'
 import { Button, Card, Input, SectionHeading } from './ui'
-
-const MAX_TAG_WEIGHT = 5
+import { MAX_TAG_WEIGHT } from '../constants'
 
 function extractErrorMessage(error: unknown): string {
   if (error && typeof error === 'object' && 'message' in error) {

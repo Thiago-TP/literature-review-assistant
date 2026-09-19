@@ -1,7 +1,8 @@
 import { type ReactNode } from 'react'
 import { Check, ChevronDown, ChevronRight, Pencil, Star } from 'lucide-react'
 import type { PaperListItem } from '../types'
-import { percentLabel } from '../format'
+import { percentLabel, trimScale } from '../format'
+import { MAX_RATING } from '../constants'
 import { usePersistentState } from '../hooks/usePersistentState'
 import { SectionHeading } from './ui'
 
@@ -157,8 +158,11 @@ export default function ProgressOverview({
         const summary = [
           paper.title,
           `${paper.filled_field_count}/${paper.total_field_count} fields filled`,
-          rated ? `rated ${paper.rating}/5` : null,
+          rated ? `rated ${paper.rating}/${trimScale(MAX_RATING)}` : null,
           hasNotes ? 'has notes' : null,
+          // The tile has no tags to name, so this is the plain total; the
+          // score beside the paper itself explains where it came from.
+          `score ${paper.score} (tag weights + rating)`,
         ]
           .filter(Boolean)
           .join('\n')

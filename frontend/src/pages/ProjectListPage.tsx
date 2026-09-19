@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { ClipboardList, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useCreateProject, useDeleteProject, useProjects, useRenameProject } from '../hooks/useProjects'
-import { Button, Card, EmptyState, Input, Label, Spinner } from '../components/ui'
+import { Badge, Button, Card, EmptyState, Input, Label, Spinner } from '../components/ui'
 import ThemeToggle from '../components/ThemeToggle'
 import HelpLink from '../components/HelpLink'
 import type { Project } from '../types'
@@ -37,16 +37,35 @@ function ProjectRow({ project, onOpen }: { project: Project; onOpen: () => void 
     )
   }
 
+  const planIncomplete = project.plan_filled < project.plan_total
+
   return (
     <Card className="flex items-center justify-between p-4">
+      {/* The whole left side is the button that opens the review, so every
+          other control has to be a sibling of it, not a child. */}
       <button className="flex-1 text-left" onClick={onOpen}>
         <p className="font-serif text-base text-text">{project.name}</p>
-        <p className="mt-0.5 text-sm text-text-muted">
-          {project.paper_count} {project.paper_count === 1 ? 'paper' : 'papers'} · updated{' '}
-          {new Date(project.updated_at).toLocaleDateString()}
+        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-muted">
+          <span>
+            {project.paper_count} {project.paper_count === 1 ? 'paper' : 'papers'} · updated{' '}
+            {new Date(project.updated_at).toLocaleDateString()}
+          </span>
+          {planIncomplete && <Badge tone="warning">Plan incomplete</Badge>}
         </p>
       </button>
       <div className="flex gap-1">
+        <Link
+          to={`/projects/${project.id}/plan`}
+          aria-label={`Review plan for ${project.name}`}
+          title={
+            planIncomplete
+              ? `Review plan — ${project.plan_filled} of ${project.plan_total} written`
+              : 'Review plan'
+          }
+          className="flex items-center rounded-md px-2.5 py-1.5 text-text-muted transition-colors hover:bg-surface-muted hover:text-text"
+        >
+          <ClipboardList size={16} />
+        </Link>
         <Button variant="ghost" aria-label="Rename review" onClick={() => setRenaming(true)}>
           <Pencil size={16} />
         </Button>

@@ -49,6 +49,8 @@ data lives in `services/` and is unit-tested directly:
 | `services/crossref.py` | CrossRef lookups by DOI and by title |
 | `services/paper_repo.py` | Building papers, scoring, ORM → response shapes |
 | `services/dashboard.py` | Aggregate statistics for one project |
+| `services/tag_repo.py` | Fields and tags, ORM → response shapes |
+| `services/review_plan.py` | The plan's sections and when one counts as written |
 
 Bulk import and single-paper add both go through `services/dedup.py`, so a paper
 cannot be added twice regardless of which path it came in through.
@@ -95,6 +97,14 @@ A few properties worth knowing before changing things:
 - A paper's **score** is the sum of the weights of its assigned tags plus its
   star rating, computed on read rather than stored, so changing a tag's weight
   reprices every paper immediately.
+- The **review plan** is five nullable `plan_*` text columns on `project`, plus a
+  `description` on `tagfield` and `tagoption`. Columns rather than JSON because
+  the set of sections is small, fixed and named by us, so it maps straight onto
+  the DTOs; and the per-field and per-tag notes sit on the records themselves so
+  they survive a rename, go away with the thing they describe, and can be shown
+  while tagging. A plan is "complete" when the five sections, every field and the
+  three Adherence tags are written; individual tag notes are deliberately not
+  counted, or a review with sixty tags could never finish (`services/review_plan.py`).
 - **Highlights** are a JSON column on `paper`, not a table: they are always
   read and written with their paper and never queried across papers. 
   Each is `{id, field, start, end}` over the plain text of `title` or `abstract`.
@@ -110,6 +120,7 @@ project.
 | | |
 | --- | --- |
 | Projects | `GET|POST /projects`, `GET|PATCH|DELETE /projects/{id}`, `PATCH /projects/{id}/last-viewed` |
+| Review plan | `GET|PATCH /projects/{id}/plan` |
 | Papers | `GET|POST /projects/{id}/papers`, `GET|PATCH|DELETE /projects/{id}/papers/{paper_id}` |
 | Rating | `PUT|DELETE /projects/{id}/papers/{paper_id}/rating` |
 | Tagging | `POST|DELETE /projects/{id}/papers/{paper_id}/tags/{option_id}` |
