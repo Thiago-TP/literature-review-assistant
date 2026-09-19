@@ -89,7 +89,7 @@ def classify(
 
     DOI match takes priority (near-zero false-positive rate) over title match
     (rare but real false positives, e.g. preprint vs. journal version with an
-    identical title) — both default to "skip" but the caller/UI can override.
+    identical title). Both default to "skip" but the caller/UI can override.
     """
     doi_norm = normalize_doi(doi)
     title_norm = normalize_title(title)

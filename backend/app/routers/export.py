@@ -1,4 +1,4 @@
-"""Secondary/optional export for backup or sharing — NOT the persistence
+"""Secondary/optional export for backup or sharing, NOT the persistence
 mechanism (that's the SQLite database, written to on every mutation)."""
 
 from __future__ import annotations

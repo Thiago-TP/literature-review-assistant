@@ -1,17 +1,17 @@
 @echo off
-rem Convenience wrapper for Windows, so run.py can be started by double-click
-rem as well as from a terminal. The start-up logic itself lives in run.py.
+rem Convenience wrapper for Windows, so main.py can be started by double-click
+rem as well as from a terminal. The start-up logic itself lives in main.py.
 setlocal
 
 where py >nul 2>&1
 if %errorlevel%==0 (
-  py -3 "%~dp0run.py" %*
+  py -3 "%~dp0main.py" %*
   goto :done
 )
 
 where python >nul 2>&1
 if %errorlevel%==0 (
-  python "%~dp0run.py" %*
+  python "%~dp0main.py" %*
   goto :done
 )
 

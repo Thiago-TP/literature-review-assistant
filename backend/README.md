@@ -1,12 +1,11 @@
 # Backend
 
-FastAPI + SQLModel over a local SQLite file. It owns everything the app
-persists: projects, papers, tag fields and their nested options, ratings, notes,
-and the derived numbers the dashboard shows.
+FastAPI + SQLModel over a local SQLite file. 
+It owns everything the app persists: 
+projects, papers, tag fields and their nested options, ratings, notes, highlights, and the derived numbers the dashboard shows.
 
-It is a plain HTTP API with no authentication — it is meant to be reached from
-`localhost` by the one person using the app, and CORS is limited to the Vite dev
-server by default.
+It is a plain HTTP API with no authentication meant to be reached from
+`localhost` by the one person using the app, and CORS is limited to the Vite dev server by default.
 
 ## Running it
 
@@ -19,8 +18,7 @@ uv run uvicorn app.main:app --reload --port 8000
 Interactive docs are at `http://localhost:8000/docs`, generated from the route
 signatures, and are the most reliable reference for request and response shapes.
 
-To start the backend together with the frontend, use `python run.py` from the
-repository root instead.
+To start the backend together with the frontend, use `python main.py` from the repository root instead.
 
 ## Layout
 
@@ -30,7 +28,7 @@ app/
   config.py        settings, all overridable by environment variable
   db.py            engine, session dependency, foreign-key pragma
   deps.py          shared FastAPI dependencies (session, 404 helpers)
-  models.py        SQLModel tables — the source of truth for the schema
+  models.py        SQLModel tables, the source of truth for the schema
   schemas.py       request/response models
   constants.py     the tag fields every new project starts with
   routers/         one module per resource, all mounted under /api
@@ -82,26 +80,24 @@ Project ──< Paper ──< TagAssignment >── TagOption
 ```
 
 Assignments reference tag options **by id**, so renaming a field or a tag never
-orphans existing work — the flaw in the old Streamlit version, which keyed
-progress by field name.
+orphans existing work, which was the flaw in the old Streamlit version, when progress was keyed by field name.
 
 A few properties worth knowing before changing things:
 
 - `TagOption.parent_id` nests tags to arbitrary depth, but `field_id` is set on
   every node regardless of depth, so "which fields does this paper have tags in"
   is one query rather than a tree walk.
-- `doi_normalized` and `title_normalized` are stored alongside the originals and
-  indexed; a partial unique index makes a duplicate DOI within a project
+- `doi_normalized` and `title_normalized` are stored alongside the originals and indexed; 
+  a partial unique index makes a duplicate DOI within a project
   impossible at the database level, not just in application code.
-- Deletes cascade (project → papers → assignments; field → options →
-  assignments), and `Project.last_viewed_paper_id` is `SET NULL` so deleting the
-  paper you were last on doesn't wedge the project.
+- Deletes cascade (project → papers → assignments; field → options → assignments), 
+  and `Project.last_viewed_paper_id` is `SET NULL` so deleting the paper you were last on doesn't wedge the project.
 - A paper's **score** is the sum of the weights of its assigned tags plus its
   star rating, computed on read rather than stored, so changing a tag's weight
   reprices every paper immediately.
 - **Highlights** are a JSON column on `paper`, not a table: they are always
-  read and written with their paper and never queried across papers. Each is
-  `{id, field, start, end}` over the plain text of `title` or `abstract`.
+  read and written with their paper and never queried across papers. 
+  Each is `{id, field, start, end}` over the plain text of `title` or `abstract`.
   Overlapping and touching spans in the same field are merged on write, and
   spans are clamped to the current text on read, so an abstract edited shorter
   cannot leave a highlight pointing past its end (`services/highlights.py`).
@@ -129,23 +125,22 @@ project.
 Two shapes are worth calling out:
 
 **Tagging is per-option, not per-list.** Assigning is `POST .../tags/{option_id}`
-and unassigning is `DELETE`, rather than sending the full set of tags. Each
-request only asserts one option's state, so clicking a topic and a subtopic in
+and unassigning is `DELETE`, rather than sending the full set of tags. 
+Each request only asserts one option's state, so clicking a topic and a subtopic in
 quick succession cannot have one request clobber the other's result.
 
 **The session endpoints only matter under the launcher.** `run.py` sets
 `LRA_SESSION_WATCH=1` so that closing the app's window stops the servers; the
 page heartbeats while it is open and beacons `/session/closed` as it unloads.
 `app/session_watch.py` has the reasoning for the two signals. Without that
-variable — a hand-started uvicorn, or anything else pointed at the API —
+variable (a hand-started uvicorn, or anything else pointed at the API)
 `/session/status` reports `watching: false`, the client stays quiet, and
 nothing ever shuts itself down.
 
 **Import is preview-then-commit.** `preview` parses the upload and classifies
-every row against what the project already holds, writing nothing. The client
-sends the rows back to `commit` with a per-row add/skip decision. Duplicates are
-flagged and defaulted to skip, never dropped silently, and the reviewer can
-override any of them.
+every row against what the project already holds, writing nothing. 
+The client sends the rows back to `commit` with a per-row add/skip decision. 
+Duplicates are flagged and defaulted to skip, never dropped silently, and the reviewer can override any of them.
 
 ## Migrations
 
@@ -156,7 +151,7 @@ uv run alembic upgrade head
 
 Read the generated file before committing it. Autogenerate handles added columns
 and tables well and is unreliable about renames, constraints and data
-migrations — and this database holds work people cannot regenerate.
+migrations. PLus, this database holds work people cannot regenerate.
 
 ## Tests
 

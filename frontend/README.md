@@ -17,7 +17,7 @@ npm run dev      # http://localhost:5173
 
 The dev server proxies `/api` to `http://localhost:8000` (see `vite.config.ts`),
 so the app always talks to a same-origin URL and there is no CORS handling in
-the client. The backend has to be running separately — or use `python run.py`
+the client. The backend has to be running separately or use `python main.py`
 from the repository root to start both.
 
 The proxy target is overridable with `LRA_API_PORT`, which is how the launcher
@@ -31,7 +31,7 @@ tells Vite where the backend ended up when port 8000 was already taken.
 | `npm run preview` | Serve the built bundle |
 
 `npm run build` type-checks with `noUnusedLocals`/`noUnusedParameters` on, so it
-is the real check — `npm run lint` alone will not catch a type error.
+is the real check. Furthermore, `npm run lint` alone will not catch a type error.
 
 ## Layout
 
@@ -75,7 +75,7 @@ components use the hooks.
 React Query matches keys by prefix, so `invalidateQueries({ queryKey:
 ['projects', id] })` also invalidates every paper and the dashboard for that
 project. When you mean only the project itself, pass `exact: true`. Getting this
-wrong is not a visible bug — it just quietly refetches everything.
+wrong is not a visible bug, it just quietly refetches everything.
 
 Two deliberate behaviours in `hooks/usePapers.ts` and `hooks/useProjects.ts`:
 
@@ -90,7 +90,7 @@ Two deliberate behaviours in `hooks/usePapers.ts` and `hooks/useProjects.ts`:
 
 Tag toggles assert one option at a time (`POST`/`DELETE` on a single option)
 rather than sending the whole list, so two quick clicks cannot clobber each
-other. Highlights work the same way — add one, remove one, clear all — rather
+other. Highlights work the same way (add one, remove one, clear all) rather
 than posting the whole set.
 
 `components/HighlightableText.tsx` maps a DOM selection back to character
@@ -106,8 +106,8 @@ watching, which is the case under a plain `npm run dev`.
 
 ## Styling and theming
 
-Tailwind v4, configured entirely from `src/index.css` — there is no
-`tailwind.config.js`. The palette is CSS custom properties on `:root`,
+Tailwind v4, configured entirely from `src/index.css` (there is no
+`tailwind.config.js`). The palette is CSS custom properties on `:root`,
 redeclared for dark mode twice: once under `@media (prefers-color-scheme: dark)`
 guarded by `:root:not([data-theme='light'])`, and once under
 `:root[data-theme='dark']` so the explicit toggle wins over the system
@@ -129,7 +129,7 @@ loads, so there is no flash of the wrong theme on a hard refresh.
 The help page's screenshots exist in both themes and are swapped by CSS on the
 same `data-theme` attribute (`.figure-light` / `.figure-dark`), for the same
 reason: a figure chosen in JavaScript would stay on the old theme after a
-toggle. Regenerating them is a manual step — take the shots at the same framing
+toggle. Regenerating them is a manual step, so take the shots at the same framing
 and drop the pair into `public/help/`.
 
 Radius scale: `rounded-lg` for surfaces that hold content, `rounded-md` for

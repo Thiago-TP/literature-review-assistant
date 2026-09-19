@@ -1,5 +1,5 @@
 #!/bin/sh
-# Convenience wrapper for macOS/Linux. The launcher itself is run.py, which
+# Convenience wrapper for macOS/Linux. The launcher itself is main.py, which
 # is shared with Windows so there is only one copy of the start-up logic.
 set -e
 
@@ -14,4 +14,4 @@ else
   exit 1
 fi
 
-exec "$PYTHON" "$ROOT_DIR/run.py" "$@"
+exec "$PYTHON" "$ROOT_DIR/main.py" "$@"

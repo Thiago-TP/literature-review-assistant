@@ -6,7 +6,7 @@ clicked. Offsets are into the stored string, which is what the client renders,
 so the two agree as long as neither re-wraps the text.
 
 Overlapping or touching spans in the same field are merged, because two passes
-of a highlighter over adjoining text is one mark, not two — and without
+of a highlighter over adjoining text is one mark, not two, and without
 merging, removing "the highlight you clicked" would be ambiguous.
 """
 
