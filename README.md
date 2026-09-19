@@ -111,14 +111,25 @@ uv run scripts/migrate_legacy.py \
 
 This creates a new project pre-populated with those papers, tags, and notes. It requires the two files to have the same number of rows/entries (they're paired positionally, as the old export format did) — it will refuse to run otherwise rather than silently mis-attach tags.
 
-## Testing
+## Testing and linting
 
 ```bash
 cd backend
-uv run pytest
+uv run pytest        # tests
+uv run ruff check .  # lint
 ```
 
-Covers duplicate-detection logic, xlsx parsing (against a synthetic fixture in `backend/tests/fixtures/`), the CrossRef client (mocked HTTP), and the full API (project/paper/field CRUD, protected-field rules, cascade deletes).
+The tests cover duplicate-detection logic, xlsx parsing (against a synthetic fixture in `backend/tests/fixtures/`), the CrossRef client (mocked HTTP), and the full API (project/paper/field CRUD, protected-field rules, cascade deletes).
+
+Both run on every push and pull request via GitHub Actions ([`.github/workflows/`](.github/workflows/)). Ruff's configuration lives in [`backend/ruff.toml`](backend/ruff.toml).
+
+The frontend has its own checks:
+
+```bash
+cd frontend
+npm run lint   # oxlint
+npm run build  # tsc + vite build
+```
 
 ## Contributing
 
