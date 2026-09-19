@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Check, ChevronDown, ChevronRight, Pencil, Star } from 'lucide-react'
 import type { PaperListItem } from '../types'
+import { percentLabel } from '../format'
 import { SectionHeading } from './ui'
 
 const HEADING_ID = 'review-progress-heading'
@@ -119,22 +120,6 @@ function Legend() {
       </span>
     </div>
   )
-}
-
-/**
- * The share of papers fully tagged, as a whole percent, or null when there is
- * nothing to take a share of.
- *
- * Rounding is nudged at the ends so the percentage can never contradict the
- * count beside it: "199 of 200" must not read 100%, and "1 of 300" must not
- * read 0%.
- */
-function percentLabel(part: number, total: number): string | null {
-  if (total === 0) return null
-  const rounded = Math.round((part / total) * 100)
-  if (rounded === 100 && part < total) return '99%'
-  if (rounded === 0 && part > 0) return '1%'
-  return `${rounded}%`
 }
 
 export default function ProgressOverview({
