@@ -48,15 +48,20 @@ export default function PaperNav({
         Paper {currentIndex + 1} of {total}
       </span>
       <form onSubmit={handleGoTo} className="flex items-center gap-1.5">
-        <Input
-          type="number"
-          min={1}
-          max={total}
-          placeholder="Go to #"
-          value={goToValue}
-          onChange={(e) => setGoToValue(e.target.value)}
-          className="w-24"
-        />
+        {/* Width goes on the wrapper, not the Input: see the note in ui.tsx.
+            32 leaves room for the placeholder beside a number input's spinner
+            arrows, which eat into the field on top of the padding. */}
+        <div className="w-32">
+          <Input
+            type="number"
+            min={1}
+            max={total}
+            placeholder="Go to #"
+            aria-label="Go to paper number"
+            value={goToValue}
+            onChange={(e) => setGoToValue(e.target.value)}
+          />
+        </div>
         <Button type="submit" variant="secondary">
           Go
         </Button>

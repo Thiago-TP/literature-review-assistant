@@ -24,6 +24,12 @@ export function Button({
   )
 }
 
+/**
+ * Note on sizing: `w-full` is baked in, and Tailwind emits `.w-full` after the
+ * numeric width utilities, so a `w-*` passed through `className` loses to it no
+ * matter which order the classes appear in. Set the width on a wrapper element
+ * instead — `className` is still the right place for everything else.
+ */
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
