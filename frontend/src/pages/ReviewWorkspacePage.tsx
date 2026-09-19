@@ -36,20 +36,21 @@ export default function ReviewWorkspacePage() {
   const rating = useRating(projectId)
 
   const [currentPaperId, setCurrentPaperId] = useState<number | null>(null)
-  const [initialized, setInitialized] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
   const [showAddPaperModal, setShowAddPaperModal] = useState(false)
 
+  // Settle on a paper whenever there are papers but none open. Deliberately
+  // not a run-once-on-mount effect: a project that was empty when the
+  // workspace mounted -- a brand new review, which is every review right
+  // after it is created -- would otherwise stay on no paper once the import
+  // landed, leaving the reviewer to click a tile to start. It also recovers
+  // when the open paper is deleted out from under us.
   useEffect(() => {
-    if (initialized || !project || !papers) return
-    if (papers.length === 0) {
-      setInitialized(true)
-      return
-    }
-    const candidate = papers.find((p) => p.id === project.last_viewed_paper_id) ?? papers[0]
+    if (!project || !papers || papers.length === 0) return
+    if (currentPaperId !== null && papers.some((paper) => paper.id === currentPaperId)) return
+    const candidate = papers.find((paper) => paper.id === project.last_viewed_paper_id) ?? papers[0]
     setCurrentPaperId(candidate.id)
-    setInitialized(true)
-  }, [initialized, project, papers])
+  }, [project, papers, currentPaperId])
 
   const { data: paper, isPlaceholderData } = usePaper(projectId, currentPaperId)
   const currentIndex = papers?.findIndex((p) => p.id === currentPaperId) ?? -1
