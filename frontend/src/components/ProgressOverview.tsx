@@ -30,7 +30,16 @@ function readCollapsed(): boolean {
 const BADGE_HALO = 'drop-shadow(0 0 1.2px rgba(255, 255, 255, 0.95))'
 const STAR_FILL = '#f5c518'
 const STAR_STROKE = '#6b4e00'
-const PENCIL_STROKE = '#15161a'
+
+/**
+ * The notes pencil rides on a filled chip rather than a bare outline. A stroke
+ * alone had to be dark to read on the pale end of the ramp and light to read
+ * on the deep end, which no single colour satisfies; a light chip with a dark
+ * rim carries its own contrast onto every tile colour in both themes.
+ */
+const NOTE_CHIP_BG = '#f7f4ea'
+const NOTE_CHIP_RIM = 'rgba(0, 0, 0, 0.55)'
+const NOTE_CHIP_FG = '#15161a'
 
 /**
  * Sequential ramp encoding "how many fields are filled in" as magnitude. The
@@ -99,7 +108,12 @@ function Legend() {
         rated
       </span>
       <span className="flex items-center gap-1.5">
-        <Pencil size={11} strokeWidth={2} className="shrink-0" />
+        <span
+          className="flex h-3 w-3 shrink-0 items-center justify-center rounded-[3px]"
+          style={{ backgroundColor: NOTE_CHIP_BG, boxShadow: `0 0 0 0.5px ${NOTE_CHIP_RIM}` }}
+        >
+          <Pencil size={8} stroke={NOTE_CHIP_FG} strokeWidth={2.75} />
+        </span>
         has notes
       </span>
     </div>
@@ -188,17 +202,25 @@ export default function ProgressOverview({
               />
             )}
             {hasNotes && (
-              <Pencil
-                size={9}
-                stroke={PENCIL_STROKE}
-                strokeWidth={2.5}
-                style={{ filter: BADGE_HALO }}
-                className="absolute right-[1px] top-[1px]"
+              <span
+                className="absolute bottom-[1px] right-[1px] flex h-3 w-3 items-center justify-center rounded-[3px]"
+                style={{ backgroundColor: NOTE_CHIP_BG, boxShadow: `0 0 0 0.5px ${NOTE_CHIP_RIM}` }}
+                aria-hidden="true"
+              >
+                <Pencil size={8} stroke={NOTE_CHIP_FG} strokeWidth={2.75} />
+              </span>
+            )}
+            {/* Top-right rather than centred: the notes chip now occupies the
+                bottom-right, and a centred check overlapped it. Completion is
+                still carried mainly by the tile turning the success colour --
+                the check is the redundant, non-colour encoding of it. */}
+            {complete && (
+              <Check
+                size={11}
+                strokeWidth={3.25}
+                className="absolute right-[1px] top-[1px] text-[var(--color-success-fg)]"
                 aria-hidden="true"
               />
-            )}
-            {complete && (
-              <Check size={12} strokeWidth={3} className="absolute inset-0 m-auto text-[var(--color-success-fg)]" />
             )}
           </button>
         )
