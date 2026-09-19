@@ -96,7 +96,7 @@ export default function HelpPage() {
             <p>
               This app is a place to do that one paper at a time without losing your place. You
               import a list of papers once, then work through them assigning tags, giving a rating
-              and writing notes. Everything is saved as you go, to a database file on your own
+              and writing notes. Everything is saved as you go, to a database (db) file on your own
               machine.
             </p>
             <Figure
@@ -109,7 +109,7 @@ export default function HelpPage() {
           <Section id="getting-started" title="Getting started">
             <p>
               <strong>1. Create a review.</strong> On the home page, give it a name. Each review is
-              independent — its own papers, its own tags, its own progress — so you can keep
+              independent, i.e., it has its own papers, its own tags, its own progress, so you can keep
               several going at once.
             </p>
             <p>
@@ -117,19 +117,20 @@ export default function HelpPage() {
             </p>
             <ul className="ml-5 list-disc marker:text-text-muted">
               <li>
-                <strong>Import a spreadsheet</strong> — an <code>.xlsx</code> export from Scopus,
+                <strong>Import a spreadsheet</strong> <br />Upload/drag-and-drop an <code>.xlsx</code> export from Scopus,
                 Web of Science, or any sheet with <code>Title</code> and <code>Abstract</code>{' '}
                 columns. You get a preview before anything is saved, with likely duplicates flagged
                 and unchecked so re-importing or combining two databases will not double up your
                 list.
               </li>
               <li>
-                <strong>Add one paper</strong> — search by DOI or by title and the details are
+                <strong>Add one paper</strong> <br />Search by DOI or by title and the details are
                 fetched from CrossRef, or type them in yourself.
               </li>
             </ul>
             <p>
-              <strong>3. Work through them.</strong> The app opens on the first paper and remembers
+              <strong>3. Work through them.</strong> The very first time you open a database, the app opens on the first paper. 
+              Afterwards, it continues from where you left off and remembers
               where you stopped, so closing it and coming back tomorrow picks up where you were.
             </p>
           </Section>
@@ -138,7 +139,7 @@ export default function HelpPage() {
             <p>
               For each paper you read the abstract and do three things, in whatever order suits
               you: assign tags, give it a star rating, and write notes. All three save
-              automatically — there is no save button to forget and nothing to export to avoid
+              automatically. There is no save button to forget and nothing to export to avoid
               losing work.
             </p>
             <p>
@@ -152,7 +153,7 @@ export default function HelpPage() {
               Marks are saved with the paper and are still there when you come back to it. Click a
               mark while the highlighter is on to remove it, or <strong>Clear all</strong> to
               remove every mark on the paper. With the highlighter off, selecting text behaves
-              normally — so copying a sentence does not leave a mark behind.
+              normally so copying a sentence does not leave a mark behind.
             </p>
           </Section>
 
@@ -164,15 +165,15 @@ export default function HelpPage() {
             </p>
             <ul className="ml-5 list-disc marker:text-text-muted">
               <li>
-                <strong>Adherence</strong> — Insufficient, Partial, Sufficient
+                <strong>Adherence</strong> is one of: Insufficient, Partial, or Sufficient
               </li>
               <li>
-                <strong>Contribution Type</strong> — Improvement, New Method, Review, Other
+                <strong>Contribution Type</strong> is one of: Improvement, New Method, Review, or Other
               </li>
             </ul>
             <p>
-              These two cannot be renamed or deleted, because they are what "fully tagged" is
-              measured against. Everything else is yours: add your own fields in{' '}
+              These two cannot be renamed or deleted, but everything else is yours: 
+              add your own fields in{' '}
               <strong>Manage fields and tags</strong>, and give each one whatever tags your review
               needs.
             </p>
@@ -184,24 +185,24 @@ export default function HelpPage() {
             <Figure
               name="fields"
               alt="The manage fields and tags panel, with a field expanded to show its tags and their weight boxes"
-              caption="Each tag carries a weight — the number beside it — which is what feeds the paper's score."
+              caption="Each tag carries a weight (the number beside it) which is what feeds the paper's score."
             />
           </Section>
 
           <Section id="rating-and-score" title="Rating and score">
             <div className="flex flex-col gap-4">
-              <Term name="Rating — what you thought of it">
-                Your own judgement, half a star to five stars. It is subjective and entirely up to
+              <Term name="Rating is what you thought of it">
+                Your own judgement, zero stars to five stars. It is subjective and entirely up to
                 you; nothing in the app sets it. Click the left half of a star for a half step, the
                 right half for a whole one, and click the same value again to clear the rating.
               </Term>
-              <Term name="Weight — what a tag is worth">
+              <Term name="Weight is what a tag is worth">
                 Every tag has a weight from 0 to 5, in steps of half a point, set in{' '}
                 <strong>Manage fields and tags</strong>. New tags start at 0, which means "this tag
                 describes the paper but does not make it more valuable to me". Raise the weight of
                 the tags that mark a paper as worth your time.
               </Term>
-              <Term name="Score — the two combined">
+              <Term name="Score is the two combined">
                 A single number for how promising a paper is, so a long list can be sorted.
               </Term>
             </div>
@@ -218,7 +219,7 @@ export default function HelpPage() {
             </p>
             <p>
               The score is worked out fresh every time it is shown, never stored. Change a tag's
-              weight and every paper carrying that tag is re-scored at once — so you can adjust the
+              weight and every paper carrying that tag is re-scored at once. This means you can adjust the
               weights as your sense of the literature develops, without redoing any tagging.
             </p>
           </Section>
@@ -248,7 +249,7 @@ export default function HelpPage() {
                     />
                   ))}
                 </span>
-                Partly tagged — darker means more fields covered.
+                Partly tagged. Darker means more fields covered.
               </p>
               <p className="flex items-center gap-2">
                 <span
@@ -258,7 +259,7 @@ export default function HelpPage() {
                 >
                   <Check size={11} strokeWidth={3} className="text-[var(--color-success-fg)]" />
                 </span>
-                Every field has at least one tag — the paper is fully tagged.
+                Every field has at least one tag. The paper is fully tagged.
               </p>
               <p className="flex items-center gap-2">
                 <Star
@@ -303,9 +304,9 @@ export default function HelpPage() {
             </p>
             <p>
               The averages are shown against the scale they are read on. Rating is out of five.
-              Score has no fixed maximum — it grows with the weights you set — so it is shown
+              Score has no fixed maximum, it grows with the weights you set, so it is shown
               against the highest score in that review, which is the most useful comparison
-              available: how the typical paper compares with the best one you have found.
+              available: how the typical paper compares with the best one in the spreadsheet.
             </p>
             <Figure
               name="dashboard"
@@ -330,8 +331,9 @@ export default function HelpPage() {
           <Section id="shortcuts" title="Keyboard shortcuts">
             <ul className="ml-5 list-disc marker:text-text-muted">
               <li>
-                <strong>Left arrow</strong> / <strong>right arrow</strong> — previous and next
-                paper. Ignored while you are typing in a box, so they will not interrupt a note.
+                <strong>Left arrow</strong> / <strong>right arrow</strong> <br />
+                Navigate to the previous and next paper, respectively.
+                Ignored while you are typing in a box, so they will not interrupt a note.
               </li>
             </ul>
           </Section>
