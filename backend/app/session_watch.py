@@ -31,7 +31,7 @@ WATCHING = os.environ.get("LRA_SESSION_WATCH") == "1"
 # tabs; the beacon path is what makes an ordinary close feel immediate.
 HEARTBEAT_GRACE_SECONDS = float(os.environ.get("LRA_SESSION_GRACE", "90"))
 # Long enough for a reload to come back and cancel the stop.
-CLOSE_GRACE_SECONDS = float(os.environ.get("LRA_SESSION_CLOSE_GRACE", "5"))
+CLOSE_GRACE_SECONDS = float(os.environ.get("LRA_SESSION_CLOSE_GRACE", "2"))
 POLL_SECONDS = 1.0
 # If a graceful stop does not take effect, stop being polite.
 FORCE_EXIT_AFTER_SECONDS = 10.0
