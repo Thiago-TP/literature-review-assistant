@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { ArrowLeft, Check, Pencil, Star } from 'lucide-react'
 import ThemeToggle from '../components/ThemeToggle'
 import { Card } from '../components/ui'
@@ -53,11 +53,23 @@ const CONTENTS = [
 ] as const
 
 export default function HelpPage() {
+  // The page the "?" was clicked on, put there by HelpLink. Leaving help
+  // should drop the reader back where they were -- on the paper they were
+  // reviewing, not at the start of the app. A direct visit to /help carries
+  // no such state, so the project list is the fallback.
+  const { state } = useLocation()
+  const backTo = (state as { from?: string } | null)?.from ?? '/'
+
   return (
     <div>
       <nav className="flex items-center justify-between border-b border-border px-8 py-4">
         <div className="flex items-center gap-3">
-          <Link to="/" className="text-text-muted hover:text-text" aria-label="Back to reviews">
+          <Link
+            to={backTo}
+            replace
+            className="text-text-muted hover:text-text"
+            aria-label={backTo === '/' ? 'Back to reviews' : 'Back'}
+          >
             <ArrowLeft size={18} />
           </Link>
           <span className="font-serif text-lg text-text">Help</span>

@@ -38,8 +38,8 @@ DEFAULT_BACKEND_PORT = 8000
 DEFAULT_FRONTEND_PORT = 5173
 # How far past the default to look before giving up on a tidy port number.
 PORT_SEARCH_RANGE = 20
-# How long to wait for the dev server before opening a window at its URL.
-FRONTEND_READY_TIMEOUT_SECONDS = 40.0
+# How long to wait for the servers before opening a window at the app's URL.
+SERVERS_READY_TIMEOUT_SECONDS = 40.0
 
 SETUP_BACKEND = (
     "Backend not set up yet. From the repository root:\n"
@@ -122,23 +122,29 @@ def pick_port(preferred: int, taken: set[int]) -> int:
         return probe.getsockname()[1]
 
 
-def wait_for_frontend(url: str, processes: list[subprocess.Popen]) -> bool:
-    """Block until the dev server answers, or it becomes pointless to wait.
+def wait_for_servers(urls: list[str], processes: list[subprocess.Popen]) -> bool:
+    """Block until every URL answers, or it becomes pointless to wait.
 
-    Vite has to finish its first optimise pass before it serves anything, and
-    opening a browser at a URL that is not up yet shows an error page the user
-    then has to reload.
+    Both halves have to be up, not just the one whose URL the window opens at.
+    Vite is ready in a fraction of a second while uvicorn still has its imports
+    and the database to get through, so a browser sent to the app the moment
+    the dev server answers lands on a page whose first API calls are proxied to
+    nothing -- including the one that arranges for these servers to stop when
+    that window is closed.
     """
-    deadline = time.monotonic() + FRONTEND_READY_TIMEOUT_SECONDS
-    while time.monotonic() < deadline:
+    deadline = time.monotonic() + SERVERS_READY_TIMEOUT_SECONDS
+    pending = list(urls)
+    while pending:
+        if time.monotonic() >= deadline:
+            return False
         if any(process.poll() is not None for process in processes):
             return False
         try:
-            with urllib.request.urlopen(url, timeout=1):
-                return True
+            with urllib.request.urlopen(pending[0], timeout=1):
+                pending.pop(0)
         except (urllib.error.URLError, OSError):
             time.sleep(0.3)
-    return False
+    return True
 
 
 class _ChildExited(Exception):
@@ -282,11 +288,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.no_browser:
         print("Press Ctrl+C to stop both.", flush=True)
     else:
-        if wait_for_frontend(frontend_url, processes):
+        backend_health = f"http://127.0.0.1:{backend_port}/api/health"
+        if wait_for_servers([backend_health, frontend_url], processes):
             webbrowser.open(frontend_url)
         else:
             print(
-                "Frontend did not come up in time; open the URL above yourself.",
+                "Servers did not both come up in time; open the URL above yourself.",
                 flush=True,
             )
         print("Close the window, or press Ctrl+C here, to stop both.", flush=True)
