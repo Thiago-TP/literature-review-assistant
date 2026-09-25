@@ -29,7 +29,7 @@ from app.constants import REQUIRED_FIELDS  # noqa: E402
 from app.db import engine, init_db  # noqa: E402
 from app.models import Project, TagAssignment, TagField, TagOption  # noqa: E402
 from app.services.paper_repo import build_paper  # noqa: E402
-from app.services.xlsx_import import parse_xlsx  # noqa: E402
+from app.services.spreadsheet_import import parse_spreadsheet  # noqa: E402
 
 
 def main() -> None:
@@ -43,7 +43,7 @@ def main() -> None:
     parser.add_argument("--project-name", required=True, help="Name for the new project to create")
     args = parser.parse_args()
 
-    rows = parse_xlsx(args.xlsx.read_bytes())
+    rows = parse_spreadsheet(args.xlsx.read_bytes())
     progress: list[dict] = json.loads(args.json.read_text())
 
     if len(rows) != len(progress):
