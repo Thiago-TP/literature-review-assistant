@@ -43,7 +43,7 @@ cd frontend && npm run dev
 ```
 
 > [!TIP]
-> `examples/` has two sample `.xlsx` files if you need papers to work with.
+> `examples/` has sample `.xlsx` and `.csv` files if you need papers to work with.
 
 ## Before you open a pull request
 
@@ -69,7 +69,7 @@ Its settings live in [`backend/ruff.toml`](backend/ruff.toml).
 ```
 backend/app/
   routers/    one module per resource; all routes are under /api
-  services/   logic with no FastAPI in it (dedup, CrossRef, xlsx, scoring)
+  services/   logic with no FastAPI in it (dedup, CrossRef, spreadsheets, scoring)
   models.py   SQLModel tables, the source of truth for the schema
   schemas.py  request/response shapes
 frontend/src/

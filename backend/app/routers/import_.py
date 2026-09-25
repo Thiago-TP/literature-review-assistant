@@ -17,20 +17,20 @@ from app.schemas import (
 )
 from app.services import crossref, dedup
 from app.services.paper_repo import build_paper, existing_paper_keys, next_order_index
-from app.services.xlsx_import import XlsxImportError, parse_xlsx
+from app.services.spreadsheet_import import SpreadsheetImportError, parse_spreadsheet
 
 router = APIRouter(prefix="/api/projects/{project_id}", tags=["import"])
 
 
-@router.post("/import/xlsx/preview", response_model=ImportPreviewResponse)
-async def preview_xlsx_import(
+@router.post("/import/preview", response_model=ImportPreviewResponse)
+async def preview_import(
     project_id: int, session: SessionDep, file: UploadFile
 ) -> ImportPreviewResponse:
     get_project_or_404(project_id, session)
     file_bytes = await file.read()
     try:
-        parsed_rows = parse_xlsx(file_bytes)
-    except XlsxImportError as exc:
+        parsed_rows = parse_spreadsheet(file_bytes)
+    except SpreadsheetImportError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     existing = existing_paper_keys(session, project_id)
@@ -62,8 +62,8 @@ async def preview_xlsx_import(
     )
 
 
-@router.post("/import/xlsx/commit", response_model=ImportCommitResponse)
-def commit_xlsx_import(
+@router.post("/import/commit", response_model=ImportCommitResponse)
+def commit_import(
     project_id: int, payload: ImportCommitRequest, session: SessionDep
 ) -> ImportCommitResponse:
     get_project_or_404(project_id, session)

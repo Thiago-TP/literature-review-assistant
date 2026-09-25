@@ -29,7 +29,7 @@ literature_review_assistant/
 │   │   ├── main.py                # FastAPI app entrypoint
 │   │   ├── models.py              # DB schema
 │   │   ├── routers/               # API endpoints (projects, papers, fields, import, export)
-│   │   └── services/              # dedup logic, CrossRef client, xlsx parsing
+│   │   └── services/              # dedup logic, CrossRef client, .xlsx/.csv parsing
 │   ├── alembic/                   # DB migrations
 │   ├── scripts/migrate_legacy.py  # one-off importer for the old Streamlit app's exports
 │   ├── tests/                     # pytest suite
@@ -40,7 +40,7 @@ literature_review_assistant/
 │       ├── components/            # Progress overview, tag panel, import/add-paper modals, etc.
 │       ├── hooks/                 # React Query hooks wrapping the API
 │       └── api/                   # Typed API client
-├── examples/                      # Example .xlsx imports + a description of the format
+├── examples/                      # Example .xlsx/.csv imports + a description of the format
 ├── docs/screenshots/              # Images used by this README
 ├── main.py                        # Cross-platform launcher (backend + frontend together)
 └── run.sh, run.cmd                # Thin wrappers around run.py
@@ -102,7 +102,7 @@ cd frontend && npm run dev
 
 1. Create a review project (or open an existing one, they're listed on the home page and persist across restarts).
 2. Add papers:
-   - **Import a spreadsheet**: click "Import spreadsheet", choose an `.xlsx` file with `Title`/`Abstract` columns (see [`examples/`](examples/) for sample files and the full column list) (`DOI`, `Authors`, `Year`, `Source title` are picked up automatically when present, as in a Scopus export). 
+   - **Import a spreadsheet**: click "Import spreadsheet", choose an `.xlsx` or `.csv` file with `Title`/`Abstract` columns (see [`examples/`](examples/) for sample files and the full column list) (`DOI`, `Authors`, `Year`, `Source title` are picked up automatically when present, as in a Scopus export). 
    You'll see a preview flagging likely duplicates (by DOI or title) before anything is saved. 
    Uncheck any you don't want to add.
    - **Add one paper**: click "Add paper" and search by DOI or title (metadata comes from CrossRef automatically) or enter details manually.

@@ -24,7 +24,7 @@ export default function BulkImportModal({ projectId, onClose }: { projectId: num
     setError(null)
     setLoading(true)
     try {
-      const response = await importApi.previewXlsx(projectId, file)
+      const response = await importApi.preview(projectId, file)
       setPreview(response)
       setActions(Object.fromEntries(response.rows.map((r) => [r.row_index, r.default_action])))
     } catch (err) {
@@ -38,7 +38,7 @@ export default function BulkImportModal({ projectId, onClose }: { projectId: num
     if (!preview) return
     setCommitting(true)
     try {
-      const response = await importApi.commitXlsx(projectId, preview.rows, actions)
+      const response = await importApi.commit(projectId, preview.rows, actions)
       setResult({ added: response.added_count, skipped: response.skipped_count })
       queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'papers'] })
       queryClient.invalidateQueries({ queryKey: ['projects'] })
@@ -50,7 +50,7 @@ export default function BulkImportModal({ projectId, onClose }: { projectId: num
   }
 
   return (
-    <Modal title="Import spreadsheet (.xlsx)" onClose={onClose} wide>
+    <Modal title="Import spreadsheet (.xlsx or .csv)" onClose={onClose} wide>
       {!preview && !result && (
         <div>
           <button
@@ -59,14 +59,14 @@ export default function BulkImportModal({ projectId, onClose }: { projectId: num
           >
             <UploadCloud size={28} />
             <span className="text-sm">
-              {loading ? 'Processing...' : 'Click to choose an .xlsx file (Scopus, WoS, etc.)'}
+              {loading ? 'Processing...' : 'Click to choose an .xlsx or .csv file (Scopus, WoS, etc.)'}
             </span>
             {loading && <Spinner className="h-5 w-5" />}
           </button>
           <input
             ref={fileInputRef}
             type="file"
-            accept=".xlsx"
+            accept=".xlsx,.csv"
             className="hidden"
             onChange={handleFileChange}
           />
