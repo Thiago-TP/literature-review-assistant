@@ -51,6 +51,8 @@ cd frontend && npm run dev
 cd backend
 uv run ruff check .
 uv run ruff format .
+uv run ruff check --config ruff.toml ../scripts    # the utility scripts, same rules
+uv run ruff format --config ruff.toml ../scripts
 uv run pytest
 
 cd ../frontend
@@ -58,7 +60,7 @@ npm run lint     # oxlint
 npm run build    # tsc --build, then the production bundle
 ```
 
-All three backend commands run in CI on every push and pull request; see [`.github/workflows/`](.github/workflows/). 
+All the backend commands run in CI on every push and pull request; see [`.github/workflows/`](.github/workflows/). 
 Formatting is not a matter of taste here, run `ruff format` and commit what it produces. 
 Its settings live in [`backend/ruff.toml`](backend/ruff.toml).
 
@@ -130,6 +132,28 @@ Reviewers can read the diff, not the reasoning.
 
 For anything that changes what the app looks like, a before/after screenshot in the pull request saves a round trip. 
 If a change touches behaviour, say how you verified it.
+
+## Updating the documentation screenshots
+
+The images in the root README (`docs/screenshots/`) and on the help page
+(`frontend/public/help/`) are generated, not taken by hand. After a visible
+change, retake them from the repository root:
+
+```bash
+uv run scripts/take_screenshots.py                    # all of them, both themes, in place
+uv run scripts/take_screenshots.py --only plan        # just some: readme, workspace, overview, fields, dashboard, plan
+uv run scripts/take_screenshots.py --out /tmp/shots   # write elsewhere, to compare before overwriting
+```
+
+It runs both servers against a throwaway database filled with the example
+review in [`scripts/screenshot_data.py`](scripts/screenshot_data.py), then
+photographs the app in a headless browser, so nothing opens on screen and your
+own `app.db` is never touched. The README's picture, `workspace.png`, is the
+light and dark shots joined along a slanted cut (`SLICE_TOP`/`SLICE_BOTTOM` in
+the script move it). It needs the backend and frontend set up as
+above, plus Google Chrome or Edge (or Playwright's Chromium:
+`uv run --with playwright playwright install chromium`). To change what the
+pictures show, edit the example data, not the script.
 
 ## Reporting a bug
 
