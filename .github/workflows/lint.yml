@@ -38,3 +38,12 @@ jobs:
 
       - name: Ruff (format)
         run: uv run ruff format --check .
+
+      # The repository's utility scripts are held to the backend's rules. Ruff
+      # only finds a config in a file's own ancestors, and scripts/ has none,
+      # so without --config they would quietly get Ruff's defaults instead.
+      - name: Ruff (scripts, lint)
+        run: uv run ruff check --config ruff.toml --output-format=github ../scripts
+
+      - name: Ruff (scripts, format)
+        run: uv run ruff format --config ruff.toml --check ../scripts

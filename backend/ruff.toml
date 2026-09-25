@@ -2,7 +2,12 @@
 #   uv run ruff check .
 #   uv run ruff format .
 #
-# CI enforces both.
+# The utility scripts in ../scripts follow the same rules, but have to be
+# pointed at this file, since Ruff only looks for one in a file's ancestors:
+#   uv run ruff check --config ruff.toml ../scripts
+#   uv run ruff format --config ruff.toml ../scripts
+#
+# CI enforces all four.
 
 # 100 rather than a longer limit on purpose: the formatter collapses anything
 # that fits on one line, and at 120 that turned the hand-wrapped query and
