@@ -51,8 +51,8 @@ cd frontend && npm run dev
 cd backend
 uv run ruff check .
 uv run ruff format .
-uv run ruff check --config ruff.toml ../scripts    # the utility scripts, same rules
-uv run ruff format --config ruff.toml ../scripts
+uv run ruff check ../main.py ../scripts     # the launcher and utility scripts, same rules
+uv run ruff format ../main.py ../scripts
 uv run pytest
 
 cd ../frontend
@@ -62,7 +62,7 @@ npm run build    # tsc --build, then the production bundle
 
 All the backend commands run in CI on every push and pull request; see [`.github/workflows/`](.github/workflows/). 
 Formatting is not a matter of taste here, run `ruff format` and commit what it produces. 
-Its settings live in [`backend/ruff.toml`](backend/ruff.toml).
+Its settings live in [`backend/ruff.toml`](backend/ruff.toml), which the root [`ruff.toml`](ruff.toml) extends to the rest of the repository.
 
 ## Where things live
 
