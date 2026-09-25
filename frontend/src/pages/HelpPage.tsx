@@ -130,7 +130,7 @@ export default function HelpPage() {
             </p>
             <ul className="ml-5 list-disc marker:text-text-muted">
               <li>
-                <strong>Import a spreadsheet</strong> <br />Upload/drag-and-drop an <code>.xlsx</code> export from Scopus,
+                <strong>Import a spreadsheet</strong> <br />Upload/drag-and-drop an <code>.xlsx</code> or <code>.csv</code> export from Scopus,
                 Web of Science, or any sheet with <code>Title</code> and <code>Abstract</code>{' '}
                 columns. You get a preview before anything is saved, with likely duplicates flagged
                 and unchecked so re-importing or combining two databases will not double up your

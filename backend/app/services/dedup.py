@@ -1,6 +1,6 @@
 """Pure, unit-testable normalization and duplicate-classification logic.
 
-Used identically by bulk xlsx import and single-paper add (by DOI/title), so a
+Used identically by bulk spreadsheet import and single-paper add (by DOI/title), so a
 paper can never be added twice regardless of which path it came in through.
 """
 

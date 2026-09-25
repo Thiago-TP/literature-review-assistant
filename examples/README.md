@@ -1,10 +1,11 @@
 # Example import spreadsheets
 
-Two small `.xlsx` files you can import to see how the bulk import works before pointing the app at your own export.
+Small `.xlsx` and `.csv` files you can import to see how the bulk import works before pointing the app at your own export.
 
 | File | What it is |
 | --- | --- |
 | [`example-scopus-export.xlsx`](example-scopus-export.xlsx) | A five-row export, shaped like a Scopus download |
+| [`example-scopus-export.csv`](example-scopus-export.csv) | The same five rows as a Scopus **CSV** download |
 | [`example-second-source.xlsx`](example-second-source.xlsx) | A three-row export from a "second database", overlapping the first |
 
 The rows are fabricated. 
@@ -14,8 +15,8 @@ and the DOIs use the `10.0000/` placeholder prefix so nothing in them resolves.
 ## Try them
 
 1. Start the app and create a review.
-2. **Import spreadsheet** → `example-scopus-export.xlsx` → **Confirm import**.
-   All five papers are added.
+2. **Import spreadsheet** → `example-scopus-export.xlsx` (or the `.csv`, it
+   holds the same rows) → **Confirm import**. All five papers are added.
 3. **Import spreadsheet** again → `example-second-source.xlsx`. The preview now
    reports **1 new** and **2 possible duplicates**:
    - *Active learning reduces screening burden in evidence synthesis* and match
@@ -27,9 +28,12 @@ and the DOIs use the `10.0000/` placeholder prefix so nothing in them resolves.
    is written until you confirm, so you can tick a duplicate back on if the match
    is wrong.
 
+   Duplicates are found whichever format each file came in, so importing the
+   `.csv` after the `.xlsx` flags all five of its rows.
+
 ## The format
 
-The first row is the header. Column names are matched exactly, and only two columns are required:
+An `.xlsx` or a `.csv` file. The first row is the header. Column names are matched exactly, and only two columns are required:
 
 | Column | Required | Notes |
 | --- | --- | --- |
@@ -47,6 +51,22 @@ silently lose the fields this app does not have a UI for.
 Both Scopus and Web of Science exports already use these column names, so in
 practice an unmodified download usually imports without editing. 
 A hand-built sheet works too: a `Title` column and an `Abstract` column are enough.
+
+### CSV files
+
+A Scopus CSV download imports as it is. For CSVs from elsewhere, including one
+saved from Excel:
+
+- **Encoding**: UTF-8, with or without a byte-order mark. Windows-1252, which
+  Excel on Windows writes for a plain "CSV" save, is accepted too. If accented
+  names come out garbled, save as **CSV UTF-8** instead.
+- **Delimiter**: comma, semicolon or tab, worked out from the header row. Excel
+  writes semicolons in locales that use a comma as the decimal separator.
+- **Values** are taken as text, exactly as written: nothing that looks like a
+  number or like `NA` is reinterpreted.
+
+The format is recognised from the file's contents, not its name. Old-style
+`.xls` workbooks are not supported; save them as `.xlsx` or `.csv` first.
 
 ## Duplicate detection
 

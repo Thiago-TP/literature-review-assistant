@@ -195,7 +195,7 @@ export default function ReviewWorkspacePage() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_auto]">
           <EmptyState
             title="No papers in this review yet"
-            description="Import a spreadsheet (.xlsx) or add individual papers by DOI, title, or manually."
+            description="Import a spreadsheet (.xlsx or .csv) or add individual papers by DOI, title, or manually."
             action={
               <div className="flex gap-2">
                 <Button variant="secondary" onClick={() => setShowImportModal(true)}>

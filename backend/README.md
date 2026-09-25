@@ -45,7 +45,7 @@ data lives in `services/` and is unit-tested directly:
 | Module | Responsibility |
 | --- | --- |
 | `services/dedup.py` | DOI/title normalisation and duplicate classification |
-| `services/xlsx_import.py` | Parsing an uploaded `.xlsx` into plain rows |
+| `services/spreadsheet_import.py` | Parsing an uploaded `.xlsx` or `.csv` into plain rows |
 | `services/crossref.py` | CrossRef lookups by DOI and by title |
 | `services/paper_repo.py` | Building papers, scoring, ORM → response shapes |
 | `services/dashboard.py` | Aggregate statistics for one project |
@@ -128,7 +128,7 @@ project.
 | Fields | `GET|POST /projects/{id}/fields`, `PATCH|DELETE /projects/{id}/fields/{field_id}` |
 | Tags | `POST /projects/{id}/fields/{field_id}/options`, `PATCH|DELETE .../options/{option_id}` |
 | Lookup | `POST /projects/{id}/papers/lookup/doi`, `.../lookup/title` |
-| Import | `POST /projects/{id}/import/xlsx/preview`, `.../commit` |
+| Import | `POST /projects/{id}/import/preview` (`.xlsx` or `.csv`), `.../commit` |
 | Export | `GET /projects/{id}/export.json`, `.../export.xlsx` |
 | Dashboard | `GET /projects/{id}/dashboard` |
 | Session | `GET /session/status`, `POST /session/heartbeat`, `POST /session/closed` |
@@ -174,7 +174,7 @@ uv run ruff format --check .
 
 Each test builds its own in-memory SQLite database and overrides the session
 dependency, so the suite never touches `data/app.db` and needs no migration step
-or fixture database. Coverage spans the pure services (dedup, xlsx parsing,
+or fixture database. Coverage spans the pure services (dedup, spreadsheet parsing,
 CrossRef against mocked HTTP) and the full API surface, including the
 protected-field rules and cascade deletes.
 

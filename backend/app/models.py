@@ -18,6 +18,9 @@ def _utcnow() -> datetime:
 
 
 class PaperSource(str, Enum):
+    # Any bulk import, .csv included. The name predates CSV support, and it is
+    # the value stored against every imported paper, so renaming it would take
+    # a data migration for no change in meaning.
     XLSX_IMPORT = "xlsx_import"
     CROSSREF_DOI = "crossref_doi"
     CROSSREF_TITLE = "crossref_title"

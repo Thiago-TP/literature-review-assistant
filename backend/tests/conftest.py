@@ -16,6 +16,8 @@ from app.main import app
 
 TESTS_DIR = Path(__file__).resolve().parent
 SAMPLE_XLSX_PATH = TESTS_DIR / "fixtures" / "sample_export.xlsx"
+# The same five rows as a Scopus CSV download: byte-order mark, every field quoted.
+SAMPLE_CSV_PATH = TESTS_DIR / "fixtures" / "sample_export.csv"
 
 
 @pytest.fixture(name="session")
