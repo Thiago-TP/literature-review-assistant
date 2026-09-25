@@ -2,7 +2,12 @@
 #   uv run ruff check .
 #   uv run ruff format .
 #
-# CI enforces both.
+# The launcher and the utility scripts outside this directory follow the same
+# rules, through ../ruff.toml, which extends this file:
+#   uv run ruff check ../main.py ../scripts
+#   uv run ruff format ../main.py ../scripts
+#
+# CI enforces all four.
 
 # 100 rather than a longer limit on purpose: the formatter collapses anything
 # that fits on one line, and at 120 that turned the hand-wrapped query and

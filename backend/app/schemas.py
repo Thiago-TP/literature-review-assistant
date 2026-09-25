@@ -197,7 +197,7 @@ class PaperCreateResult(BaseModel):
     duplicate: DuplicateInfo | None = None
 
 
-# ---- Bulk xlsx import -----------------------------------------------------
+# ---- Bulk spreadsheet import (.xlsx or .csv) ------------------------------
 
 
 class ImportPreviewRow(BaseModel):

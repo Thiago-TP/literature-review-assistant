@@ -38,3 +38,12 @@ jobs:
 
       - name: Ruff (format)
         run: uv run ruff format --check .
+
+      # The launcher and the utility scripts, under the root ruff.toml, which
+      # inherits the backend's rules. No --config: Ruff finds that file itself,
+      # exactly as it does when run from the repository root or by an editor.
+      - name: Ruff (launcher and scripts, lint)
+        run: uv run ruff check --output-format=github ../main.py ../scripts
+
+      - name: Ruff (launcher and scripts, format)
+        run: uv run ruff format --check ../main.py ../scripts
