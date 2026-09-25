@@ -2,10 +2,10 @@
 #   uv run ruff check .
 #   uv run ruff format .
 #
-# The utility scripts in ../scripts follow the same rules, but have to be
-# pointed at this file, since Ruff only looks for one in a file's ancestors:
-#   uv run ruff check --config ruff.toml ../scripts
-#   uv run ruff format --config ruff.toml ../scripts
+# The launcher and the utility scripts outside this directory follow the same
+# rules, through ../ruff.toml, which extends this file:
+#   uv run ruff check ../main.py ../scripts
+#   uv run ruff format ../main.py ../scripts
 #
 # CI enforces all four.
 

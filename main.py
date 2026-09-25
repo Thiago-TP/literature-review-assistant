@@ -15,6 +15,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import contextlib
 import errno
 import os
 import shutil
@@ -49,9 +50,7 @@ SETUP_BACKEND = (
     "(uv: https://docs.astral.sh/uv/getting-started/installation/)"
 )
 SETUP_FRONTEND = (
-    "Frontend dependencies not installed. From the repository root:\n"
-    "  cd frontend\n"
-    "  npm install"
+    "Frontend dependencies not installed. From the repository root:\n  cd frontend\n  npm install"
 )
 
 
@@ -161,11 +160,9 @@ def install_shutdown_handler() -> None:
     def handler(_signum: int, _frame: object) -> NoReturn:
         raise KeyboardInterrupt
 
-    try:
+    # ValueError: not running in the main thread; Ctrl+C handling still applies.
+    with contextlib.suppress(ValueError):
         signal.signal(signal.SIGTERM, handler)
-    except ValueError:
-        # Not running in the main thread; Ctrl+C handling still applies.
-        pass
 
 
 def fail(message: str) -> NoReturn:
@@ -173,9 +170,7 @@ def fail(message: str) -> NoReturn:
     raise SystemExit(1)
 
 
-def spawn(
-    command: list[str], cwd: Path, env: dict[str, str] | None = None
-) -> subprocess.Popen:
+def spawn(command: list[str], cwd: Path, env: dict[str, str] | None = None) -> subprocess.Popen:
     """Start a long-running child in its own process group.
 
     The new group is what lets `stop` later take down the child *and* the
